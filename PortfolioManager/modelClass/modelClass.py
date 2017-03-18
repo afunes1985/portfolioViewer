@@ -6,106 +6,15 @@ Created on Feb 19, 2017
 import datetime
 from decimal import Decimal, InvalidOperation
 
-from PySide import QtGui
-from PySide.QtGui import QTableWidget, QTableWidgetItem, QMenuBar
+from PySide import QtGui, QtCore
+from PySide.QtCore import QRect
+from PySide.QtGui import QTableWidget, QTableWidgetItem, QWidget, \
+    QLineEdit, QIntValidator, QLabel, QComboBox, QPushButton
 import requests
 
+from dao.dao import DaoAssetType
+from modelClass.movement import EquityMovement
 
-class Constant:
-    CONST_MOVEMENT_OID = 0
-    CONST_ASSET_TYPE = 1
-    CONST_ASSET_NAME = 2
-    CONST_MOVEMENT_BUY_SELL = 3
-    CONST_MOVEMENT_ACQUISITION_DATE = 4
-    CONST_MOVEMENT_QUANTITY = 5
-    CONST_MOVEMENT_PRICE = 6
-    CONST_MOVEMENT_RATE = 7
-    CONST_MOVEMENT_GROSS_AMOUNT = 8
-    CONST_ASSET_IS_SIC = 13
-    
-class Position():
-    assetType = ''
-    assetName = ''
-    ppp = 0
-    rate = 0
-    totalQuantity = 0
-    accumulatedAmount = 0
-    marketPrice = 0
-    isSic = 0
-    movementList = []
-    acquisitionDate = 0
-    
-    def __init__(self, assetName, movement):
-        self.assetName = assetName
-        self.assetType = movement[Constant.CONST_ASSET_TYPE]
-        self.isSIC = movement[Constant.CONST_ASSET_IS_SIC]
-        self.acquisitionDate = movement[Constant.CONST_MOVEMENT_ACQUISITION_DATE]
-        if (self.assetType == 'CETES'):
-            self.addMovementCetes(movement)
-        else:    
-            self.addMovement(movement)
-        
-    def addMovement(self, movement):   
-        self.movementList.append(movement)
-        quantity = movement[Constant.CONST_MOVEMENT_QUANTITY]
-        grossAmount = movement[Constant.CONST_MOVEMENT_GROSS_AMOUNT]
-        if movement[Constant.CONST_MOVEMENT_BUY_SELL] == 'BUY':
-            self.totalQuantity = self.totalQuantity + abs(quantity)#quantity
-            self.accumulatedAmount = self.accumulatedAmount + abs(grossAmount)#gross amount
-        else:
-            self.accumulatedAmount = self.accumulatedAmount - abs(quantity) * self.getPPP()
-            self.totalQuantity = self.totalQuantity - abs(quantity)#quantity
-        
-        if self.totalQuantity == 0:        
-            self.ppp = 0
-            self.accumulatedAmount = 0
-        else:
-            self.ppp = self.accumulatedAmount / self.totalQuantity
-    
-    def addMovementCetes(self, movement):
-        self.movementList.append(movement)
-        self.totalQuantity = movement[Constant.CONST_MOVEMENT_QUANTITY]
-        self.accumulatedAmount = movement[Constant.CONST_MOVEMENT_GROSS_AMOUNT]
-        self.ppp = movement[Constant.CONST_MOVEMENT_PRICE]
-        self.rate = movement[Constant.CONST_MOVEMENT_RATE]
-        
-    def getPPP(self):
-        return self.ppp
-    
-    def getAssetName(self):
-        return self.assetName
-    
-    def getTotalQuantity(self):
-        return self.totalQuantity;
-    
-    def getInvestedAmount(self):
-        return self.totalQuantity * self.ppp;
-    
-    def getElapsedDays(self):
-        elapsedDays = datetime.datetime.now() - self.acquisitionDate
-        return elapsedDays.days
-    
-    def getValuatedAmount(self):
-        if (self.assetType == 'CETES'):
-            return self.accumulatedAmount * (1 + (self.getElapsedDays() * (self.rate / 360)))
-        else:    
-            return Decimal(self.totalQuantity) * self.marketPrice
-    
-    def getMovementList(self):
-        return self.movementList
-    
-    def setMarketPrice(self, marketPrice):
-        try:
-            self.marketPrice = Decimal(marketPrice)
-        except InvalidOperation:
-            self.marketPrice = 0
-        
-    def getMarketPrice(self):
-        return self.marketPrice
-    
-    def getPnL(self):
-        return self.getValuatedAmount() - self.getInvestedAmount()
-    
 class QTableWidgetItemString(QTableWidgetItem):
     def __init__(self, value):
         super(QTableWidgetItemString, self).__init__(value)
@@ -141,9 +50,10 @@ class MainWindow(QtGui.QMainWindow):
         
     def createMenu(self):
         self.fileMenu = self.menuBar().addMenu("&Movement")
-        #=======================================================================
-        # self.fileMenu.addAction(self.newAct)
-        #=======================================================================
+        self.actionOpenMovementEditor = QtGui.QAction("&Add movement", self, checkable=True,
+            shortcut="Ctrl+M", statusTip="Add movement",
+            triggered=self.openMovementEditor)
+        self.fileMenu.addAction(self.actionOpenMovementEditor)
 
     def renderPositions(self, positionList):   
         self.subtotalPNL = 0
@@ -195,3 +105,97 @@ class MainWindow(QtGui.QMainWindow):
         #total PNL    
         totalPNLItem = QTableWidgetItemDecimal(self.totalPNL)
         self.tableWidget.setItem(self.row,6,totalPNLItem)
+        
+    def openMovementEditor(self):
+        self.movementEditor = MovementEditor()
+        self.movementEditor.setGeometry(QRect(100, 100, 400, 200))
+        self.movementEditor.show()
+        
+class MovementEditor(QWidget):
+    def __init__(self):
+        QWidget.__init__(self)
+        self.layout = QtGui.QGridLayout(self)
+        #lblAssetType
+        self.lblAssetType = QLabel("Asset Type")
+        self.layout.addWidget(self.lblAssetType, 0, 0)
+        #cmdAssetType
+        self.cmdAssetType = QComboBox(self)
+        self.cmdAssetType.addItems(DaoAssetType().getAssetTypes())
+        self.connect(self.cmdAssetType, QtCore.SIGNAL("currentIndexChanged(const QString&)"), self.loadCmdAssetName) 
+        self.layout.addWidget(self.cmdAssetType, 0, 1)
+        #lblAssetName
+        self.lblAssetName = QLabel("Asset Name")
+        self.layout.addWidget(self.lblAssetName, 1, 0)
+        #cmdAssetName
+        self.cmdAssetName = QComboBox(self)
+        self.layout.addWidget(self.cmdAssetName, 1, 1)
+        #lblBuySell
+        self.lblBuySell = QLabel("Buy Sell")
+        self.layout.addWidget(self.lblBuySell, 2, 0)
+        #cmdBuySell
+        self.cmdBuySell = QComboBox(self)
+        self.cmdBuySell.addItem("BUY")
+        self.cmdBuySell.addItem("SELL")
+        self.layout.addWidget(self.cmdBuySell, 2, 1)
+        #lblQuantity
+        self.lblQuantity = QLabel("Quantity")
+        self.layout.addWidget(self.lblQuantity, 3, 0)
+        #txtQuantity
+        self.txtQuantity = QLineEdit(self)
+        self.txtQuantity.setValidator(QIntValidator(0, 1000000000, self))
+        self.layout.addWidget(self.txtQuantity, 3, 1)
+        #lblPrice
+        self.lblPrice = QLabel("Price")
+        self.layout.addWidget(self.lblPrice, 4, 0)
+        #txtPrice
+        self.txtPrice = QLineEdit(self)
+        self.txtPrice.setValidator(QIntValidator(0, 1000000000, self))
+        self.layout.addWidget(self.txtPrice, 4, 1)
+        #lblRate
+        self.lblRate = QLabel("Rate")
+        self.layout.addWidget(self.lblRate, 5, 0)
+        #txtRate
+        self.txtRate = QLineEdit(self)
+        self.txtRate.setValidator(QIntValidator(0, 1000000000, self))
+        self.layout.addWidget(self.txtRate, 5, 1)
+        #lblGrossAmount
+        self.lblGrossAmount = QLabel("Gross Amount")
+        self.layout.addWidget(self.lblGrossAmount, 6, 0)
+        #txtGrossAmount
+        self.txtGrossAmount = QLineEdit(self)
+        self.txtGrossAmount.setValidator(QIntValidator(0, 1000000000, self))
+        self.layout.addWidget(self.txtGrossAmount, 6, 1)
+        #lblNetAmount
+        self.lblNetAmount = QLabel("Net Amount")
+        self.layout.addWidget(self.lblNetAmount, 7, 0)
+        #txtNetAmount
+        self.txtNetAmount = QLineEdit(self)
+        self.txtNetAmount.setValidator(QIntValidator(0, 1000000000, self))
+        self.layout.addWidget(self.txtNetAmount, 7, 1)
+        #lblCommissionPercentage
+        self.lblCommissionPercentage = QLabel("Commission Percentage")
+        self.layout.addWidget(self.lblCommissionPercentage, 8, 0)
+        #txtCommissionPercentage
+        self.txtCommissionPercentage = QLineEdit(self)
+        self.txtCommissionPercentage.setValidator(QIntValidator(0, 10000, self))
+        self.layout.addWidget(self.txtCommissionPercentage, 8, 1)
+        #btnAdd
+        self.btnAdd = QPushButton("Add", self)
+        self.layout.addWidget(self.btnAdd)
+        self.actAddMovement = QtGui.QAction("&Add movement", self, checkable=True,
+            shortcut="Ctrl+A", statusTip="Add movement",
+            triggered=self.addMovement)
+        self.btnAdd.addAction(self.actAddMovement)
+        #btnClear
+        self.btnClear = QPushButton("Clear", self)
+        self.layout.addWidget(self.btnClear)
+    
+    def addMovement(self):
+        movement = EquityMovement()
+        #movement.assetOID = txt
+        
+        
+    def loadCmdAssetName(self):
+        self.cmdAssetName.clear()
+        self.cmdAssetName.addItems(DaoAssetType().getAssetNames(self.cmdAssetType.currentText()))  
+        
