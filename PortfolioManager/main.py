@@ -1,31 +1,14 @@
-'''
-Created on Feb 12, 2017
-
-@author: afunes
-'''
-
 from datetime import date
-from dao.dao import DaoMovement
-from modelClass.modelClass import Position
+import sys
 
-movementList = DaoMovement().getMovementsByDate(date(2001, 7, 14), date(2020, 7, 14))
-positionDict = {}
-position = 0
-#print(positionDict.get('1'))
+from PySide import QtGui
 
-for (movement) in movementList:
-    assetName = movement[1]
-    buySell = movement[2]
-    print("asset = {}".format(assetName))
-    position = positionDict.get(assetName)
-    if position is None:
-        position = Position(movement)
-        positionDict[assetName] = position
-    else:    
-        position.addMovement(movement)
+from engine.engine import Engine
 
-for key, value in positionDict.items():
-    print("key = {}".format(key)) 
-    print("PPP = {}".format(value.getPPP()))
-    print("totalamount = {}".format(value.accumulatedAmount))
-    print("totalquantity = {}".format(value.totalQuantity))
+def main():
+    app = QtGui.QApplication(sys.argv)
+    mainWindow = Engine().startApp()
+    sys.exit(app.exec_())
+
+if __name__== '__main__':
+    main()
