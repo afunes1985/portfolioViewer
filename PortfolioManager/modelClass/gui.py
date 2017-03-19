@@ -3,9 +3,6 @@ Created on Feb 19, 2017
 
 @author: afunes
 '''
-import datetime
-from decimal import Decimal, InvalidOperation
-
 from PySide import QtGui, QtCore
 from PySide.QtCore import QRect
 from PySide.QtGui import QTableWidget, QTableWidgetItem, QWidget, \
