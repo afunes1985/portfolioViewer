@@ -3,14 +3,20 @@ Created on Feb 19, 2017
 
 @author: afunes
 '''
+from datetime import date
+import datetime
+
 from PySide import QtGui, QtCore
-from PySide.QtCore import QRect
+from PySide.QtCore import QRect, SIGNAL, SLOT
 from PySide.QtGui import QTableWidget, QTableWidgetItem, QWidget, \
-    QLineEdit, QIntValidator, QLabel, QComboBox, QPushButton
+    QLineEdit, QIntValidator, QLabel, QComboBox, QPushButton, QDoubleSpinBox, \
+    QDateEdit, QDoubleValidator
 import requests
 
-from dao.dao import DaoAssetType
+from dao.dao import DaoAssetType, DaoMovement
 from modelClass.movement import EquityMovement
+from modelClass.constant import Constant
+
 
 class QTableWidgetItemString(QTableWidgetItem):
     def __init__(self, value):
@@ -118,7 +124,7 @@ class MovementEditor(QWidget):
         #cmdAssetType
         self.cmdAssetType = QComboBox(self)
         self.cmdAssetType.addItems(DaoAssetType().getAssetTypes())
-        self.connect(self.cmdAssetType, QtCore.SIGNAL("currentIndexChanged(const QString&)"), self.loadCmdAssetName) 
+        self.connect(self.cmdAssetType, QtCore.SIGNAL("currentIndexChanged(const QString&)"), self.configEditorByAssetType) 
         self.layout.addWidget(self.cmdAssetType, 0, 1)
         #lblAssetName
         self.lblAssetName = QLabel("Asset Name")
@@ -133,66 +139,161 @@ class MovementEditor(QWidget):
         self.cmdBuySell = QComboBox(self)
         self.cmdBuySell.addItem("BUY")
         self.cmdBuySell.addItem("SELL")
+        self.connect(self.cmdBuySell, QtCore.SIGNAL("currentIndexChanged(const QString&)"), self.calculateNetAmount) 
         self.layout.addWidget(self.cmdBuySell, 2, 1)
+        #lblAcquisitionDate
+        self.lblAcquisitionDate = QLabel("Acquisition Date")
+        self.layout.addWidget(self.lblAcquisitionDate, 3, 0)
+        #cmdAcquisitionDate
+        self.dateAcquisitionDate = QDateEdit(self)
+        self.dateAcquisitionDate.setDisplayFormat("dd-MM-yyyy")
+        self.dateAcquisitionDate.setDate(datetime.datetime.now())
+        self.layout.addWidget(self.dateAcquisitionDate, 3, 1)
         #lblQuantity
         self.lblQuantity = QLabel("Quantity")
-        self.layout.addWidget(self.lblQuantity, 3, 0)
+        self.layout.addWidget(self.lblQuantity, 4, 0)
         #txtQuantity
         self.txtQuantity = QLineEdit(self)
+        self.txtQuantity.connect(self.txtQuantity,SIGNAL("textChanged(QString)"),self.calculateGrossAmount) 
         self.txtQuantity.setValidator(QIntValidator(0, 1000000000, self))
-        self.layout.addWidget(self.txtQuantity, 3, 1)
+        self.layout.addWidget(self.txtQuantity, 4, 1)
         #lblPrice
         self.lblPrice = QLabel("Price")
-        self.layout.addWidget(self.lblPrice, 4, 0)
+        self.layout.addWidget(self.lblPrice, 5, 0)
         #txtPrice
         self.txtPrice = QLineEdit(self)
-        self.txtPrice.setValidator(QIntValidator(0, 1000000000, self))
-        self.layout.addWidget(self.txtPrice, 4, 1)
+        self.txtPrice.setValidator(QDoubleValidator(0, 999999999, 2, self))
+        self.txtPrice.connect(self.txtPrice,SIGNAL("textChanged(QString)"),self.calculateGrossAmount) 
+        self.layout.addWidget(self.txtPrice, 5, 1)
         #lblRate
         self.lblRate = QLabel("Rate")
-        self.layout.addWidget(self.lblRate, 5, 0)
+        self.layout.addWidget(self.lblRate, 6, 0)
         #txtRate
         self.txtRate = QLineEdit(self)
-        self.txtRate.setValidator(QIntValidator(0, 1000000000, self))
-        self.layout.addWidget(self.txtRate, 5, 1)
+        self.txtRate.setValidator(QDoubleValidator(0, 999999999, 4, self))
+        self.txtRate.setEnabled(0)
+        self.layout.addWidget(self.txtRate, 6, 1)
         #lblGrossAmount
         self.lblGrossAmount = QLabel("Gross Amount")
-        self.layout.addWidget(self.lblGrossAmount, 6, 0)
+        self.layout.addWidget(self.lblGrossAmount, 7, 0)
         #txtGrossAmount
         self.txtGrossAmount = QLineEdit(self)
-        self.txtGrossAmount.setValidator(QIntValidator(0, 1000000000, self))
-        self.layout.addWidget(self.txtGrossAmount, 6, 1)
+        self.txtGrossAmount.setEnabled(0)
+        self.txtGrossAmount.setValidator(QDoubleValidator(0, 99999999999, 2, self))
+        self.layout.addWidget(self.txtGrossAmount, 7, 1)
         #lblNetAmount
         self.lblNetAmount = QLabel("Net Amount")
-        self.layout.addWidget(self.lblNetAmount, 7, 0)
+        self.layout.addWidget(self.lblNetAmount, 8, 0)
         #txtNetAmount
         self.txtNetAmount = QLineEdit(self)
-        self.txtNetAmount.setValidator(QIntValidator(0, 1000000000, self))
-        self.layout.addWidget(self.txtNetAmount, 7, 1)
+        self.txtNetAmount.setEnabled(0)
+        self.txtNetAmount.setValidator(QDoubleValidator(0, 99999999999, 2, self))
+        self.layout.addWidget(self.txtNetAmount, 8, 1)
         #lblCommissionPercentage
         self.lblCommissionPercentage = QLabel("Commission Percentage")
-        self.layout.addWidget(self.lblCommissionPercentage, 8, 0)
+        self.layout.addWidget(self.lblCommissionPercentage, 9, 0)
         #txtCommissionPercentage
         self.txtCommissionPercentage = QLineEdit(self)
-        self.txtCommissionPercentage.setValidator(QIntValidator(0, 10000, self))
-        self.layout.addWidget(self.txtCommissionPercentage, 8, 1)
+        self.txtCommissionPercentage.setValidator(QDoubleValidator(0, 9999999, 4, self))
+        self.txtCommissionPercentage.connect(self.txtCommissionPercentage,SIGNAL("textChanged(QString)"),self.calculateCommission) 
+        self.layout.addWidget(self.txtCommissionPercentage, 9, 1)
+        #lblCommissionAmount
+        self.lblCommissionAmount = QLabel("Commission Amount")
+        self.layout.addWidget(self.lblCommissionAmount, 10, 0)
+        #txtCommissionAmmount
+        self.txtCommissionAmount = QLineEdit(self)
+        self.txtCommissionAmount.setEnabled(0)
+        self.txtCommissionAmount.setValidator(QDoubleValidator(0, 9999999, 4, self))
+        self.layout.addWidget(self.txtCommissionAmount, 10, 1)
+        #lblCommissionAmount
+        self.lblCommissionVATAmount = QLabel("Commission VAT Amount")
+        self.layout.addWidget(self.lblCommissionVATAmount, 11, 0)
+        #txtCommissionAmmount
+        self.txtCommissionVATAmount = QLineEdit(self)
+        self.txtCommissionVATAmount.setEnabled(0)
+        self.txtCommissionVATAmount.setValidator(QDoubleValidator(0, 9999999, 4, self))
+        self.layout.addWidget(self.txtCommissionVATAmount, 11, 1)
         #btnAdd
         self.btnAdd = QPushButton("Add", self)
+        self.btnAdd.clicked.connect(self.addMovement)
         self.layout.addWidget(self.btnAdd)
-        self.actAddMovement = QtGui.QAction("&Add movement", self, checkable=True,
-            shortcut="Ctrl+A", statusTip="Add movement",
-            triggered=self.addMovement)
-        self.btnAdd.addAction(self.actAddMovement)
         #btnClear
         self.btnClear = QPushButton("Clear", self)
+        self.btnClear.clicked.connect(self.clearEditor)
         self.layout.addWidget(self.btnClear)
+        #clearEditor
+        self.clearEditor()
     
     def addMovement(self):
         movement = EquityMovement()
-        #movement.assetOID = txt
+        movement.buySell = self.cmdBuySell.currentText()
+        movement.assetOID = self.cmdAssetName.itemData(self.cmdAssetName.currentIndex())
+        movement.acquisitionDate = (self.dateAcquisitionDate.date()).toString("yyyy-M-dd")
+        movement.quantity = self.txtQuantity.text()
+        movement.price = self.txtPrice.text()
+        movement.grossAmount = self.txtGrossAmount.text()
+        movement.netAmount = self.txtNetAmount.text()
+        movement.commissionPercentage = self.txtCommissionPercentage.text()
+        DaoMovement().insertMovement(movement)
+        self.clearEditor()
+    
+    def clearEditor(self):
+        #self.cmdAssetType.set
+        self.txtQuantity.setText("0")
+        self.txtPrice.setText("0")
+        self.txtGrossAmount.setText("0")
+        self.txtNetAmount.setText("0")
+        self.txtRate.setText("0")
+        self.txtCommissionPercentage.setText(str(0))
+        self.dateAcquisitionDate.setDate(datetime.datetime.now())
         
-        
-    def loadCmdAssetName(self):
+    def configEditorByAssetType(self):
         self.cmdAssetName.clear()
-        self.cmdAssetName.addItems(DaoAssetType().getAssetNames(self.cmdAssetType.currentText()))  
+        #loadAssetNames
+        assetNameList = DaoAssetType().getAssetNames(self.cmdAssetType.currentText())
+        for (assetName) in assetNameList:
+            self.cmdAssetName.addItem(assetName[1], assetName[0]) 
+        #setPriceOrRate    
+        if self.cmdAssetType.currentText() == 'EQUITY' or self.cmdAssetType.currentText() == 'FUND':
+            self.txtPrice.setEnabled(1)
+            self.txtRate.setEnabled(0)
+            self.txtRate.setText(str(0))
+        else:
+            self.txtPrice.setEnabled(0)
+            self.txtRate.setEnabled(1)
+            self.txtPrice.setText(str(0))
+        #configDefaultCommission
+        if self.cmdAssetType.currentText() == 'EQUITY':
+            self.txtCommissionPercentage.setText(str(Constant.CONST_DEF_EQUITY_COMMISSION_PERCENTAGE))
+        else:
+            self.txtCommissionPercentage.setText(str(Constant.CONST_DEF_OTHER_COMMISSION_PERCENTAGE))
+        
+    
+    def calculateCommission(self):
+        commissionPercentage = float(self.txtCommissionPercentage.text())
+        grossAmount = float(self.txtGrossAmount.text()) 
+        commissionAmount = grossAmount * commissionPercentage
+        self.txtCommissionAmount.setText(str(commissionAmount))
+        commissionVATAmount = commissionAmount * Constant.CONST_IVA_PERCENTAGE
+        self.txtCommissionVATAmount.setText(str(commissionVATAmount))
+        self.calculateNetAmount()
+        
+    
+    def calculateNetAmount(self):
+        buySell = self.cmdBuySell.currentText()
+        grossAmount = float(self.txtGrossAmount.text()) 
+        commissionAmount = float(self.txtCommissionAmount.text())
+        commissionVATAmount = float(self.txtCommissionVATAmount.text())
+        if buySell == 'BUY':
+            netAmount = grossAmount + commissionVATAmount + commissionAmount
+        else:
+            netAmount = grossAmount - commissionVATAmount - commissionAmount    
+        self.txtNetAmount.setText(str(netAmount))
+        
+    def calculateGrossAmount(self):
+        quantity = self.txtQuantity.text()
+        price = self.txtPrice.text()
+        if quantity is not None and price is not None:
+            self.txtGrossAmount.setText(str(float(quantity) * float(price)))
+            self.calculateCommission()
         

@@ -6,7 +6,9 @@ Created on Mar 9, 2017
 from datetime import date
 
 from dao.dao import DaoMovement
-from modelClass.modelClass import MainWindow, Constant, Position
+from modelClass.constant import Constant
+from modelClass.gui import MainWindow
+from modelClass.position import Position
 
 
 class Engine:
@@ -14,8 +16,12 @@ class Engine:
     def startApp(self):
         mainWindow = MainWindow()
         positionDict = Engine().buildPositions()
-        equityNoSICPositionList = self.getPositionByAssetType(positionDict, 'EQUITY', 0)
-        mainWindow.renderPositions(equityNoSICPositionList)
+        #=======================================================================
+        # equityNoSICPositionList = self.getPositionByAssetType(positionDict, 'EQUITY', 0)
+        #=======================================================================
+        #=======================================================================
+        # mainWindow.renderPositions(equityNoSICPositionList)
+        #=======================================================================
         #equitySICPositionList = self.getPositionByAssetType(positionDict, 'EQUITY', 1)
         #mainWindow.renderPositions(equitySICPositionList)
         #fundPositionList = self.getPositionByAssetType(positionDict, 'FUND', 0)

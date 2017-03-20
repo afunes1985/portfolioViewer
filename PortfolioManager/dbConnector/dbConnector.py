@@ -29,7 +29,14 @@ class DbConnector():
                 
     def closeConnection(self, cnx):    
         cnx.close()
-        
+    
+    def doInsert(self, sentence, params):
+        cnx = self.initConnection()
+        cursor = cnx.cursor()
+        cursor.execute(sentence,params)
+        cnx.commit()
+        self.closeConnection(cnx);
+ 
     def doQuery(self, query, params):
         cnx = self.initConnection()
         cursor = cnx.cursor()

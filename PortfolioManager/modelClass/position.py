@@ -8,7 +8,6 @@ from decimal import Decimal, InvalidOperation
 
 from modelClass.constant import Constant
 
-
 class Position():
     assetType = ''
     assetName = ''

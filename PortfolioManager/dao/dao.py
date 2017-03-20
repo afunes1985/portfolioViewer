@@ -3,7 +3,7 @@ Created on Feb 13, 2017
 
 @author: afunes
 '''
-from dbConnector.DbConnector import DbConnector
+from dbConnector.dbConnector import DbConnector
 
 class DaoMovement():
 
@@ -28,6 +28,17 @@ class DaoMovement():
                     ORDER BY ACQUISITION_DATE'''
         returnList = DbConnector().doQuery(query, (fromDate, toDate))
         return returnList    
+    
+    def insertMovement(self, movement):
+        insertSentence = """insert movement(asset_oid, buy_sell,acquisition_date, quantity, 
+                                    price, rate, gross_amount, net_amount, 
+                                    commission_percentage, commission_amount, commission_iva_amount) 
+                       values (%s,%s,%s,%s,
+                               %s,null, %s,%s,
+                               %s,0,0)"""
+        DbConnector().doInsert(insertSentence, (movement.assetOID, movement.buySell, movement.acquisitionDate, movement.quantity,
+                                                movement.price, movement.grossAmount, movement.netAmount,
+                                                movement.commissionPercentage))
 
 class DaoAssetType():
 
@@ -41,10 +52,10 @@ class DaoAssetType():
         return returnList  
     
     def getAssetNames(self, assetType):
-        query = """SELECT DISTINCT NAME FROM ASSET WHERE ASSET_TYPE = %s"""
+        query = """SELECT ID, NAME FROM ASSET WHERE ASSET_TYPE = %s"""
         resultSet = DbConnector().doQuery(query, (assetType,))
-        returnList = []
-        for (assetName) in resultSet:
-            returnList.append(assetName[0])
-        return returnList  
+        #returnList = []
+        #for (assetName) in resultSet:
+        #    returnList.append(assetName[0])
+        return resultSet  
         
