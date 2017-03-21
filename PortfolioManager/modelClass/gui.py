@@ -246,6 +246,7 @@ class MovementEditor(QWidget):
         movement.commissionPercentage = self.txtCommissionPercentage.text()
         movement.commissionAmount = self.txtCommissionAmount.text()
         movement.commissionIVAAmount = self.txtCommissionVATAmount.text()
+        movement.tenor = self.txtTenor.text()
         DaoMovement().insertMovement(movement)
         self.clearEditor()
     

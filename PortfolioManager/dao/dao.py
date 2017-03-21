@@ -33,10 +33,10 @@ class DaoMovement():
     def insertMovement(self, movement):
         insertSentence = """insert movement(asset_oid, buy_sell,acquisition_date, quantity, 
                                     price, rate, gross_amount, net_amount, 
-                                    commission_percentage, commission_amount, commission_iva_amount) 
+                                    commission_percentage, commission_amount, commission_iva_amount, tenor) 
                        values (%s,%s,%s,%s,
                                %s,%s,%s,%s,
-                               %s,%s,%s)"""
+                               %s,%s,%s,%s)"""
         DbConnector().doInsert(insertSentence, (movement.assetOID, movement.buySell, movement.acquisitionDate, movement.quantity,
                                                 movement.price, movement.rate, movement.grossAmount, movement.netAmount,
                                                 movement.commissionPercentage, movement.commissionAmount, movement.commissionVATAmount))

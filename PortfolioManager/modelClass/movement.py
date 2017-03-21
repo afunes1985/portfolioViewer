@@ -15,7 +15,7 @@ class Movement():
     commissionVATAmount = 0
     rate = 0
     price = 0
-    
+    tenor = 0
     def constructMovementByType(self, assetType):
         if assetType == 'EQUITY':
             return EquityMovement()
