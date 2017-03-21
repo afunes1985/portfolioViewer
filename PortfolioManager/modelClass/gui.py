@@ -3,19 +3,18 @@ Created on Feb 19, 2017
 
 @author: afunes
 '''
-from datetime import date
 import datetime
 
 from PySide import QtGui, QtCore
-from PySide.QtCore import QRect, SIGNAL, SLOT
+from PySide.QtCore import QRect, SIGNAL
 from PySide.QtGui import QTableWidget, QTableWidgetItem, QWidget, \
-    QLineEdit, QIntValidator, QLabel, QComboBox, QPushButton, QDoubleSpinBox, \
+    QLineEdit, QIntValidator, QLabel, QComboBox, QPushButton, \
     QDateEdit, QDoubleValidator
 import requests
 
 from dao.dao import DaoAssetType, DaoMovement
-from modelClass.movement import EquityMovement
 from modelClass.constant import Constant
+from modelClass.movement import Movement
 
 
 class QTableWidgetItemString(QTableWidgetItem):
@@ -118,20 +117,20 @@ class MovementEditor(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         self.layout = QtGui.QGridLayout(self)
-        #lblAssetType
-        self.lblAssetType = QLabel("Asset Type")
-        self.layout.addWidget(self.lblAssetType, 0, 0)
-        #cmdAssetType
-        self.cmdAssetType = QComboBox(self)
-        self.cmdAssetType.addItems(DaoAssetType().getAssetTypes())
-        self.connect(self.cmdAssetType, QtCore.SIGNAL("currentIndexChanged(const QString&)"), self.configEditorByAssetType) 
-        self.layout.addWidget(self.cmdAssetType, 0, 1)
         #lblAssetName
         self.lblAssetName = QLabel("Asset Name")
         self.layout.addWidget(self.lblAssetName, 1, 0)
         #cmdAssetName
         self.cmdAssetName = QComboBox(self)
         self.layout.addWidget(self.cmdAssetName, 1, 1)
+        #lblAssetType
+        self.lblAssetType = QLabel("Asset Type")
+        self.layout.addWidget(self.lblAssetType, 0, 0)
+        #cmdAssetType
+        self.cmdAssetType = QComboBox(self)
+        self.connect(self.cmdAssetType, QtCore.SIGNAL("currentIndexChanged(const QString&)"), self.configEditorByAssetType) 
+        self.cmdAssetType.addItems(DaoAssetType().getAssetTypes())
+        self.layout.addWidget(self.cmdAssetType, 0, 1)
         #lblBuySell
         self.lblBuySell = QLabel("Buy Sell")
         self.layout.addWidget(self.lblBuySell, 2, 0)
@@ -225,12 +224,15 @@ class MovementEditor(QWidget):
         self.clearEditor()
     
     def addMovement(self):
-        movement = EquityMovement()
+        movement = Movement().constructMovementByType(self.cmdAssetType.currentText())
         movement.buySell = self.cmdBuySell.currentText()
         movement.assetOID = self.cmdAssetName.itemData(self.cmdAssetName.currentIndex())
         movement.acquisitionDate = (self.dateAcquisitionDate.date()).toString("yyyy-M-dd")
         movement.quantity = self.txtQuantity.text()
-        movement.price = self.txtPrice.text()
+        if self.cmdAssetType.currentText() == 'BOND':
+            movement.rate = self.txtRate.text();
+        else:  
+            movement.price = self.txtPrice.text()
         movement.grossAmount = self.txtGrossAmount.text()
         movement.netAmount = self.txtNetAmount.text()
         movement.commissionPercentage = self.txtCommissionPercentage.text()
@@ -244,7 +246,7 @@ class MovementEditor(QWidget):
         self.txtGrossAmount.setText("0")
         self.txtNetAmount.setText("0")
         self.txtRate.setText("0")
-        self.txtCommissionPercentage.setText(str(0))
+        self.txtCommissionPercentage.setText("0")
         self.dateAcquisitionDate.setDate(datetime.datetime.now())
         
     def configEditorByAssetType(self):
@@ -270,13 +272,14 @@ class MovementEditor(QWidget):
         
     
     def calculateCommission(self):
-        commissionPercentage = float(self.txtCommissionPercentage.text())
-        grossAmount = float(self.txtGrossAmount.text()) 
-        commissionAmount = grossAmount * commissionPercentage
-        self.txtCommissionAmount.setText(str(commissionAmount))
-        commissionVATAmount = commissionAmount * Constant.CONST_IVA_PERCENTAGE
-        self.txtCommissionVATAmount.setText(str(commissionVATAmount))
-        self.calculateNetAmount()
+        commissionPercentage = self.txtCommissionPercentage.text()
+        grossAmount = self.txtGrossAmount.text() 
+        if commissionPercentage >= 0:
+            commissionAmount = float(grossAmount) * float(commissionPercentage)
+            self.txtCommissionAmount.setText(str(commissionAmount))
+            commissionVATAmount = commissionAmount * Constant.CONST_IVA_PERCENTAGE
+            self.txtCommissionVATAmount.setText(str(commissionVATAmount))
+            self.calculateNetAmount()
         
     
     def calculateNetAmount(self):

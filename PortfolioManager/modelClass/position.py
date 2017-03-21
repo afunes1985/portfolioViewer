@@ -25,8 +25,8 @@ class Position():
         self.assetType = movement[Constant.CONST_ASSET_TYPE]
         self.isSIC = movement[Constant.CONST_ASSET_IS_SIC]
         self.acquisitionDate = movement[Constant.CONST_MOVEMENT_ACQUISITION_DATE]
-        if (self.assetType == 'CETES'):
-            self.addMovementCetes(movement)
+        if (self.assetType == 'BOND'):
+            self.addBondMovement(movement)
         else:    
             self.addMovement(movement)
         
@@ -47,7 +47,7 @@ class Position():
         else:
             self.ppp = self.accumulatedAmount / self.totalQuantity
     
-    def addMovementCetes(self, movement):
+    def addBondMovement(self, movement):
         self.movementList.append(movement)
         self.totalQuantity = movement[Constant.CONST_MOVEMENT_QUANTITY]
         self.accumulatedAmount = movement[Constant.CONST_MOVEMENT_GROSS_AMOUNT]
@@ -71,7 +71,7 @@ class Position():
         return elapsedDays.days
     
     def getValuatedAmount(self):
-        if (self.assetType == 'CETES'):
+        if (self.assetType == 'BOND'):
             return self.accumulatedAmount * (1 + (self.getElapsedDays() * (self.rate / 360)))
         else:    
             return Decimal(self.totalQuantity) * self.marketPrice

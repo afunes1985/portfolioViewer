@@ -16,18 +16,14 @@ class Engine:
     def startApp(self):
         mainWindow = MainWindow()
         positionDict = Engine().buildPositions()
-        #=======================================================================
-        # equityNoSICPositionList = self.getPositionByAssetType(positionDict, 'EQUITY', 0)
-        #=======================================================================
-        #=======================================================================
-        # mainWindow.renderPositions(equityNoSICPositionList)
-        #=======================================================================
-        #equitySICPositionList = self.getPositionByAssetType(positionDict, 'EQUITY', 1)
-        #mainWindow.renderPositions(equitySICPositionList)
-        #fundPositionList = self.getPositionByAssetType(positionDict, 'FUND', 0)
-        #mainWindow.renderPositions(fundPositionList)
-        #cetesPositionList = self.getPositionByAssetType(positionDict, 'CETES', 0)
-        #mainWindow.renderPositions(cetesPositionList)
+        equityNoSICPositionList = self.getPositionByAssetType(positionDict, 'EQUITY', 0)
+        mainWindow.renderPositions(equityNoSICPositionList)
+        equitySICPositionList = self.getPositionByAssetType(positionDict, 'EQUITY', 1)
+        mainWindow.renderPositions(equitySICPositionList)
+        fundPositionList = self.getPositionByAssetType(positionDict, 'FUND', 0)
+        mainWindow.renderPositions(fundPositionList)
+        bondPositionList = self.getPositionByAssetType(positionDict, 'BOND', 0)
+        mainWindow.renderPositions(bondPositionList)
         mainWindow.renderGrandTotal()
         return mainWindow
         
@@ -37,9 +33,6 @@ class Engine:
             if position.assetType == assetType and position.isSIC == isSIC:
                 positionList.append(position)
         return positionList
-                
-            
-            
     
     def buildPositions(self):
         movementList = DaoMovement().getMovementsByDate(date(2001, 7, 14), date(2020, 7, 14))
@@ -48,10 +41,10 @@ class Engine:
         
         for (movement) in movementList:
             assetName = movement[Constant.CONST_ASSET_NAME]
-            if(assetName == 'CETES'):
+            if(assetName == 'BOND'):
                 assetName = assetName + str(movement[Constant.CONST_MOVEMENT_OID])
             position = positionDict.get(assetName)
-            if (position is None) or (position.assetType == 'CETES'):
+            if (position is None):
                 position = Position(assetName, movement)
                 positionDict[assetName] = position
             else:    
