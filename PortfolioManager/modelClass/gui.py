@@ -212,6 +212,14 @@ class MovementEditor(QWidget):
         self.txtCommissionVATAmount.setEnabled(0)
         self.txtCommissionVATAmount.setValidator(QDoubleValidator(0, 9999999, 4, self))
         self.layout.addWidget(self.txtCommissionVATAmount, 11, 1)
+        #lblTenor
+        self.lblTenor = QLabel("Tenor")
+        self.layout.addWidget(self.lblTenor, 12, 0)
+        #txtTenor
+        self.txtTenor = QLineEdit(self)
+        self.txtTenor.setEnabled(0)
+        self.txtTenor.setValidator(QDoubleValidator(0, 9999999, 4, self))
+        self.layout.addWidget(self.txtTenor, 12, 1)
         #btnAdd
         self.btnAdd = QPushButton("Add", self)
         self.btnAdd.clicked.connect(self.addMovement)
@@ -236,6 +244,8 @@ class MovementEditor(QWidget):
         movement.grossAmount = self.txtGrossAmount.text()
         movement.netAmount = self.txtNetAmount.text()
         movement.commissionPercentage = self.txtCommissionPercentage.text()
+        movement.commissionAmount = self.txtCommissionAmount.text()
+        movement.commissionIVAAmount = self.txtCommissionVATAmount.text()
         DaoMovement().insertMovement(movement)
         self.clearEditor()
     
@@ -259,11 +269,14 @@ class MovementEditor(QWidget):
         if self.cmdAssetType.currentText() == 'EQUITY' or self.cmdAssetType.currentText() == 'FUND':
             self.txtPrice.setEnabled(1)
             self.txtRate.setEnabled(0)
-            self.txtRate.setText(str(0))
+            self.txtRate.setText("0")
+            self.txtTenor.setEnabled(0)
+            self.txtTenor.setText("")
         else:
             self.txtPrice.setEnabled(0)
             self.txtRate.setEnabled(1)
             self.txtPrice.setText(str(0))
+            self.txtTenor.setEnabled(1)
         #configDefaultCommission
         if self.cmdAssetType.currentText() == 'EQUITY':
             self.txtCommissionPercentage.setText(str(Constant.CONST_DEF_EQUITY_COMMISSION_PERCENTAGE))

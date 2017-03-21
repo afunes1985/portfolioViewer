@@ -12,7 +12,9 @@ class Movement():
     netAmount = 0
     commissionPercentage = 0
     commissionAmount = 0
-    commissionIVAAmount = 0
+    commissionVATAmount = 0
+    rate = 0
+    price = 0
     
     def constructMovementByType(self, assetType):
         if assetType == 'EQUITY':

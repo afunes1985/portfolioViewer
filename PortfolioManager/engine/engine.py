@@ -41,7 +41,8 @@ class Engine:
         
         for (movement) in movementList:
             assetName = movement[Constant.CONST_ASSET_NAME]
-            if(assetName == 'BOND'):
+            assetType = movement[Constant.CONST_ASSET_TYPE]
+            if(assetType == 'BOND'):
                 assetName = assetName + str(movement[Constant.CONST_MOVEMENT_OID])
             position = positionDict.get(assetName)
             if (position is None):

@@ -25,6 +25,7 @@ class DaoMovement():
                     FROM movement as m 
                         inner join asset as a on m.asset_oid = a.id  
                     WHERE ACQUISITION_DATE BETWEEN %s AND %s 
+                        AND (TENOR is null OR ADDDATE(ACQUISITION_DATE,TENOR) >= curdate())
                     ORDER BY ACQUISITION_DATE'''
         returnList = DbConnector().doQuery(query, (fromDate, toDate))
         return returnList    
@@ -34,11 +35,11 @@ class DaoMovement():
                                     price, rate, gross_amount, net_amount, 
                                     commission_percentage, commission_amount, commission_iva_amount) 
                        values (%s,%s,%s,%s,
-                               %s,null, %s,%s,
-                               %s,0,0)"""
+                               %s,%s,%s,%s,
+                               %s,%s,%s)"""
         DbConnector().doInsert(insertSentence, (movement.assetOID, movement.buySell, movement.acquisitionDate, movement.quantity,
-                                                movement.price, movement.grossAmount, movement.netAmount,
-                                                movement.commissionPercentage))
+                                                movement.price, movement.rate, movement.grossAmount, movement.netAmount,
+                                                movement.commissionPercentage, movement.commissionAmount, movement.commissionVATAmount))
 
 class DaoAssetType():
 
