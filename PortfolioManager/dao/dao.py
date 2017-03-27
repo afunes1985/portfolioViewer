@@ -39,7 +39,7 @@ class DaoMovement():
                                %s,%s,%s,%s)"""
         DbConnector().doInsert(insertSentence, (movement.assetOID, movement.buySell, movement.acquisitionDate, movement.quantity,
                                                 movement.price, movement.rate, movement.grossAmount, movement.netAmount,
-                                                movement.commissionPercentage, movement.commissionAmount, movement.commissionVATAmount))
+                                                movement.commissionPercentage, movement.commissionAmount, movement.commissionVATAmount, movement.tenor))
 
 class DaoAssetType():
 
