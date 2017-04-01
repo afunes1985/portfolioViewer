@@ -10,9 +10,8 @@ from PySide.QtCore import QRect, SIGNAL
 from PySide.QtGui import QTableWidget, QTableWidgetItem, QWidget, \
     QLineEdit, QIntValidator, QLabel, QComboBox, QPushButton, \
     QDateEdit, QDoubleValidator, QCheckBox
-import requests
 
-from dao.dao import DaoAssetType, DaoMovement
+from dao.dao import DaoAsset, DaoMovement
 from modelClass.constant import Constant
 from modelClass.movement import Movement
 
@@ -78,8 +77,6 @@ class MainWindow(QtGui.QMainWindow):
             pppItem = QTableWidgetItemDecimal(position.getPPP())
             self.tableWidget.setItem(self.row,2,pppItem)
             #Market price
-            result = requests.get('http://finance.yahoo.com/d/quotes.csv?s='+position.getAssetName() +'&f=l1')
-            position.setMarketPrice(result.text)
             marketPriceItem = QTableWidgetItemDecimal(position.getMarketPrice())
             self.tableWidget.setItem(self.row,3,marketPriceItem)
             #Invested amount
@@ -133,7 +130,7 @@ class MovementEditor(QWidget):
         self.layout.addWidget(self.lblAssetType, 0, 0)
         #cmdAssetType
         self.cmdAssetType = QComboBox(self)
-        self.cmdAssetType.addItems(DaoAssetType().getAssetTypes())
+        self.cmdAssetType.addItems(DaoAsset().getAssetTypes())
         self.layout.addWidget(self.cmdAssetType, 0, 1)
         #lblBuySell
         self.lblBuySell = QLabel("Buy Sell")
@@ -149,15 +146,6 @@ class MovementEditor(QWidget):
         #chkByAmount
         self.chkByAmount = QCheckBox(self)
         self.layout.addWidget(self.chkByAmount, 3, 1)
-        #=======================================================================
-        # #lblAmount
-        # self.lblAmount = QLabel("Amount")
-        # self.layout.addWidget(self.lblAmount, 4, 0)
-        # #txtAmount
-        # self.txtAmount = QLineEdit(self)
-        # self.txtAmount.setValidator(QDoubleValidator(0, 999999999, 2, self))
-        # self.layout.addWidget(self.txtAmount, 4, 1)
-        #=======================================================================
         #lblGrossAmount
         self.lblGrossAmount = QLabel("Gross Amount")
         self.layout.addWidget(self.lblGrossAmount, 4, 0)
@@ -246,7 +234,7 @@ class MovementEditor(QWidget):
     
     def initListener(self):
         self.cmdBuySell.connect(self.cmdBuySell, QtCore.SIGNAL("currentIndexChanged(const QString&)"), self.calculateNetAmount) 
-        self.chkByAmount.connect(self.chkByAmount, QtCore.SIGNAL("currentIndexChanged(const QString&)"), self.configEditorByAmount) 
+        self.chkByAmount.connect(self.chkByAmount, QtCore.SIGNAL("stateChanged(int)"), self.configEditorByAmount) 
         self.txtGrossAmount.connect(self.txtGrossAmount,SIGNAL("textChanged(QString)"),self.calculatePrice) 
         self.cmdAssetType.connect(self.cmdAssetType, QtCore.SIGNAL("currentIndexChanged(const QString&)"), self.configEditorByAssetType) 
         self.txtQuantity.connect(self.txtQuantity,SIGNAL("textChanged(QString)"),self.calculateGrossAmount) 
@@ -294,7 +282,7 @@ class MovementEditor(QWidget):
     def configEditorByAssetType(self):
         self.cmdAssetName.clear()
         #loadAssetNames
-        assetNameList = DaoAssetType().getAssetNames(self.cmdAssetType.currentText())
+        assetNameList = DaoAsset().getAssetNames(self.cmdAssetType.currentText())
         for (assetName) in assetNameList:
             self.cmdAssetName.addItem(assetName[1], assetName[0]) 
         #setPriceOrRate    

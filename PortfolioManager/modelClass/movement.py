@@ -32,3 +32,10 @@ class EquityMovement(Movement):
 
 class FundMovement(Movement):
     price = 0
+
+class Asset():
+    OID = 0
+    assetType = ''
+    name = ''
+    isSIC = 0
+    isOnlinePrice = 0

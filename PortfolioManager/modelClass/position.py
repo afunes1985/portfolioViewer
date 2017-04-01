@@ -7,25 +7,24 @@ import datetime
 from decimal import Decimal, InvalidOperation
 
 from modelClass.constant import Constant
+import requests
 
 class Position():
-    assetType = ''
     assetName = ''
     ppp = 0
     rate = 0
     totalQuantity = 0
     accumulatedAmount = 0
     marketPrice = 0
-    isSic = 0
     movementList = []
     acquisitionDate = 0
+    asset = 0
     
-    def __init__(self, assetName, movement):
-        self.assetName = assetName
-        self.assetType = movement[Constant.CONST_ASSET_TYPE]
-        self.isSIC = movement[Constant.CONST_ASSET_IS_SIC]
+    def __init__(self, asset, movement):
+        self.asset = asset
+        self.assetName = asset.name
         self.acquisitionDate = movement[Constant.CONST_MOVEMENT_ACQUISITION_DATE]
-        if (self.assetType == 'BOND'):
+        if (self.asset.assetType == 'BOND'):
             self.addBondMovement(movement)
         else:    
             self.addMovement(movement)
@@ -71,7 +70,7 @@ class Position():
         return elapsedDays.days
     
     def getValuatedAmount(self):
-        if (self.assetType == 'BOND'):
+        if (self.asset.assetType == 'BOND'):
             return self.accumulatedAmount * (1 + (self.getElapsedDays() * (self.rate / 360)))
         else:    
             return Decimal(self.totalQuantity) * self.marketPrice
@@ -86,6 +85,9 @@ class Position():
             self.marketPrice = 0
         
     def getMarketPrice(self):
+        if self.asset.isOnlinePrice:
+            result = requests.get('http://finance.yahoo.com/d/quotes.csv?s='+self.getAssetName() +'&f=l1')
+            self.setMarketPrice(result.text)
         return self.marketPrice
     
     def getPnL(self):

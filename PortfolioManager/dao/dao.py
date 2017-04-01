@@ -41,7 +41,7 @@ class DaoMovement():
                                                 movement.price, movement.rate, movement.grossAmount, movement.netAmount,
                                                 movement.commissionPercentage, movement.commissionAmount, movement.commissionVATAmount, movement.tenor))
 
-class DaoAssetType():
+class DaoAsset():
 
     def getAssetTypes(self):
         query = '''SELECT DISTINCT ASSET_TYPE
@@ -55,8 +55,10 @@ class DaoAssetType():
     def getAssetNames(self, assetType):
         query = """SELECT ID, NAME FROM ASSET WHERE ASSET_TYPE = %s"""
         resultSet = DbConnector().doQuery(query, (assetType,))
-        #returnList = []
-        #for (assetName) in resultSet:
-        #    returnList.append(assetName[0])
+        return resultSet  
+    
+    def getAssetList(self):
+        query = '''SELECT * FROM ASSET'''
+        resultSet = DbConnector().doQuery(query, "")
         return resultSet  
         
