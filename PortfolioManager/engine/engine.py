@@ -25,7 +25,9 @@ class Engine:
         mainWindow.renderPositions(fundPositionList)
         bondPositionList = self.getPositionByAssetType(positionDict, 'BOND', 0)
         mainWindow.renderPositions(bondPositionList)
-        mainWindow.renderGrandTotal()
+        #=======================================================================
+        # mainWindow.renderGrandTotal()
+        #=======================================================================
         return mainWindow
         
     def getPositionByAssetType(self, positionDict, assetType ,isSIC):
