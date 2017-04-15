@@ -6,8 +6,10 @@ Created on Mar 18, 2017
 import datetime
 from decimal import Decimal, InvalidOperation
 
-from modelClass.constant import Constant
 import requests
+
+from modelClass.constant import Constant
+
 
 class Position():
     assetName = ''
@@ -19,6 +21,7 @@ class Position():
     movementList = []
     acquisitionDate = 0
     asset = 0
+    tenor = 0
     
     def __init__(self, asset, movement):
         self.asset = asset
@@ -52,6 +55,7 @@ class Position():
         self.accumulatedAmount = movement[Constant.CONST_MOVEMENT_GROSS_AMOUNT]
         self.ppp = movement[Constant.CONST_MOVEMENT_PRICE]
         self.rate = movement[Constant.CONST_MOVEMENT_RATE]
+        self.tenor = movement[Constant.CONST_MOVEMENT_TENOR]
         
     def getPPP(self):
         return self.ppp
@@ -86,10 +90,16 @@ class Position():
         
     def getMarketPrice(self):
         if self.asset.isOnlinePrice:
-            result = requests.get('http://finance.yahoo.com/d/quotes.csv?s='+self.getAssetName() +'&f=l1')
-            self.setMarketPrice(result.text)
+            try:
+                result = requests.get('http://finance.yahoo.com/d/quotes.csv?s='+self.getAssetName() +'&f=l1')
+                self.setMarketPrice(result.text)
+            except requests.exceptions.ConnectionError:
+                return 0   
         return self.marketPrice
     
     def getPnL(self):
         return self.getValuatedAmount() - self.getInvestedAmount()
+    
+    def getPnLPercentage(self):
+        return (self.getValuatedAmount() / self.getInvestedAmount() -1 ) * 100
     

@@ -21,7 +21,7 @@ class DaoMovement():
                     m.COMMISSION_PERCENTAGE, 
                     m.COMMISSION_AMOUNT, 
                     m.COMMISSION_IVA_AMOUNT, 
-                    a.IS_SIC  
+                    m.TENOR  
                     FROM movement as m 
                         inner join asset as a on m.asset_oid = a.id  
                     WHERE ACQUISITION_DATE BETWEEN %s AND %s 

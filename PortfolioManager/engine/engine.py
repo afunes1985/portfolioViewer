@@ -43,7 +43,7 @@ class Engine:
             asset.OID = assetRow[0]
             asset.assetType = assetRow[1]
             asset.name = assetRow[2]
-            asset.isSic = assetRow[3]
+            asset.isSIC = assetRow[3]
             asset.isOnlinePrice = assetRow[4]
             assetDict[asset.name] = asset
         return assetDict 

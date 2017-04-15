@@ -36,6 +36,7 @@ class MainWindow(QtGui.QMainWindow):
     row = 0
     totalValuatedAmount = 0
     totalPNL = 0
+    totalPNLPercentage = 0
     
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -48,8 +49,8 @@ class MainWindow(QtGui.QMainWindow):
     def createMovementTable(self):
         self.tableWidget = QTableWidget()
         self.tableWidget.setRowCount(25)
-        self.tableWidget.setColumnCount(7)
-        self.tableWidget.setHorizontalHeaderLabels("Asset Name;Position;PPP;Market Price;Invested amount;Valuated amount;PNL".split(";"))
+        self.tableWidget.setColumnCount(9)
+        self.tableWidget.setHorizontalHeaderLabels("Asset Name;Position;PPP;Market Price;Invested amount;Valuated amount;Tenor;PNL;%PNL".split(";"))
         #self.tableWidget.setSortingEnabled(True)  
         #self.tableWidget.sortItems(0)  
         self.setCentralWidget(self.tableWidget)     
@@ -64,6 +65,8 @@ class MainWindow(QtGui.QMainWindow):
     def renderPositions(self, positionList):   
         self.subtotalPNL = 0
         self.subTotalValuatedAmount = 0
+        self.subTotalPNLPercentage = 0
+        self.subTotalInvestedAmount = 0
         
         for position in positionList:
             print('processing ' + position.getAssetName())
@@ -82,25 +85,39 @@ class MainWindow(QtGui.QMainWindow):
             #Invested amount
             investedAmountItem = QTableWidgetItemDecimal(position.getInvestedAmount())
             self.tableWidget.setItem(self.row,4,investedAmountItem)
+            self.subTotalInvestedAmount += position.getInvestedAmount()
             #Valuated amount
             valuatedAmountItem = QTableWidgetItemDecimal(position.getValuatedAmount())
             self.tableWidget.setItem(self.row,5,valuatedAmountItem)
             self.subTotalValuatedAmount += position.getValuatedAmount()
+            #Tenor
+            tenorItem = QTableWidgetItemInt(position.tenor)
+            self.tableWidget.setItem(self.row,6,tenorItem)
             #PnL
             pnlItem = QTableWidgetItemDecimal(position.getPnL())
-            self.tableWidget.setItem(self.row,6,pnlItem)
+            self.tableWidget.setItem(self.row,7,pnlItem)
             self.subtotalPNL += position.getPnL()
+            #PnLPercentage
+            pnlPercentageItem = QTableWidgetItemDecimal(position.getPnLPercentage())
+            self.tableWidget.setItem(self.row,8,pnlPercentageItem)
             self.row +=1  
         #sub total valuated amount
-        totalValuatedAmountItem = QTableWidgetItemDecimal(self.subTotalValuatedAmount)
-        self.tableWidget.setItem(self.row,5,totalValuatedAmountItem)   
+        subTotalValuatedAmountItem = QTableWidgetItemDecimal(self.subTotalValuatedAmount)
+        self.tableWidget.setItem(self.row,5,subTotalValuatedAmountItem)   
         #sub total PNL    
-        totalPNLItem = QTableWidgetItemDecimal(self.subtotalPNL)
-        self.tableWidget.setItem(self.row,6,totalPNLItem)
+        subTotalPNLItem = QTableWidgetItemDecimal(self.subtotalPNL)
+        self.tableWidget.setItem(self.row,7,subTotalPNLItem)
+        #sub total PNL Percentage    
+        #=======================================================================
+        # totalPNLPercentageItem = QTableWidgetItemDecimal(self.subTotalValuatedAmount/ self.subTotalInvestedAmount)
+        # self.tableWidget.setItem(self.row,8,totalPNLPercentageItem)
+        #=======================================================================
+
         self.row +=1 
         #Grand total
         self.totalValuatedAmount += self.subTotalValuatedAmount
         self.totalPNL += self.subtotalPNL
+        self.totalPNLPercentage += self.subTotalPNLPercentage
         
     def renderGrandTotal(self):
         #total valuated amount
@@ -108,7 +125,7 @@ class MainWindow(QtGui.QMainWindow):
         self.tableWidget.setItem(self.row,5,totalValuatedAmountItem)   
         #total PNL    
         totalPNLItem = QTableWidgetItemDecimal(self.totalPNL)
-        self.tableWidget.setItem(self.row,6,totalPNLItem)
+        self.tableWidget.setItem(self.row,7,totalPNLItem)
         
     def openMovementEditor(self):
         self.movementEditor = MovementEditor()
@@ -151,7 +168,7 @@ class MovementEditor(QWidget):
         self.layout.addWidget(self.lblGrossAmount, 4, 0)
         #txtGrossAmount
         self.txtGrossAmount = QLineEdit(self)
-        self.txtGrossAmount.setValidator(QDoubleValidator(0, 99999999999, 2, self))
+        self.txtGrossAmount.setValidator(QDoubleValidator(0, 99999999999, 6, self))
         self.layout.addWidget(self.txtGrossAmount, 4, 1)
         #lblAcquisitionDate
         self.lblAcquisitionDate = QLabel("Acquisition Date")
@@ -189,14 +206,14 @@ class MovementEditor(QWidget):
         #txtNetAmount
         self.txtNetAmount = QLineEdit(self)
         self.txtNetAmount.setEnabled(0)
-        self.txtNetAmount.setValidator(QDoubleValidator(0, 99999999999, 2, self))
+        self.txtNetAmount.setValidator(QDoubleValidator(0, 99999999999, 6, self))
         self.layout.addWidget(self.txtNetAmount, 10, 1)
         #lblCommissionPercentage
         self.lblCommissionPercentage = QLabel("Commission Percentage")
         self.layout.addWidget(self.lblCommissionPercentage, 11, 0)
         #txtCommissionPercentage
         self.txtCommissionPercentage = QLineEdit(self)
-        self.txtCommissionPercentage.setValidator(QDoubleValidator(0, 9999999, 4, self))
+        self.txtCommissionPercentage.setValidator(QDoubleValidator(0, 9999999, 6, self))
         self.layout.addWidget(self.txtCommissionPercentage, 11, 1)
         #lblCommissionAmount
         self.lblCommissionAmount = QLabel("Commission Amount")
@@ -204,7 +221,7 @@ class MovementEditor(QWidget):
         #txtCommissionAmmount
         self.txtCommissionAmount = QLineEdit(self)
         self.txtCommissionAmount.setEnabled(0)
-        self.txtCommissionAmount.setValidator(QDoubleValidator(0, 9999999, 4, self))
+        self.txtCommissionAmount.setValidator(QDoubleValidator(0, 9999999, 6, self))
         self.layout.addWidget(self.txtCommissionAmount, 12, 1)
         #lblCommissionAmount
         self.lblCommissionVATAmount = QLabel("Commission VAT Amount")
@@ -212,7 +229,7 @@ class MovementEditor(QWidget):
         #txtCommissionAmmount
         self.txtCommissionVATAmount = QLineEdit(self)
         self.txtCommissionVATAmount.setEnabled(0)
-        self.txtCommissionVATAmount.setValidator(QDoubleValidator(0, 9999999, 4, self))
+        self.txtCommissionVATAmount.setValidator(QDoubleValidator(0, 9999999, 6, self))
         self.layout.addWidget(self.txtCommissionVATAmount, 13, 1)
         #lblTenor
         self.lblTenor = QLabel("Tenor")
@@ -259,7 +276,7 @@ class MovementEditor(QWidget):
         movement.netAmount = self.txtNetAmount.text()
         movement.commissionPercentage = self.txtCommissionPercentage.text()
         movement.commissionAmount = self.txtCommissionAmount.text()
-        movement.commissionIVAAmount = self.txtCommissionVATAmount.text()
+        movement.commissionVATAmount = self.txtCommissionVATAmount.text()
         if self.txtTenor.text() == '': 
             movement.tenor = None 
         else: 
@@ -317,15 +334,15 @@ class MovementEditor(QWidget):
         grossAmount = self.txtGrossAmount.text() 
         if commissionPercentage >= 0:
             commissionAmount = float(grossAmount) * float(commissionPercentage)
-            self.txtCommissionAmount.setText(str(commissionAmount))
+            self.txtCommissionAmount.setText(str('{0:.6f}'.format(commissionAmount)))
             commissionVATAmount = commissionAmount * Constant.CONST_IVA_PERCENTAGE
-            self.txtCommissionVATAmount.setText(str(commissionVATAmount))
+            self.txtCommissionVATAmount.setText(str('{0:.6f}'.format(commissionVATAmount)))
             self.calculateNetAmount()
         
     def calculatePrice(self):
         quantity = self.txtQuantity.text()
         amount = self.txtGrossAmount.text()
-        if quantity is not None and amount is not None:
+        if (quantity is not u"" or None) and (amount is not u"" or None):
             self.txtPrice.setText(str('{0:.6f}'.format(float(amount) / float(quantity))))
         
     def calculateNetAmount(self):
@@ -342,7 +359,7 @@ class MovementEditor(QWidget):
     def calculateGrossAmount(self):
         quantity = self.txtQuantity.text()
         price = self.txtPrice.text()
-        if not self.chkByAmount.isChecked() and quantity is not None and price is not None:
-            self.txtGrossAmount.setText(str(float(quantity) * float(price)))
+        if (not self.chkByAmount.isChecked()) and (quantity is not u"" or None) and (price is not u"" or None):
+            self.txtGrossAmount.setText(str('{0:.6f}'.format(float(quantity) * float(price))))
         self.calculateCommission()
         
