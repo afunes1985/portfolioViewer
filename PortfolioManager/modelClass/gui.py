@@ -12,6 +12,7 @@ from PySide.QtGui import QTableWidget, QTableWidgetItem, QWidget, \
     QDateEdit, QDoubleValidator, QCheckBox
 
 from dao.dao import DaoAsset, DaoMovement
+from engine.engine import Engine
 from modelClass.constant import Constant
 from modelClass.movement import Movement
 
@@ -40,8 +41,8 @@ class MainWindow(QtGui.QMainWindow):
     
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.setWindowTitle('Porfolio Viewer')
-        self.resize(900, 650)
+        self.setWindowTitle('Portfolio Viewer')
+        self.resize(1100, 800)
         self.createMovementTable()
         self.createMenu()
         self.show()
@@ -49,8 +50,8 @@ class MainWindow(QtGui.QMainWindow):
     def createMovementTable(self):
         self.tableWidget = QTableWidget()
         self.tableWidget.setRowCount(25)
-        self.tableWidget.setColumnCount(9)
-        self.tableWidget.setHorizontalHeaderLabels("Asset Name;Position;PPP;Market Price;Invested amount;Valuated amount;Tenor;PNL;%PNL".split(";"))
+        self.tableWidget.setColumnCount(11)
+        self.tableWidget.setHorizontalHeaderLabels("Asset Name;Position;PPP;Market Price;Invested amount;Valuated amount;Tenor;Maturity Date;PNL;%PNL;%Portfolio".split(";"))
         #self.tableWidget.setSortingEnabled(True)  
         #self.tableWidget.sortItems(0)  
         self.setCentralWidget(self.tableWidget)     
@@ -62,70 +63,63 @@ class MainWindow(QtGui.QMainWindow):
             triggered=self.openMovementEditor)
         self.fileMenu.addAction(self.actionOpenMovementEditor)
 
-    def renderPositions(self, positionList):   
-        self.subtotalPNL = 0
-        self.subTotalValuatedAmount = 0
-        self.subTotalPNLPercentage = 0
-        self.subTotalInvestedAmount = 0
-        
+    def renderSubtotal(self, positionDict, assetType ,isSIC):
+        subTotalValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, assetType, isSIC)
+        totalValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, 'ALL', isSIC)
+        positionPercentage = (subTotalValuatedAmount * 100) / totalValuatedAmount
+        #sub total valuated amount
+        subTotalValuatedAmountItem = QTableWidgetItemDecimal(Engine.getSubTotalValuatedAmount(positionDict, assetType, isSIC))
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_VALUATED_AMOUNT,subTotalValuatedAmountItem)   
+        #sub total PNL    
+        subTotalPNLItem = QTableWidgetItemDecimal(Engine.getSubtotalPNL(positionDict, assetType, isSIC))
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_PNL,subTotalPNLItem)
+        #PositionPercentage
+        positionPercentageItem = QTableWidgetItemDecimal(positionPercentage)
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_POSITION_PERCENTAGE,positionPercentageItem)
+    
+    def renderPositions(self, positionDict, assetType ,isSIC):   
+        positionList = Engine().getPositionByAssetType(positionDict, assetType, isSIC)
+        totalValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, 'ALL', isSIC)
         for position in positionList:
             print('processing ' + position.getAssetName())
+            position.row = self.row
             #assetName
             assetNameItem = QTableWidgetItemString(position.getAssetName())
-            self.tableWidget.setItem(self.row,0,assetNameItem)
+            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_ASSET_NAME,assetNameItem)
             #totalQuantity
             totalQuantityItem = QTableWidgetItemInt(position.getTotalQuantity())
-            self.tableWidget.setItem(self.row,1,totalQuantityItem)
+            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_QUANTITY,totalQuantityItem)
             #PPP
             pppItem = QTableWidgetItemDecimal(position.getPPP())
-            self.tableWidget.setItem(self.row,2,pppItem)
+            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_PPP,pppItem)
             #Market price
             marketPriceItem = QTableWidgetItemDecimal(position.getMarketPrice())
-            self.tableWidget.setItem(self.row,3,marketPriceItem)
+            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_MARKET_PRICE,marketPriceItem)
             #Invested amount
             investedAmountItem = QTableWidgetItemDecimal(position.getInvestedAmount())
-            self.tableWidget.setItem(self.row,4,investedAmountItem)
-            self.subTotalInvestedAmount += position.getInvestedAmount()
+            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_INVESTED_AMOUNT,investedAmountItem)
             #Valuated amount
             valuatedAmountItem = QTableWidgetItemDecimal(position.getValuatedAmount())
-            self.tableWidget.setItem(self.row,5,valuatedAmountItem)
-            self.subTotalValuatedAmount += position.getValuatedAmount()
+            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_VALUATED_AMOUNT,valuatedAmountItem)
             #Tenor
             tenorItem = QTableWidgetItemInt(position.tenor)
-            self.tableWidget.setItem(self.row,6,tenorItem)
+            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_TENOR,tenorItem)
+            #Maturity Date
+            maturityDateItem = QTableWidgetItemString(position.getMaturityDate())
+            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_MATURITY_DATE,maturityDateItem)
             #PnL
             pnlItem = QTableWidgetItemDecimal(position.getPnL())
-            self.tableWidget.setItem(self.row,7,pnlItem)
-            self.subtotalPNL += position.getPnL()
+            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_PNL,pnlItem)
             #PnLPercentage
             pnlPercentageItem = QTableWidgetItemDecimal(position.getPnLPercentage())
-            self.tableWidget.setItem(self.row,8,pnlPercentageItem)
+            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_PNL_PERCENTAGE,pnlPercentageItem)
+            #PositionPercentage
+            positionPercentage = (position.getValuatedAmount() * 100) / totalValuatedAmount
+            positionPercentageItem = QTableWidgetItemDecimal(positionPercentage)
+            self.tableWidget.setItem(position.row,Constant.CONST_COLUMN_POSITION_POSITION_PERCENTAGE,positionPercentageItem)
             self.row +=1  
-        #sub total valuated amount
-        subTotalValuatedAmountItem = QTableWidgetItemDecimal(self.subTotalValuatedAmount)
-        self.tableWidget.setItem(self.row,5,subTotalValuatedAmountItem)   
-        #sub total PNL    
-        subTotalPNLItem = QTableWidgetItemDecimal(self.subtotalPNL)
-        self.tableWidget.setItem(self.row,7,subTotalPNLItem)
-        #sub total PNL Percentage    
-        #=======================================================================
-        # totalPNLPercentageItem = QTableWidgetItemDecimal(self.subTotalValuatedAmount/ self.subTotalInvestedAmount)
-        # self.tableWidget.setItem(self.row,8,totalPNLPercentageItem)
-        #=======================================================================
-
+        self.renderSubtotal(positionDict, assetType, isSIC)
         self.row +=1 
-        #Grand total
-        self.totalValuatedAmount += self.subTotalValuatedAmount
-        self.totalPNL += self.subtotalPNL
-        self.totalPNLPercentage += self.subTotalPNLPercentage
-        
-    def renderGrandTotal(self):
-        #total valuated amount
-        totalValuatedAmountItem = QTableWidgetItemDecimal(self.totalValuatedAmount)
-        self.tableWidget.setItem(self.row,5,totalValuatedAmountItem)   
-        #total PNL    
-        totalPNLItem = QTableWidgetItemDecimal(self.totalPNL)
-        self.tableWidget.setItem(self.row,7,totalPNLItem)
         
     def openMovementEditor(self):
         self.movementEditor = MovementEditor()
@@ -168,7 +162,7 @@ class MovementEditor(QWidget):
         self.layout.addWidget(self.lblGrossAmount, 4, 0)
         #txtGrossAmount
         self.txtGrossAmount = QLineEdit(self)
-        self.txtGrossAmount.setValidator(QDoubleValidator(0, 99999999999, 6, self))
+        self.txtGrossAmount.setValidator(QDoubleValidator(0, 99999999, 6, self))
         self.layout.addWidget(self.txtGrossAmount, 4, 1)
         #lblAcquisitionDate
         self.lblAcquisitionDate = QLabel("Acquisition Date")
@@ -190,14 +184,14 @@ class MovementEditor(QWidget):
         self.layout.addWidget(self.lblPrice, 7, 0)
         #txtPrice
         self.txtPrice = QLineEdit(self)
-        self.txtPrice.setValidator(QDoubleValidator(0, 999999999, 6, self))
+        self.txtPrice.setValidator(QDoubleValidator(0, 99999999, 6, self))
         self.layout.addWidget(self.txtPrice, 7, 1)
         #lblRate
         self.lblRate = QLabel("Rate")
         self.layout.addWidget(self.lblRate, 8, 0)
         #txtRate
         self.txtRate = QLineEdit(self)
-        self.txtRate.setValidator(QDoubleValidator(0, 999999999, 4, self))
+        self.txtRate.setValidator(QDoubleValidator(0, 99999999, 4, self))
         self.txtRate.setEnabled(0)
         self.layout.addWidget(self.txtRate, 8, 1)
         #lblNetAmount
@@ -206,7 +200,7 @@ class MovementEditor(QWidget):
         #txtNetAmount
         self.txtNetAmount = QLineEdit(self)
         self.txtNetAmount.setEnabled(0)
-        self.txtNetAmount.setValidator(QDoubleValidator(0, 99999999999, 6, self))
+        self.txtNetAmount.setValidator(QDoubleValidator(0, 99999999, 6, self))
         self.layout.addWidget(self.txtNetAmount, 10, 1)
         #lblCommissionPercentage
         self.lblCommissionPercentage = QLabel("Commission Percentage")

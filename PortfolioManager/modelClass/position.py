@@ -22,6 +22,7 @@ class Position():
     acquisitionDate = 0
     asset = 0
     tenor = 0
+    row = 0
     
     def __init__(self, asset, movement):
         self.asset = asset
@@ -73,11 +74,19 @@ class Position():
         elapsedDays = datetime.datetime.now() - self.acquisitionDate
         return elapsedDays.days
     
+    def getMaturityDate(self):
+        if (self.asset.assetType == 'BOND'):
+            return (self.acquisitionDate + datetime.timedelta(days = int(self.tenor))).strftime("%Y-%m-%d")
+        return None
+    
     def getValuatedAmount(self):
         if (self.asset.assetType == 'BOND'):
             return self.accumulatedAmount * (1 + (self.getElapsedDays() * (self.rate / 360)))
-        else:    
-            return Decimal(self.totalQuantity) * self.marketPrice
+        else:  
+            if (self.marketPrice == 0):
+                return Decimal(self.totalQuantity) * self.getPPP()
+            else:
+                return Decimal(self.totalQuantity) * self.marketPrice
     
     def getMovementList(self):
         return self.movementList

@@ -7,35 +7,41 @@ from datetime import date
 
 from dao.dao import DaoMovement, DaoAsset
 from modelClass.constant import Constant
-from modelClass.gui import MainWindow
 from modelClass.movement import Asset
-from modelClass.position import Position
+from modelClass.position import Position    
 
 
 class Engine:
     
-    def startApp(self):
-        mainWindow = MainWindow()
-        positionDict = Engine().buildPositions()
-        equityNoSICPositionList = self.getPositionByAssetType(positionDict, 'EQUITY', 0)
-        mainWindow.renderPositions(equityNoSICPositionList)
-        equitySICPositionList = self.getPositionByAssetType(positionDict, 'EQUITY', 1)
-        mainWindow.renderPositions(equitySICPositionList)
-        fundPositionList = self.getPositionByAssetType(positionDict, 'FUND', 0)
-        mainWindow.renderPositions(fundPositionList)
-        bondPositionList = self.getPositionByAssetType(positionDict, 'BOND', 0)
-        mainWindow.renderPositions(bondPositionList)
-        #=======================================================================
-        # mainWindow.renderGrandTotal()
-        #=======================================================================
-        return mainWindow
-        
-    def getPositionByAssetType(self, positionDict, assetType ,isSIC):
+    @staticmethod
+    def getSubTotalValuatedAmount(positionDict, assetType ,isSIC):
+        subTotalValuatedAmount = 0
+        positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
+        for position in positionList:
+            subTotalValuatedAmount += position.getValuatedAmount()
+        return subTotalValuatedAmount
+    
+    @staticmethod
+    def getPositionByAssetType(positionDict, assetType ,isSIC):
         positionList = []
         for key, position in positionDict.items():
-            if position.asset.assetType == assetType and position.asset.isSIC == isSIC:
+            if assetType == 'ALL' or (position.asset.assetType == assetType and position.asset.isSIC == isSIC):
                 positionList.append(position)
         return positionList
+    
+    @staticmethod
+    def getSubtotalPNL(positionDict, assetType ,isSIC):
+        subTotalPNL = 0
+        positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
+        for position in positionList:
+            subTotalPNL += position.getPnL()
+        return subTotalPNL
+    
+    @staticmethod
+    def getPortfolioPercentage(positionDict, valuatedAmount):
+        totalValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, 'ALL', 0)
+        return (valuatedAmount * 100) / totalValuatedAmount
+        
     
     def getAssetDict(self):
         assetResultSet = DaoAsset().getAssetList()
