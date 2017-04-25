@@ -1,2 +1,6 @@
 /__init__.pyc
 /modelClass.pyc
+/constant.pyc
+/gui.pyc
+/movement.pyc
+/position.pyc
