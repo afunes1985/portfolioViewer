@@ -12,7 +12,7 @@ def main():
     app = QtGui.QApplication(sys.argv)
     mainWindow = Singleton(MainWindow)
     mainCache = Singleton(MainCache)
-    mainCache.positionDict = Engine().buildPositions()
+    mainCache.positionDict = Engine.buildPositions()
     mainWindow.renderPositions(mainCache.positionDict, 'EQUITY', 0)
     mainWindow.renderPositions(mainCache.positionDict, 'EQUITY', 1)
     mainWindow.renderPositions(mainCache.positionDict, 'FUND', 0)

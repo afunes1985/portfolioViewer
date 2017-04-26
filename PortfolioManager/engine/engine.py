@@ -42,8 +42,8 @@ class Engine:
         totalValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, 'ALL', 0)
         return (valuatedAmount * 100) / totalValuatedAmount
         
-    
-    def getAssetDict(self):
+    @staticmethod
+    def getAssetDict():
         assetResultSet = DaoAsset().getAssetList()
         assetDict = {}
         for (assetRow) in assetResultSet:
@@ -56,9 +56,9 @@ class Engine:
             assetDict[asset.name] = asset
         return assetDict 
         
-    
-    def buildPositions(self):
-        assetDict = self.getAssetDict()
+    @staticmethod
+    def buildPositions():
+        assetDict = Engine.getAssetDict()
         movementList = DaoMovement().getMovementsByDate(date(2001, 7, 14), date(2020, 7, 14))
         positionDict = {}
         position = 0
