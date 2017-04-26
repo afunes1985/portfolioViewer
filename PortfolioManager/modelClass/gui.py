@@ -16,7 +16,6 @@ from engine.engine import Engine
 from modelClass.constant import Constant
 from modelClass.movement import Movement
 
-
 class QTableWidgetItemString(QTableWidgetItem):
     def __init__(self, value):
         super(QTableWidgetItemString, self).__init__(value)
@@ -33,12 +32,9 @@ class QTableWidgetItemInt(QTableWidgetItem):
         self.setTextAlignment(0x0002 | 0x0080) 
     
 class MainWindow(QtGui.QMainWindow):
+    _instance = None
     tableWidget = 0
     row = 0
-    totalValuatedAmount = 0
-    totalPNL = 0
-    totalPNLPercentage = 0
-    
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setWindowTitle('Portfolio Viewer')
