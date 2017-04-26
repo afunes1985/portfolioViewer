@@ -74,7 +74,7 @@ class MainWindow(QtGui.QMainWindow):
         self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_POSITION_PERCENTAGE,positionPercentageItem)
     
     def renderPositions(self, positionDict, assetType ,isSIC):   
-        positionList = Engine().getPositionByAssetType(positionDict, assetType, isSIC)
+        positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
         totalValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, 'ALL', isSIC)
         for position in positionList:
             print('processing ' + position.getAssetName())
