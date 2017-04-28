@@ -30,17 +30,29 @@ class QTableWidgetItemInt(QTableWidgetItem):
     def __init__(self, value):
         super(QTableWidgetItemInt, self).__init__(str('{0:.0f}'.format(value)))
         self.setTextAlignment(0x0002 | 0x0080) 
-    
+
+class MainWidget(QtGui.QWidget):
+    tableWidget = None
+    def initUI(self): 
+        self.layout = QtGui.QGridLayout(self)
+        self.layout.addWidget(MovementFilterWidget(), 1, 0)
+        self.tableWidget = self.createMovementTable()
+        self.layout.addWidget(self.tableWidget, 2, 0)     
+
+class MovementFilterWidget(QtGui.QWidget):
+    def initUI(self):      
+        self.resize(100, 100)
+
 class MainWindow(QtGui.QMainWindow):
     _instance = None
-    tableWidget = 0
+    mainWidget = None
     row = 0
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setWindowTitle('Portfolio Viewer')
-        self.resize(1100, 800)
-        self.createMovementTable()
+        self.resize(1200, 800)
         self.createMenu()
+        self.setCentralWidget(MainWidget()) 
         self.show()
          
     def createMovementTable(self):
@@ -50,7 +62,8 @@ class MainWindow(QtGui.QMainWindow):
         self.tableWidget.setHorizontalHeaderLabels("Asset Name;Position;PPP;Market Price;Invested amount;Valuated amount;Tenor;Maturity Date;PNL;%PNL;%Portfolio".split(";"))
         #self.tableWidget.setSortingEnabled(True)  
         #self.tableWidget.sortItems(0)  
-        self.setCentralWidget(self.tableWidget)     
+        #self.setCentralWidget(self.tableWidget)  
+        return   self.tableWidget
         
     def createMenu(self):
         self.fileMenu = self.menuBar().addMenu("&Movement")
