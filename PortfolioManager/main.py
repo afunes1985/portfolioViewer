@@ -5,7 +5,7 @@ from PySide import QtGui
 
 from core.cache import Singleton, MainCache
 from engine.engine import Engine
-from modelClass.gui import MainWindow
+from frame.mainWindow import MainWindow
 
 
 def main():
