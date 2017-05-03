@@ -3,15 +3,16 @@ Created on Feb 19, 2017
 
 @author: afunes
 '''
+
+from datetime import date
 import datetime
 
 from PySide import QtGui
-from PySide.QtCore import QRect
-from PySide.QtGui import QTableWidgetItem, QTableWidget
+from PySide.QtGui import QTableWidgetItem, QTableWidget, QLabel, QDateEdit, \
+    QPushButton
 
+from core.cache import Singleton, MainCache
 from engine.engine import Engine
-from frame.movementEditor import MovementEditor
-from modelClass.constant import Constant
 
 
 class QTableWidgetItemString(QTableWidgetItem):
@@ -48,4 +49,28 @@ class MovementFilterWidget(QtGui.QWidget):
     def __init__(self):      
         super(MovementFilterWidget, self).__init__()
         self.layout = QtGui.QGridLayout(self)
-
+        #lblFromDate
+        self.lblFromDate = QLabel("From Date")
+        self.layout.addWidget(self.lblFromDate, 1, 0)
+        #dateFromDate
+        self.dateFromDate = QDateEdit(self)
+        self.dateFromDate.setDisplayFormat("dd-MM-yyyy")
+        self.dateFromDate.setDate(date(2001, 7, 14))
+        self.layout.addWidget(self.dateFromDate, 1, 1)
+        #lblToDate
+        self.lblToDate = QLabel("To Date")
+        self.layout.addWidget(self.lblToDate, 2, 0)
+        #dateToDate
+        self.dateToDate = QDateEdit(self)
+        self.dateToDate.setDisplayFormat("dd-MM-yyyy")
+        self.dateToDate.setDate(date(2020, 7, 14))
+        self.layout.addWidget(self.dateToDate, 2, 1)
+        #btnSubmit
+        self.btnSubmit = QPushButton("Submit", self)
+        self.layout.addWidget(self.btnSubmit)
+    
+    def initListener(self):
+        self.btnSubmit.clicked.connect(self.doSubmit)
+    
+    def doSubmit(self):
+        Singleton(MainCache).positionDict = Engine.buildPositions(self.dateFromDate.date(),self.dateToDate.date())

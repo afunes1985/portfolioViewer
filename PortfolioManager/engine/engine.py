@@ -57,9 +57,9 @@ class Engine:
         return assetDict 
         
     @staticmethod
-    def buildPositions():
+    def buildPositions(fromDate, toDate):
         assetDict = Engine.getAssetDict()
-        movementList = DaoMovement().getMovementsByDate(date(2001, 7, 14), date(2020, 7, 14))
+        movementList = DaoMovement().getMovementsByDate(fromDate, toDate)
         positionDict = {}
         position = 0
         for (movement) in movementList:
