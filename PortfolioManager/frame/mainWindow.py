@@ -3,6 +3,8 @@ Created on May 3, 2017
 
 @author: afunes
 '''
+from datetime import date
+
 from PySide import QtGui
 from PySide.QtCore import QRect
 
@@ -98,4 +100,7 @@ class MainWindow(QtGui.QMainWindow):
         self.movementEditor = MovementEditor()
         self.movementEditor.setGeometry(QRect(100, 100, 400, 200))
         self.movementEditor.show()
-        
+    
+    def clearTable(self):
+        self.row = 0
+        self.mainWidget.createTable()

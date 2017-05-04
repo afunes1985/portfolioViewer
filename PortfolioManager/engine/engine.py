@@ -3,8 +3,6 @@ Created on Mar 9, 2017
 
 @author: afunes
 '''
-from datetime import date
-
 from dao.dao import DaoMovement, DaoAsset
 from modelClass.constant import Constant
 from modelClass.movement import Asset
