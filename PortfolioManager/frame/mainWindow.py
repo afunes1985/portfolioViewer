@@ -10,7 +10,7 @@ from PySide.QtCore import QRect
 
 from engine.engine import Engine
 from frame.gui import MainWidget, QTableWidgetItemDecimal, \
-    QTableWidgetItemString, QTableWidgetItemInt
+    QTableWidgetItemString, QTableWidgetItemInt, QTableWidgetItemDecimalColor
 from frame.movementEditor import MovementEditor
 from modelClass.constant import Constant
 
@@ -42,15 +42,29 @@ class MainWindow(QtGui.QMainWindow):
         subTotalValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, assetType, isSIC)
         totalValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, 'ALL', isSIC)
         positionPercentage = (subTotalValuatedAmount * 100) / totalValuatedAmount
+        subTotalInvestedAmount = Engine.getSubTotalInvestedAmount(positionDict, assetType, isSIC)
+        subTotalPnlPercentage = (subTotalValuatedAmount / subTotalInvestedAmount -1 ) * 100
+        self.paintEntireRow(self.row)
+        #Invested amount
+        investedAmountItem = QTableWidgetItemDecimal(subTotalInvestedAmount)
+        self.mainWidget.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_INVESTED_AMOUNT,investedAmountItem)
         #sub total valuated amount
         subTotalValuatedAmountItem = QTableWidgetItemDecimal(Engine.getSubTotalValuatedAmount(positionDict, assetType, isSIC))
         self.mainWidget.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_VALUATED_AMOUNT,subTotalValuatedAmountItem)   
         #sub total PNL    
-        subTotalPNLItem = QTableWidgetItemDecimal(Engine.getSubtotalPNL(positionDict, assetType, isSIC))
+        subTotalPNLItem = QTableWidgetItemDecimalColor(Engine.getSubtotalPNL(positionDict, assetType, isSIC))
         self.mainWidget.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_PNL,subTotalPNLItem)
+        #Sub Total PnLPercentage
+        pnlPercentageItem = QTableWidgetItemDecimalColor(subTotalPnlPercentage)
+        self.mainWidget.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_PNL_PERCENTAGE,pnlPercentageItem)
         #PositionPercentage
         positionPercentageItem = QTableWidgetItemDecimal(positionPercentage)
         self.mainWidget.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_POSITION_PERCENTAGE,positionPercentageItem)
+    
+    def paintEntireRow(self, row):
+        for r in (0,self.mainWidget.tableWidget.columnCount()):
+            self.mainWidget.tableWidget.item(row, r).setBackground(QtGui.QColor(204,204,204))
+            
     
     def renderPositions(self, positionDict, assetType ,isSIC):   
         positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
@@ -83,10 +97,10 @@ class MainWindow(QtGui.QMainWindow):
             maturityDateItem = QTableWidgetItemString(position.getMaturityDate())
             self.mainWidget.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_MATURITY_DATE,maturityDateItem)
             #PnL
-            pnlItem = QTableWidgetItemDecimal(position.getPnL())
+            pnlItem = QTableWidgetItemDecimalColor(position.getPnL())
             self.mainWidget.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_PNL,pnlItem)
             #PnLPercentage
-            pnlPercentageItem = QTableWidgetItemDecimal(position.getPnLPercentage())
+            pnlPercentageItem = QTableWidgetItemDecimalColor(position.getPnLPercentage())
             self.mainWidget.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_PNL_PERCENTAGE,pnlPercentageItem)
             #PositionPercentage
             positionPercentage = (position.getValuatedAmount() * 100) / totalValuatedAmount

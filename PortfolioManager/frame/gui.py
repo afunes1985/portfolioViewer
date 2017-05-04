@@ -7,10 +7,12 @@ Created on Feb 19, 2017
 from datetime import date
 
 from PySide import QtGui
+from PySide.QtCore import Qt
 from PySide.QtGui import QTableWidgetItem, QTableWidget, QLabel, QDateEdit, \
     QPushButton, QSizePolicy
 
 from core.cache import Singleton
+
 
 class QTableWidgetItemString(QTableWidgetItem):
     def __init__(self, value):
@@ -21,6 +23,15 @@ class QTableWidgetItemDecimal(QTableWidgetItem):
     def __init__(self, value):
         super(QTableWidgetItemDecimal, self).__init__(str('{0:.2f}'.format(value)))
         self.setTextAlignment(0x0002 | 0x0080)        
+
+class QTableWidgetItemDecimalColor(QTableWidgetItem):
+    def __init__(self, value):
+        super(QTableWidgetItemDecimalColor, self).__init__(str('{0:.2f}'.format(value)))
+        self.setTextAlignment(0x0002 | 0x0080) 
+        if(value < 0):  
+            self.setBackground(QtGui.QColor(255,000,51))
+        else:
+            self.setBackground(QtGui.QColor(102,204,51))
 
 class QTableWidgetItemInt(QTableWidgetItem):
     def __init__(self, value):

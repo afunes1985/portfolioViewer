@@ -12,6 +12,14 @@ from modelClass.position import Position
 class Engine:
     
     @staticmethod
+    def getSubTotalInvestedAmount(positionDict, assetType ,isSIC):
+        subTotalInvestedAmount = 0
+        positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
+        for position in positionList:
+            subTotalInvestedAmount += position.getInvestedAmount()
+        return subTotalInvestedAmount
+    
+    @staticmethod
     def getSubTotalValuatedAmount(positionDict, assetType ,isSIC):
         subTotalValuatedAmount = 0
         positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
