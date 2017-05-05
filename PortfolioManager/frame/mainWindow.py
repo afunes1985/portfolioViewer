@@ -7,6 +7,7 @@ from datetime import date
 
 from PySide import QtGui
 from PySide.QtCore import QRect
+from PySide.QtGui import QTableWidgetItem
 
 from engine.engine import Engine
 from frame.gui import MainWidget, QTableWidgetItemDecimal, \
@@ -44,7 +45,9 @@ class MainWindow(QtGui.QMainWindow):
         positionPercentage = (subTotalValuatedAmount * 100) / totalValuatedAmount
         subTotalInvestedAmount = Engine.getSubTotalInvestedAmount(positionDict, assetType, isSIC)
         subTotalPnlPercentage = (subTotalValuatedAmount / subTotalInvestedAmount -1 ) * 100
-        self.paintEntireRow(self.row)
+        #=======================================================================
+        # self.paintEntireRow(self.row)
+        #=======================================================================
         #Invested amount
         investedAmountItem = QTableWidgetItemDecimal(subTotalInvestedAmount)
         self.mainWidget.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_INVESTED_AMOUNT,investedAmountItem)
@@ -62,8 +65,10 @@ class MainWindow(QtGui.QMainWindow):
         self.mainWidget.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_POSITION_PERCENTAGE,positionPercentageItem)
     
     def paintEntireRow(self, row):
-        for r in (0,self.mainWidget.tableWidget.columnCount()):
-            self.mainWidget.tableWidget.item(row, r).setBackground(QtGui.QColor(204,204,204))
+        for r in range(self.mainWidget.tableWidget.columnCount()+1):
+            emptyCell = QTableWidgetItem()
+            emptyCell.setBackground(QtGui.QColor(204,204,204))
+            self.mainWidget.tableWidget.setItem(row, r, emptyCell)
             
     
     def renderPositions(self, positionDict, assetType ,isSIC):   

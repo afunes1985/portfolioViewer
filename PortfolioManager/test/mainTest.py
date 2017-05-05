@@ -1,8 +1,8 @@
-from claseB import ClaseB
+from test.claseB import ClaseB
 
 def main():
-    claseB = ClaseB()
-    claseB.getA()
+    for r in range(11):
+        print(r)
 
 if __name__== '__main__':
     main()
