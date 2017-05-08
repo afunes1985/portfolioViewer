@@ -16,17 +16,26 @@ from core.cache import Singleton
 
 class QTableWidgetItemString(QTableWidgetItem):
     def __init__(self, value):
-        super(QTableWidgetItemString, self).__init__(value)
+        super(self.__class__, self).__init__(value)
         self.setTextAlignment(0x0080) 
           
 class QTableWidgetItemDecimal(QTableWidgetItem):
     def __init__(self, value):
-        super(QTableWidgetItemDecimal, self).__init__(str('{0:.2f}'.format(value)))
+        super(self.__class__, self).__init__(str('{0:.2f}'.format(value)))
         self.setTextAlignment(0x0002 | 0x0080)        
+
+class QTableWidgetItemDuoDecimal(QTableWidgetItem):
+    def __init__(self, value1, value2):
+        if(value2 == 0):
+            value = str('{0:.2f}'.format(value1))
+        else:    
+            value = str('{0:.2f}'.format(value1)) + '(' + str('{0:.2f}'.format(value2)) + ')'
+        super(self.__class__, self).__init__(str(value))
+        self.setTextAlignment(0x0002 | 0x0080)
 
 class QTableWidgetItemDecimalColor(QTableWidgetItem):
     def __init__(self, value):
-        super(QTableWidgetItemDecimalColor, self).__init__(str('{0:.2f}'.format(value)))
+        super(self.__class__, self).__init__(str('{0:.2f}'.format(value)))
         self.setTextAlignment(0x0002 | 0x0080) 
         if(value < 0):  
             self.setBackground(QtGui.QColor(255,000,51))
@@ -35,13 +44,13 @@ class QTableWidgetItemDecimalColor(QTableWidgetItem):
 
 class QTableWidgetItemInt(QTableWidgetItem):
     def __init__(self, value):
-        super(QTableWidgetItemInt, self).__init__(str('{0:.0f}'.format(value)))
+        super(self.__class__, self).__init__(str('{0:.0f}'.format(value)))
         self.setTextAlignment(0x0002 | 0x0080) 
 
 class MainWidget(QtGui.QWidget):
     tableWidget = None
     def __init__(self): 
-        super(MainWidget, self).__init__()
+        super(self.__class__, self).__init__()
         self.layout = QtGui.QGridLayout(self)
         self.layout.addWidget(MovementFilterWidget(), 1, 0)
     

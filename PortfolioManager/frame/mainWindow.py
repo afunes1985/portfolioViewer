@@ -11,7 +11,8 @@ from PySide.QtGui import QTableWidgetItem
 
 from engine.engine import Engine
 from frame.gui import MainWidget, QTableWidgetItemDecimal, \
-    QTableWidgetItemString, QTableWidgetItemInt, QTableWidgetItemDecimalColor
+    QTableWidgetItemString, QTableWidgetItemInt, QTableWidgetItemDecimalColor, \
+    QTableWidgetItemDuoDecimal
 from frame.movementEditor import MovementEditor
 from modelClass.constant import Constant
 
@@ -87,13 +88,13 @@ class MainWindow(QtGui.QMainWindow):
             pppItem = QTableWidgetItemDecimal(position.getPPP())
             self.mainWidget.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_PPP,pppItem)
             #Market price
-            marketPriceItem = QTableWidgetItemDecimal(position.getMarketPrice())
+            marketPriceItem = QTableWidgetItemDuoDecimal(position.getMarketPrice(), position.getMarketPriceOrig())
             self.mainWidget.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_MARKET_PRICE,marketPriceItem)
             #Invested amount
             investedAmountItem = QTableWidgetItemDecimal(position.getInvestedAmount())
             self.mainWidget.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_INVESTED_AMOUNT,investedAmountItem)
             #Valuated amount
-            valuatedAmountItem = QTableWidgetItemDecimal(position.getValuatedAmount())
+            valuatedAmountItem = QTableWidgetItemDuoDecimal(position.getValuatedAmount(), position.getValuatedAmountOrig())
             self.mainWidget.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_VALUATED_AMOUNT,valuatedAmountItem)
             #Tenor
             tenorItem = QTableWidgetItemInt(position.tenor)

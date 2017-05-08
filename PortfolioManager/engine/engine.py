@@ -3,10 +3,13 @@ Created on Mar 9, 2017
 
 @author: afunes
 '''
+import requests
+
 from dao.dao import DaoMovement, DaoAsset
 from modelClass.constant import Constant
 from modelClass.movement import Asset
 from modelClass.position import Position    
+from decimal import Decimal
 
 
 class Engine:
@@ -57,8 +60,9 @@ class Engine:
             asset.OID = assetRow[0]
             asset.assetType = assetRow[1]
             asset.name = assetRow[2]
-            asset.isSIC = assetRow[3]
-            asset.isOnlinePrice = assetRow[4]
+            asset.originName = assetRow[3]
+            asset.isSIC = assetRow[4]
+            asset.isOnlinePrice = assetRow[5]
             assetDict[asset.name] = asset
         return assetDict 
         
@@ -80,3 +84,8 @@ class Engine:
             else:    
                 position.addMovement(movement)
         return positionDict
+    
+    @staticmethod
+    def getMarketPriceByAssetName(assetName):
+        result = requests.get('http://finance.yahoo.com/d/quotes.csv?s='+assetName+'&f=l1')
+        return result.text

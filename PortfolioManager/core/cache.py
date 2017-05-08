@@ -3,6 +3,10 @@ Created on Apr 26, 2017
 
 @author: afunes
 '''
+from engine.engine import Engine
+from decimal import Decimal
+
+
 def Singleton(klass):
     if not klass._instance:
         klass._instance = klass()
@@ -11,6 +15,10 @@ def Singleton(klass):
 class MainCache:
     _instance = None
     positionDict = None
-
-
-
+    usdMXN = None
+    
+    def setUSDMXN(self, usdMXN):
+        self.usdMXN = Decimal(usdMXN)
+    
+    def __init__(self):
+        self.setUSDMXN(Engine.getMarketPriceByAssetName('MXN=X'))

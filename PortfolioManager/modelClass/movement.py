@@ -35,7 +35,8 @@ class FundMovement(Movement):
 
 class Asset():
     OID = 0
-    assetType = ''
-    name = ''
+    assetType = None
+    name = None
+    originName = None
     isSIC = 0
     isOnlinePrice = 0

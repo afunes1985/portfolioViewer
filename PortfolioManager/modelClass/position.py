@@ -18,9 +18,10 @@ class Position():
     totalQuantity = 0
     accumulatedAmount = 0
     marketPrice = 0
+    marketPriceOrig = 0
     movementList = []
     acquisitionDate = 0
-    asset = 0
+    asset = None
     tenor = 0
     row = 0
     
@@ -87,9 +88,24 @@ class Position():
                 return Decimal(self.totalQuantity) * self.getPPP()
             else:
                 return Decimal(self.totalQuantity) * self.marketPrice
+            
+    def getValuatedAmountOrig(self):
+        if (self.asset.assetType == 'BOND'):
+            return 0
+        else:  
+            if (self.asset.isSIC):
+                return Decimal(self.totalQuantity) * self.marketPriceOrig
+            else:
+                return 0
     
     def getMovementList(self):
         return self.movementList
+    
+    def setMarketPriceOrig(self, marketPriceOrig):
+        try:
+            self.marketPriceOrig = Decimal(marketPriceOrig)
+        except InvalidOperation:
+            self.marketPriceOrig = 0
     
     def setMarketPrice(self, marketPrice):
         try:
@@ -98,13 +114,26 @@ class Position():
             self.marketPrice = 0
         
     def getMarketPrice(self):
+        from engine.engine import Engine
         if self.asset.isOnlinePrice:
             try:
-                result = requests.get('http://finance.yahoo.com/d/quotes.csv?s='+self.getAssetName() +'&f=l1')
-                self.setMarketPrice(result.text)
+                marketPrice = Engine.getMarketPriceByAssetName(self.getAssetName())
+                self.setMarketPrice(marketPrice)
             except requests.exceptions.ConnectionError:
                 return 0   
         return self.marketPrice
+    
+    def getMarketPriceOrig(self):
+        from engine.engine import Engine
+        from core.cache import MainCache
+        from core.cache import Singleton
+        if self.asset.isOnlinePrice and self.asset.isSIC:
+            try:
+                self.setMarketPriceOrig(Engine.getMarketPriceByAssetName(self.asset.originName))
+                self.marketPriceOrig = self.marketPriceOrig * Singleton(MainCache).usdMXN
+            except requests.exceptions.ConnectionError:
+                return 0   
+        return self.marketPriceOrig
     
     def getPnL(self):
         return self.getValuatedAmount() - self.getInvestedAmount()
