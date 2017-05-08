@@ -12,7 +12,6 @@ from modelClass.constant import Constant
 
 
 class Position():
-    assetName = ''
     ppp = 0
     rate = 0
     totalQuantity = 0
@@ -27,7 +26,6 @@ class Position():
     
     def __init__(self, asset, movement):
         self.asset = asset
-        self.assetName = asset.name
         self.acquisitionDate = movement[Constant.CONST_MOVEMENT_ACQUISITION_DATE]
         if (self.asset.assetType == 'BOND'):
             self.addBondMovement(movement)
@@ -63,7 +61,7 @@ class Position():
         return self.ppp
     
     def getAssetName(self):
-        return self.assetName
+        return self.asset.name
     
     def getTotalQuantity(self):
         return self.totalQuantity;
