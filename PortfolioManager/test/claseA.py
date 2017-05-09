@@ -1,4 +1,4 @@
-from claseB import ClaseB
+from test.claseB import ClaseB
 
 class ClaseA():
     def __init__(self):
