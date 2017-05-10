@@ -6,7 +6,7 @@ Created on May 2, 2017
 import datetime
 
 from PySide import QtGui, QtCore
-from PySide.QtCore import SIGNAL
+from PySide.QtCore import SIGNAL, QRect
 from PySide.QtGui import QWidget, QLabel, QComboBox, QCheckBox, QLineEdit, \
     QDoubleValidator, QDateEdit, QIntValidator, QPushButton
 
@@ -18,6 +18,7 @@ from modelClass.movement import Movement
 class MovementEditor(QWidget):
     def __init__(self):
         QWidget.__init__(self)
+        self.setGeometry(QRect(100, 100, 400, 200))
         self.layout = QtGui.QGridLayout(self)
         #lblAssetName
         self.lblAssetName = QLabel("Asset Name")

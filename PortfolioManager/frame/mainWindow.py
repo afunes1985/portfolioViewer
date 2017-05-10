@@ -46,7 +46,6 @@ class MainWindow(QtGui.QMainWindow):
             
     def openMovementEditor(self):
         self.movementEditor = MovementEditor()
-        self.movementEditor.setGeometry(QRect(100, 100, 400, 200))
         self.movementEditor.show()
     
     def clearTable(self):

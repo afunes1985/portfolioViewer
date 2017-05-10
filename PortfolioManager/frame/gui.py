@@ -6,10 +6,10 @@ Created on Feb 19, 2017
 
 from datetime import date
 
-from PySide import QtGui
-from PySide.QtCore import Qt
+from PySide import QtGui, QtCore
+from PySide.QtCore import QObject
 from PySide.QtGui import QTableWidgetItem, QTableWidget, QLabel, QDateEdit, \
-    QPushButton, QSizePolicy
+    QPushButton, QSizePolicy, QWidget
 
 from core.cache import Singleton
 from engine.engine import Engine
@@ -51,21 +51,25 @@ class QTableWidgetItemInt(QTableWidgetItem):
 
 class MainWidget(QtGui.QWidget):
     tableWidget = None
+    movementFilterWidget = None
     row = 0
     def __init__(self): 
         super(self.__class__, self).__init__()
         self.layout = QtGui.QGridLayout(self)
-        self.layout.addWidget(MovementFilterWidget(), 1, 0)
+        self.movementFilterWidget = MovementFilterWidget()
+        self.layout.addWidget(self.movementFilterWidget, 1, 0)
     
     def createTable(self):
         self.tableWidget = QTableWidget()
         self.tableWidget.setRowCount(25)
         self.tableWidget.setColumnCount(12)
         self.tableWidget.setColumnHidden(Constant.CONST_COLUMN_POSITION_HIDDEN_ID, True)
+        self.tableWidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.tableWidget.setHorizontalHeaderLabels("Asset Name;Position;PPP;Market Price;Invested amount;Valuated amount;Tenor;Maturity Date;PNL;%PNL;%Portfolio".split(";"))
         #self.tableWidget.setSortingEnabled(True)  
         #self.tableWidget.sortItems(0)  
         #self.setCentralWidget(self.tableWidget)  
+        self.tableWidget.doubleClicked.connect(self.openMovementView)
         self.layout.addWidget(self.tableWidget, 2, 0, 2, 2)   
         
     def renderSubtotal(self, positionDict, assetType ,isSIC):  
@@ -143,6 +147,12 @@ class MainWidget(QtGui.QWidget):
         self.renderSubtotal(positionDict, assetType, isSIC)
         self.row +=1 
         
+    def openMovementView(self):
+        assetName = self.tableWidget.item(self.tableWidget.currentRow(), Constant.CONST_COLUMN_POSITION_ASSET_NAME).text()
+        movementList = Engine.getMovementListByAsset(assetName, (self.movementFilterWidget.dateFromDate.date()).toString("yyyy-M-dd"),(self.movementFilterWidget.dateToDate.date()).toString("yyyy-M-dd"))
+        self.movementView = MovementView(movementList)
+        self.movementView.show()
+            
 class MovementFilterWidget(QtGui.QWidget):
     def __init__(self):      
         super(MovementFilterWidget, self).__init__()
@@ -181,3 +191,33 @@ class MovementFilterWidget(QtGui.QWidget):
         from core.mainEngine import MainEngine
         mainWindow = Singleton(MainEngine)
         mainWindow.refreshAll((self.dateFromDate.date()).toString("yyyy-M-dd"),(self.dateToDate.date()).toString("yyyy-M-dd"))
+        
+class MovementView(QWidget):
+    tableWidget = None
+    row = 0
+    def __init__(self, movementList):
+        QWidget.__init__(self)
+        self.layout = QtGui.QGridLayout(self)
+        self.tableWidget = QTableWidget()
+        self.tableWidget.setRowCount(15)
+        self.tableWidget.setColumnCount(12)
+        self.tableWidget.setHorizontalHeaderLabels("Asset Name;Buy Sell;Acquisition Date".split(";"))
+        self.layout.addWidget(self.tableWidget, 1, 0)   
+        for (movement) in movementList:
+            self.renderMovements(movement)
+        
+    def renderMovements(self, movement):
+        #=======================================================================
+        # #assetName
+        # assetNameItem = QTableWidgetItemString(movement.getAssetName())
+        # self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_ASSET_NAME,assetNameItem)
+        #=======================================================================
+        #buysell
+        buySellItem = QTableWidgetItemString(movement.buySell)
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_BUYSELL,buySellItem)
+        #acquisitionDate
+        acquisitionDateItem = QTableWidgetItemString(movement.getAcquisitionDate())
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_ACQUISITION_DATE,acquisitionDateItem)
+        
+        
+        self.row +=1 

@@ -7,9 +7,8 @@ import requests
 
 from dao.dao import DaoMovement, DaoAsset
 from modelClass.constant import Constant
-from modelClass.movement import Asset
+from modelClass.movement import Asset, Movement
 from modelClass.position import Position    
-from decimal import Decimal
 
 
 class Engine:
@@ -53,26 +52,20 @@ class Engine:
         
     @staticmethod
     def getAssetDict():
-        assetResultSet = DaoAsset().getAssetList()
+        assetRS = DaoAsset().getAssetList()
         assetDict = {}
-        for (assetRow) in assetResultSet:
-            asset = Asset()
-            asset.OID = assetRow[0]
-            asset.assetType = assetRow[1]
-            asset.name = assetRow[2]
-            asset.originName = assetRow[3]
-            asset.isSIC = assetRow[4]
-            asset.isOnlinePrice = assetRow[5]
+        for (assetRow) in assetRS:
+            asset = Asset(assetRow)
             assetDict[asset.name] = asset
         return assetDict 
         
     @staticmethod
     def buildPositions(fromDate, toDate):
         assetDict = Engine.getAssetDict()
-        movementList = DaoMovement().getMovementsByDate(fromDate, toDate)
+        movementRS = DaoMovement.getMovementsByDate(fromDate, toDate)
         positionDict = {}
         position = 0
-        for (movement) in movementList:
+        for (movement) in movementRS:
             asset = assetDict.get(movement[Constant.CONST_ASSET_NAME])
             assetName = asset.name
             if(asset.assetType == 'BOND'):
@@ -89,3 +82,13 @@ class Engine:
     def getMarketPriceByAssetName(assetName):
         result = requests.get('http://finance.yahoo.com/d/quotes.csv?s='+assetName+'&f=l1')
         return result.text
+    
+    @staticmethod
+    def getMovementListByAsset(assetName, fromDate, toDate):
+        movementRS = DaoMovement.getMovementsByAsset(assetName, fromDate, toDate)
+        movementList = []
+        for (movementRow) in movementRS:
+            movement = Movement(movementRow)
+            movementList.append(movement)
+        return movementList
+            
