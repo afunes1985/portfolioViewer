@@ -7,7 +7,7 @@ Created on Feb 19, 2017
 from datetime import date
 
 from PySide import QtGui, QtCore
-from PySide.QtCore import QObject
+from PySide.QtCore import QObject, QRect
 from PySide.QtGui import QTableWidgetItem, QTableWidget, QLabel, QDateEdit, \
     QPushButton, QSizePolicy, QWidget
 
@@ -24,6 +24,11 @@ class QTableWidgetItemString(QTableWidgetItem):
 class QTableWidgetItemDecimal(QTableWidgetItem):
     def __init__(self, value):
         super(self.__class__, self).__init__(str('{0:.2f}'.format(value)))
+        self.setTextAlignment(0x0002 | 0x0080) 
+
+class QTableWidgetItem6Decimal(QTableWidgetItem):
+    def __init__(self, value):
+        super(self.__class__, self).__init__(str('{0:.6f}'.format(value)))
         self.setTextAlignment(0x0002 | 0x0080)        
 
 class QTableWidgetItemDuoDecimal(QTableWidgetItem):
@@ -199,25 +204,43 @@ class MovementView(QWidget):
         QWidget.__init__(self)
         self.layout = QtGui.QGridLayout(self)
         self.tableWidget = QTableWidget()
+        self.resize(1200, 400)
         self.tableWidget.setRowCount(15)
         self.tableWidget.setColumnCount(12)
-        self.tableWidget.setHorizontalHeaderLabels("Asset Name;Buy Sell;Acquisition Date".split(";"))
+        self.tableWidget.setHorizontalHeaderLabels("Asset Name;Buy Sell;Acquisition Date;Quantity;Price;Gross Amount;Net Amount;Comm %;Comm Amount; Comm VAT Amount".split(";"))
         self.layout.addWidget(self.tableWidget, 1, 0)   
         for (movement) in movementList:
             self.renderMovements(movement)
         
     def renderMovements(self, movement):
-        #=======================================================================
-        # #assetName
-        # assetNameItem = QTableWidgetItemString(movement.getAssetName())
-        # self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_ASSET_NAME,assetNameItem)
-        #=======================================================================
+        #assetName
+        assetNameItem = QTableWidgetItemString(movement.assetName)
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_ASSET_NAME,assetNameItem)
         #buysell
         buySellItem = QTableWidgetItemString(movement.buySell)
         self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_BUYSELL,buySellItem)
         #acquisitionDate
         acquisitionDateItem = QTableWidgetItemString(movement.getAcquisitionDate())
         self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_ACQUISITION_DATE,acquisitionDateItem)
-        
-        
+        #quantity
+        quantityItem = QTableWidgetItem6Decimal(movement.quantity)
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_QUANTITY,quantityItem)
+        #price
+        priceItem = QTableWidgetItem6Decimal(movement.price)
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_PRICE,priceItem)
+        #grossAmount
+        grossAmountItem = QTableWidgetItem6Decimal(movement.grossAmount)
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_GROSS_AMOUNT,grossAmountItem)
+        #netAmount
+        netAmountItem = QTableWidgetItem6Decimal(movement.netAmount)
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_NET_AMOUNT,netAmountItem)
+        #commissionPercentage
+        commissionPercentageItem = QTableWidgetItem6Decimal(movement.commissionPercentage)
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_COMMISSION_PERCENTAGE,commissionPercentageItem)
+        #commissionAmount
+        commissionAmountItem = QTableWidgetItem6Decimal(movement.commissionAmount)
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_COMMISSION_AMOUNT,commissionAmountItem)
+        #commissionVATAmount
+        commissionVATAmountItem = QTableWidgetItem6Decimal(movement.commissionVATAmount)
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_COMMISSION_VAT_AMOUNT,commissionVATAmountItem)
         self.row +=1 

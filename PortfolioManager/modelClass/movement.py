@@ -5,6 +5,7 @@ Created on Mar 18, 2017
 '''
 class Movement():
     OID = None
+    assetName = None
     buySell = ''
     assetOID = None
     asset = None
@@ -20,6 +21,7 @@ class Movement():
     tenor = 0
     def __init__(self, movementRow):
         self.OID = movementRow[0]
+        self.assetName = movementRow[1]
         self.buySell = movementRow[2]
         self.acquisitionDate = movementRow[3]
         self.quantity = movementRow[4]
