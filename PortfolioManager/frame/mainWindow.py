@@ -4,7 +4,6 @@ Created on May 3, 2017
 @author: afunes
 '''
 from PySide import QtGui
-from PySide.QtCore import QRect
 from PySide.QtGui import QTableWidgetItem
 
 from frame.gui import MainWidget

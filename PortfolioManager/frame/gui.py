@@ -6,53 +6,17 @@ Created on Feb 19, 2017
 
 from datetime import date
 
-from PySide import QtGui, QtCore
-from PySide.QtCore import QObject, QRect
-from PySide.QtGui import QTableWidgetItem, QTableWidget, QLabel, QDateEdit, \
+from PySide import QtGui
+from PySide.QtGui import  QTableWidget, QLabel, QDateEdit, \
     QPushButton, QSizePolicy, QWidget
 
 from core.cache import Singleton
 from engine.engine import Engine
+from frame.framework import QTableWidgetItemDecimal, \
+    QTableWidgetItemDecimalColor, QTableWidgetItemString, QTableWidgetItemInt, \
+    QTableWidgetItemDuoDecimal, QTableWidgetItem6Decimal, QTableWidgetItemDuoInt
 from modelClass.constant import Constant
 
-
-class QTableWidgetItemString(QTableWidgetItem):
-    def __init__(self, value):
-        super(self.__class__, self).__init__(value)
-        self.setTextAlignment(0x0080) 
-          
-class QTableWidgetItemDecimal(QTableWidgetItem):
-    def __init__(self, value):
-        super(self.__class__, self).__init__(str('{0:.2f}'.format(value)))
-        self.setTextAlignment(0x0002 | 0x0080) 
-
-class QTableWidgetItem6Decimal(QTableWidgetItem):
-    def __init__(self, value):
-        super(self.__class__, self).__init__(str('{0:.6f}'.format(value)))
-        self.setTextAlignment(0x0002 | 0x0080)        
-
-class QTableWidgetItemDuoDecimal(QTableWidgetItem):
-    def __init__(self, value1, value2):
-        if(value2 == 0):
-            value = str('{0:.2f}'.format(value1))
-        else:    
-            value = str('{0:.2f}'.format(value1)) + '(' + str('{0:.2f}'.format(value2)) + ')'
-        super(self.__class__, self).__init__(str(value))
-        self.setTextAlignment(0x0002 | 0x0080)
-
-class QTableWidgetItemDecimalColor(QTableWidgetItem):
-    def __init__(self, value):
-        super(self.__class__, self).__init__(str('{0:.2f}'.format(value)))
-        self.setTextAlignment(0x0002 | 0x0080) 
-        if(value < 0):  
-            self.setBackground(QtGui.QColor(255,000,51))
-        else:
-            self.setBackground(QtGui.QColor(102,204,51))
-
-class QTableWidgetItemInt(QTableWidgetItem):
-    def __init__(self, value):
-        super(self.__class__, self).__init__(str('{0:.0f}'.format(value)))
-        self.setTextAlignment(0x0002 | 0x0080) 
 
 class MainWidget(QtGui.QWidget):
     tableWidget = None
@@ -130,7 +94,7 @@ class MainWidget(QtGui.QWidget):
             valuatedAmountItem = QTableWidgetItemDuoDecimal(position.getValuatedAmount(), position.getValuatedAmountOrig())
             self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_VALUATED_AMOUNT,valuatedAmountItem)
             #Tenor
-            tenorItem = QTableWidgetItemInt(position.tenor)
+            tenorItem = QTableWidgetItemDuoInt(position.tenor, position.getElapsedDays())
             self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_TENOR,tenorItem)
             #Maturity Date
             maturityDateItem = QTableWidgetItemString(position.getMaturityDate())
@@ -206,7 +170,7 @@ class MovementView(QWidget):
         self.tableWidget = QTableWidget()
         self.resize(1200, 400)
         self.tableWidget.setRowCount(15)
-        self.tableWidget.setColumnCount(12)
+        self.tableWidget.setColumnCount(10)
         self.tableWidget.setHorizontalHeaderLabels("Asset Name;Buy Sell;Acquisition Date;Quantity;Price;Gross Amount;Net Amount;Comm %;Comm Amount; Comm VAT Amount".split(";"))
         self.layout.addWidget(self.tableWidget, 1, 0)   
         for (movement) in movementList:
