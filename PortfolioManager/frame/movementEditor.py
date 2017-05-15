@@ -146,7 +146,7 @@ class MovementEditor(QWidget):
         self.btnClear.clicked.connect(self.clearEditor)
          
     def addMovement(self):
-        movement = Movement().constructMovementByType(self.cmdAssetType.currentText())
+        movement = Movement.constructMovementByType(self.cmdAssetType.currentText())
         movement.buySell = self.cmdBuySell.currentText()
         movement.assetOID = self.cmdAssetName.itemData(self.cmdAssetName.currentIndex())
         movement.acquisitionDate = (self.dateAcquisitionDate.date()).toString("yyyy-M-dd")

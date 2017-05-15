@@ -19,26 +19,29 @@ class Movement():
     rate = 0
     price = 0
     tenor = 0
-    def __init__(self, movementRow):
-        self.OID = movementRow[0]
-        self.assetName = movementRow[1]
-        self.buySell = movementRow[2]
-        self.acquisitionDate = movementRow[3]
-        self.quantity = movementRow[4]
-        self.price = movementRow[5]
-        self.grossAmount = movementRow[6]
-        self.netAmount = movementRow[7]
-        self.commissionPercentage = movementRow[8]
-        self.commissionAmount = movementRow[9]
-        self.commissionVATAmount = movementRow[10]
         
-    def constructMovementByType(self, assetType):
+    def __init__(self, movementRow):
+        if(movementRow is not None):
+            self.OID = movementRow[0]
+            self.assetName = movementRow[1]
+            self.buySell = movementRow[2]
+            self.acquisitionDate = movementRow[3]
+            self.quantity = movementRow[4]
+            self.price = movementRow[5]
+            self.grossAmount = movementRow[6]
+            self.netAmount = movementRow[7]
+            self.commissionPercentage = movementRow[8]
+            self.commissionAmount = movementRow[9]
+            self.commissionVATAmount = movementRow[10]
+    
+    @staticmethod 
+    def constructMovementByType(assetType):
         if assetType == 'EQUITY':
-            return EquityMovement()
+            return EquityMovement(None)
         elif assetType == 'FUND':
-            return FundMovement()
+            return FundMovement(None)
         elif assetType == 'BOND':
-            return BondMovement()
+            return BondMovement(None)
 
     def getAcquisitionDate(self):
         return self.acquisitionDate.strftime("%Y-%m-%d")
