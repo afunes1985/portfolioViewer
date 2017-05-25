@@ -26,7 +26,7 @@ class DaoMovement():
                     FROM movement as m 
                         inner join asset as a on m.asset_oid = a.id  
                     WHERE ACQUISITION_DATE BETWEEN %s AND %s 
-                        AND (TENOR is null OR ADDDATE(ACQUISITION_DATE,TENOR) >= curdate())
+                        AND (TENOR is null OR ADDDATE(ACQUISITION_DATE,TENOR) > curdate())
                     ORDER BY ACQUISITION_DATE'''
         resultSet = DbConnector().doQuery(query, (fromDate, toDate))
         return resultSet    

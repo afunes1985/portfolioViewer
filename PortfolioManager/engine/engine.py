@@ -38,12 +38,20 @@ class Engine:
         return positionList
     
     @staticmethod
-    def getSubtotalPNL(positionDict, assetType ,isSIC):
-        subTotalPNL = 0
+    def getSubtotalGrossPNL(positionDict, assetType ,isSIC):
+        subTotalGrossPNL = 0
         positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
         for position in positionList:
-            subTotalPNL += position.getPnL()
-        return subTotalPNL
+            subTotalGrossPNL += position.getGrossPnL()
+        return subTotalGrossPNL
+    
+    @staticmethod
+    def getSubtotalNetPNL(positionDict, assetType ,isSIC):
+        subTotalNetPNL = 0
+        positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
+        for position in positionList:
+            subTotalNetPNL += position.getNetPnL()
+        return subTotalNetPNL
     
     @staticmethod
     def getPortfolioPercentage(positionDict, valuatedAmount):

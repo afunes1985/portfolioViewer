@@ -31,10 +31,10 @@ class MainWidget(QtGui.QWidget):
     def createTable(self):
         self.tableWidget = QTableWidget()
         self.tableWidget.setRowCount(25)
-        self.tableWidget.setColumnCount(12)
+        self.tableWidget.setColumnCount(13)
         self.tableWidget.setColumnHidden(Constant.CONST_COLUMN_POSITION_HIDDEN_ID, True)
         self.tableWidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        self.tableWidget.setHorizontalHeaderLabels("Asset Name;Position;PPP;Market Price;Invested amount;Valuated amount;Tenor;Maturity Date;PNL;%PNL;%Portfolio".split(";"))
+        self.tableWidget.setHorizontalHeaderLabels("Asset Name;Position;PPP;Market Price;Invested amount;Valuated amount;Tenor;Maturity Date;Gross PNL;Net PNL;%PNL;%Portfolio".split(";"))
         #self.tableWidget.setSortingEnabled(True)  
         #self.tableWidget.sortItems(0)  
         #self.setCentralWidget(self.tableWidget)  
@@ -56,12 +56,15 @@ class MainWidget(QtGui.QWidget):
         #sub total valuated amount
         subTotalValuatedAmountItem = QTableWidgetItemDecimal(Engine.getSubTotalValuatedAmount(positionDict, assetType, isSIC))
         self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_VALUATED_AMOUNT,subTotalValuatedAmountItem)   
-        #sub total PNL    
-        subTotalPNLItem = QTableWidgetItemDecimalColor(Engine.getSubtotalPNL(positionDict, assetType, isSIC))
-        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_PNL,subTotalPNLItem)
+        #sub total Gross PNL    
+        subTotalGrossPNLItem = QTableWidgetItemDecimalColor(Engine.getSubtotalGrossPNL(positionDict, assetType, isSIC))
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_GROSS_PNL,subTotalGrossPNLItem)
+        #sub total Net PNL    
+        subTotalNetPNLItem = QTableWidgetItemDecimalColor(Engine.getSubtotalNetPNL(positionDict, assetType, isSIC))
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_NET_PNL,subTotalNetPNLItem)
         #Sub Total PnLPercentage
         pnlPercentageItem = QTableWidgetItemDecimalColor(subTotalPnlPercentage)
-        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_PNL_PERCENTAGE,pnlPercentageItem)
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_GROSS_PNL_PERCENTAGE,pnlPercentageItem)
         #PositionPercentage
         positionPercentageItem = QTableWidgetItemDecimal(positionPercentage)
         self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_POSITION_PERCENTAGE,positionPercentageItem)
@@ -99,13 +102,16 @@ class MainWidget(QtGui.QWidget):
             #Maturity Date
             maturityDateItem = QTableWidgetItemString(position.getMaturityDate())
             self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_MATURITY_DATE,maturityDateItem)
-            #PnL
-            pnlItem = QTableWidgetItemDecimalColor(position.getPnL())
-            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_PNL,pnlItem)
-            #PnLPercentage
-            pnlPercentageItem = QTableWidgetItemDecimalColor(position.getPnLPercentage())
-            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_PNL_PERCENTAGE,pnlPercentageItem)
-            #PositionPercentage
+            #GrossPnL
+            grossPnlItem = QTableWidgetItemDecimalColor(position.getGrossPnL())
+            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_GROSS_PNL,grossPnlItem)
+            #netPnL
+            netPnlItem = QTableWidgetItemDecimalColor(position.getNetPnL())
+            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_NET_PNL,netPnlItem)
+            #pnLGrossPercentage
+            pnLGrossPercentageItem = QTableWidgetItemDecimalColor(position.getGrossPnLPercentage())
+            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_GROSS_PNL_PERCENTAGE,pnLGrossPercentageItem)
+            #positionPercentage
             positionPercentage = (position.getValuatedAmount() * 100) / totalValuatedAmount
             positionPercentageItem = QTableWidgetItemDecimal(positionPercentage)
             self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_POSITION_PERCENTAGE,positionPercentageItem)

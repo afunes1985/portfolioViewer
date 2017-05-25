@@ -16,6 +16,8 @@ class Position():
     rate = 0
     totalQuantity = 0
     accumulatedAmount = 0
+    accumulatedCommission = 0
+    accumulatedVATCommission = 0
     marketPrice = 0
     marketPriceOrig = 0
     movementList = []
@@ -36,6 +38,8 @@ class Position():
         self.movementList.append(movement)
         quantity = movement[Constant.CONST_MOVEMENT_QUANTITY]
         grossAmount = movement[Constant.CONST_MOVEMENT_GROSS_AMOUNT]
+        self.accumulatedCommission += movement[Constant.CONST_MOVEMENT_COM_AMOUNT]
+        self.accumulatedVATCommission += movement[Constant.CONST_MOVEMENT_COM_VAT_AMOUNT]
         if movement[Constant.CONST_MOVEMENT_BUY_SELL] == 'BUY':
             self.totalQuantity = self.totalQuantity + abs(quantity)#quantity
             self.accumulatedAmount = self.accumulatedAmount + abs(grossAmount)#gross amount
@@ -133,9 +137,12 @@ class Position():
                 return 0   
         return self.marketPriceOrig
     
-    def getPnL(self):
+    def getGrossPnL(self):
         return self.getValuatedAmount() - self.getInvestedAmount()
     
-    def getPnLPercentage(self):
+    def getNetPnL(self):
+        return self.getGrossPnL() - self.accumulatedCommission - self.accumulatedVATCommission
+        
+    def getGrossPnLPercentage(self):
         return (self.getValuatedAmount() / self.getInvestedAmount() -1 ) * 100
     
