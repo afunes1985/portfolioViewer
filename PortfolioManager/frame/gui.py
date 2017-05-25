@@ -22,6 +22,7 @@ class MainWidget(QtGui.QWidget):
     tableWidget = None
     movementFilterWidget = None
     row = 0
+    columnList = "Asset Name;Position;PPP;Market Price;Invested amount;Valuated amount;Tenor;Maturity Date;Gross PNL;Net PNL;Gross%PNL;%Portfolio".split(";");
     def __init__(self): 
         super(self.__class__, self).__init__()
         self.layout = QtGui.QGridLayout(self)
@@ -30,11 +31,11 @@ class MainWidget(QtGui.QWidget):
     
     def createTable(self):
         self.tableWidget = QTableWidget()
-        self.tableWidget.setRowCount(25)
-        self.tableWidget.setColumnCount(13)
+        self.tableWidget.setRowCount(27)
+        self.tableWidget.setColumnCount(len(self.columnList) +1)
         self.tableWidget.setColumnHidden(Constant.CONST_COLUMN_POSITION_HIDDEN_ID, True)
         self.tableWidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        self.tableWidget.setHorizontalHeaderLabels("Asset Name;Position;PPP;Market Price;Invested amount;Valuated amount;Tenor;Maturity Date;Gross PNL;Net PNL;%PNL;%Portfolio".split(";"))
+        self.tableWidget.setHorizontalHeaderLabels(self.columnList)
         #self.tableWidget.setSortingEnabled(True)  
         #self.tableWidget.sortItems(0)  
         #self.setCentralWidget(self.tableWidget)  
@@ -170,14 +171,15 @@ class MovementFilterWidget(QtGui.QWidget):
 class MovementView(QWidget):
     tableWidget = None
     row = 0
+    columnList = "Asset Name;Buy Sell;Acquisition Date;Quantity;Price;Gross Amount;Net Amount;Comm %;Comm Amount; Comm VAT Amount".split(";")
     def __init__(self, movementList):
         QWidget.__init__(self)
         self.layout = QtGui.QGridLayout(self)
         self.tableWidget = QTableWidget()
         self.resize(1200, 400)
         self.tableWidget.setRowCount(15)
-        self.tableWidget.setColumnCount(10)
-        self.tableWidget.setHorizontalHeaderLabels("Asset Name;Buy Sell;Acquisition Date;Quantity;Price;Gross Amount;Net Amount;Comm %;Comm Amount; Comm VAT Amount".split(";"))
+        self.tableWidget.setColumnCount(len(self.columnList)+1)
+        self.tableWidget.setHorizontalHeaderLabels(self.columnList)
         self.layout.addWidget(self.tableWidget, 1, 0)   
         for (movement) in movementList:
             self.renderMovements(movement)
