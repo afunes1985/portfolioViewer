@@ -22,7 +22,7 @@ class MainWidget(QtGui.QWidget):
     tableWidget = None
     movementFilterWidget = None
     row = 0
-    columnList = "Asset Name;Position;PPP;Market Price;Invested amount;Valuated amount;Tenor;Maturity Date;Gross PNL;Net PNL;Gross%PNL;%Portfolio".split(";");
+    columnList = "Asset Name;Position;Unit Cost;Market Price;Invested amount;Valuated amount;Tenor;Maturity Date;Gross PNL;Net PNL;Gross%PNL;%Portfolio;WeightedPNL%".split(";");
     def __init__(self): 
         super(self.__class__, self).__init__()
         self.layout = QtGui.QGridLayout(self)
@@ -48,6 +48,8 @@ class MainWidget(QtGui.QWidget):
         positionPercentage = (subTotalValuatedAmount * 100) / totalValuatedAmount
         subTotalInvestedAmount = Engine.getSubTotalInvestedAmount(positionDict, assetType, isSIC)
         subTotalPnlPercentage = (subTotalValuatedAmount / subTotalInvestedAmount -1 ) * 100
+        subTotalNetPNL = Engine.getSubtotalNetPNL(positionDict, assetType, isSIC)
+        subTotalWeightedPNL = subTotalPnlPercentage * positionPercentage / 100
         #=======================================================================
         # self.paintEntireRow(self.row)
         #=======================================================================
@@ -61,14 +63,17 @@ class MainWidget(QtGui.QWidget):
         subTotalGrossPNLItem = QTableWidgetItemDecimalColor(Engine.getSubtotalGrossPNL(positionDict, assetType, isSIC))
         self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_GROSS_PNL,subTotalGrossPNLItem)
         #sub total Net PNL    
-        subTotalNetPNLItem = QTableWidgetItemDecimalColor(Engine.getSubtotalNetPNL(positionDict, assetType, isSIC))
+        subTotalNetPNLItem = QTableWidgetItemDecimalColor(subTotalNetPNL)
         self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_NET_PNL,subTotalNetPNLItem)
-        #Sub Total PnLPercentage
-        pnlPercentageItem = QTableWidgetItemDecimalColor(subTotalPnlPercentage)
-        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_GROSS_PNL_PERCENTAGE,pnlPercentageItem)
-        #PositionPercentage
+        #subTotalGrossPnLPercentage
+        subTotalGrossPnLPercentage = QTableWidgetItemDecimalColor(subTotalPnlPercentage)
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_GROSS_PNL_PERCENTAGE,subTotalGrossPnLPercentage)
+        #positionPercentage
         positionPercentageItem = QTableWidgetItemDecimal(positionPercentage)
         self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_POSITION_PERCENTAGE,positionPercentageItem)
+        #weightedPercentageItem
+        weightedPercentageItem = QTableWidgetItemDecimal(subTotalWeightedPNL)
+        self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_WEIGHTED_PNL,weightedPercentageItem)
         #HiddenID
         hiddenIDItem = QTableWidgetItemDecimal(self.row)
         self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_HIDDEN_ID,hiddenIDItem)
@@ -116,6 +121,10 @@ class MainWidget(QtGui.QWidget):
             positionPercentage = (position.getValuatedAmount() * 100) / totalValuatedAmount
             positionPercentageItem = QTableWidgetItemDecimal(positionPercentage)
             self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_POSITION_PERCENTAGE,positionPercentageItem)
+            #weightedPercentageItem
+            weightedPNL = position.getGrossPnLPercentage() * positionPercentage / 100
+            weightedPercentageItem = QTableWidgetItemDecimal(weightedPNL)
+            self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_WEIGHTED_PNL,weightedPercentageItem)
             #HiddenID
             hiddenIDItem = QTableWidgetItemDecimal(self.row)
             self.tableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_HIDDEN_ID,hiddenIDItem)
