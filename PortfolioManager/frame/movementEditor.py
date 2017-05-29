@@ -136,7 +136,7 @@ class MovementEditor(QWidget):
     def initListener(self):
         self.cmdBuySell.connect(self.cmdBuySell, QtCore.SIGNAL("currentIndexChanged(const QString&)"), self.calculateNetAmount) 
         self.chkByAmount.connect(self.chkByAmount, QtCore.SIGNAL("stateChanged(int)"), self.configEditorByAmount) 
-        self.txtGrossAmount.connect(self.txtGrossAmount,SIGNAL("textChanged(QString)"),self.calculatePrice) 
+        self.txtGrossAmount.connect(self.txtGrossAmount,SIGNAL("editingFinished()"),self.calculatePrice) 
         self.cmdAssetType.connect(self.cmdAssetType, QtCore.SIGNAL("currentIndexChanged(const QString&)"), self.configEditorByAssetType) 
         self.txtQuantity.connect(self.txtQuantity,SIGNAL("textChanged(QString)"),self.calculateGrossAmount) 
         self.txtQuantity.connect(self.txtQuantity,SIGNAL("textChanged(QString)"),self.calculatePrice) 
@@ -175,10 +175,15 @@ class MovementEditor(QWidget):
         self.txtGrossAmount.setText("0")
         self.txtNetAmount.setText("0")
         self.txtRate.setText("0")
-        self.txtCommissionPercentage.setText("0")
+        #configDefaultCommission
+        if self.cmdAssetType.currentText() == 'EQUITY':
+            self.txtCommissionPercentage.setText(str(Constant.CONST_DEF_EQUITY_COMMISSION_PERCENTAGE))
+        else:
+            self.txtCommissionPercentage.setText(str(Constant.CONST_DEF_OTHER_COMMISSION_PERCENTAGE))
         self.txtTenor.setText("")
         self.dateAcquisitionDate.setDate(datetime.datetime.now())
         self.configEditorByAmount()
+        self.configEditorByAssetType()
          
     def configEditorByAssetType(self):
         self.cmdAssetName.clear()
