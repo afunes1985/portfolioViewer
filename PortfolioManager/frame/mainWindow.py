@@ -38,10 +38,10 @@ class MainWindow(QtGui.QMainWindow):
         self.mainWidget.renderPositions(positionDict, assetType, isSIC) 
     
     def paintEntireRow(self, row):
-        for r in range(self.mainWidget.tableWidget.columnCount()+1):
+        for r in range(self.mainWidget.positionTableWidget.columnCount()+1):
             emptyCell = QTableWidgetItem()
             emptyCell.setBackground(QtGui.QColor(204,204,204))
-            self.mainWidget.tableWidget.setItem(row, r, emptyCell)
+            self.mainWidget.positionTableWidget.setItem(row, r, emptyCell)
             
     def openMovementEditor(self):
         self.movementEditor = MovementEditor()
@@ -50,3 +50,4 @@ class MainWindow(QtGui.QMainWindow):
     def clearTable(self):
         self.mainWidget.row = 0
         self.mainWidget.createTable()
+        self.mainWidget.createSummaryTable()

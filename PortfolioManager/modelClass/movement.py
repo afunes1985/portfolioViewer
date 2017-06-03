@@ -19,6 +19,7 @@ class Movement():
     rate = 0
     price = 0
     tenor = 0
+    custody = None
         
     def __init__(self, movementRow):
         if(movementRow is not None):

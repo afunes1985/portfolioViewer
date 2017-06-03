@@ -16,8 +16,10 @@ class MainEngine(object):
         mainWindow = Singleton(MainWindow)
         mainWindow.clearTable()
         mainCache.positionDict = Engine.buildPositions(fromDate, toDate)
-        mainWindow.renderPositions(mainCache.positionDict, 'EQUITY', 0)
-        mainWindow.renderPositions(mainCache.positionDict, 'EQUITY', 1)
-        mainWindow.renderPositions(mainCache.positionDict, 'FUND', 0)
-        mainWindow.renderPositions(mainCache.positionDict, 'BOND', 0)
+        #=======================================================================
+        # mainWindow.renderPositions(mainCache.positionDict, 'EQUITY', 0)
+        # mainWindow.renderPositions(mainCache.positionDict, 'EQUITY', 1)
+        # mainWindow.renderPositions(mainCache.positionDict, 'FUND', 0)
+        # mainWindow.renderPositions(mainCache.positionDict, 'BOND', 0)
+        #=======================================================================
         mainWindow.renderSubtotal(mainCache.positionDict, 'ALL', 0)

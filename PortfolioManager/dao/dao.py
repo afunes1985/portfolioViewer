@@ -22,9 +22,11 @@ class DaoMovement():
                     m.COMMISSION_PERCENTAGE, 
                     m.COMMISSION_AMOUNT, 
                     m.COMMISSION_IVA_AMOUNT, 
-                    m.TENOR  
+                    m.TENOR,
+                    c.NAME  
                     FROM movement as m 
-                        inner join asset as a on m.asset_oid = a.id  
+                        inner join asset as a on m.asset_oid = a.id 
+                        inner join custody as c on c.ID = m.CUSTODY_OID
                     WHERE ACQUISITION_DATE BETWEEN %s AND %s 
                         AND (TENOR is null OR ADDDATE(ACQUISITION_DATE,TENOR) > curdate())
                     ORDER BY ACQUISITION_DATE'''
@@ -71,8 +73,8 @@ class DaoAsset():
                     FROM ASSET'''
         resultSet = DbConnector().doQuery(query, "")
         returnList = []
-        for (assetType) in resultSet:
-            returnList.append(assetType[0])
+        for (row) in resultSet:
+            returnList.append(row[0])
         return returnList  
     
     def getAssetNames(self, assetType):
@@ -85,3 +87,13 @@ class DaoAsset():
         resultSet = DbConnector().doQuery(query, "")
         return resultSet  
         
+class DaoCustody():
+    def getCustodyList(self):
+        query = "SELECT ID, NAME FROM CUSTODY"
+        resultSet = DbConnector().doQuery(query, "")
+        return resultSet  
+    
+    def getDefaultCustody(self, name):
+        query = "SELECT C.ID FROM CUSTODY AS C INNER JOIN ASSET AS A ON A.DEFAULT_CUSTODY_OID = C.ID WHERE A.NAME = %s"
+        resultSet = DbConnector().doQuery(query,(name,))
+        return resultSet  

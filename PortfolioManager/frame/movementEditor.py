@@ -10,7 +10,7 @@ from PySide.QtCore import SIGNAL, QRect
 from PySide.QtGui import QWidget, QLabel, QComboBox, QCheckBox, QLineEdit, \
     QDoubleValidator, QDateEdit, QIntValidator, QPushButton
 
-from dao.dao import DaoAsset, DaoMovement
+from dao.dao import DaoAsset, DaoMovement, DaoCustody
 from modelClass.constant import Constant
 from modelClass.movement import Movement
 
@@ -20,12 +20,6 @@ class MovementEditor(QWidget):
         QWidget.__init__(self)
         self.setGeometry(QRect(100, 100, 400, 200))
         self.layout = QtGui.QGridLayout(self)
-        #lblAssetName
-        self.lblAssetName = QLabel("Asset Name")
-        self.layout.addWidget(self.lblAssetName, 1, 0)
-        #cmdAssetName
-        self.cmdAssetName = QComboBox(self)
-        self.layout.addWidget(self.cmdAssetName, 1, 1)
         #lblAssetType
         self.lblAssetType = QLabel("Asset Type")
         self.layout.addWidget(self.lblAssetType, 0, 0)
@@ -33,57 +27,72 @@ class MovementEditor(QWidget):
         self.cmdAssetType = QComboBox(self)
         self.cmdAssetType.addItems(DaoAsset().getAssetTypes())
         self.layout.addWidget(self.cmdAssetType, 0, 1)
+        #lblAssetName
+        self.lblAssetName = QLabel("Asset Name")
+        self.layout.addWidget(self.lblAssetName, 1, 0)
+        #cmdAssetName
+        self.cmdAssetName = QComboBox(self)
+        self.layout.addWidget(self.cmdAssetName, 1, 1)
+        #lblCustody
+        self.lblCustody = QLabel("Custody")
+        self.layout.addWidget(self.lblCustody, 2, 0)
+        #cmbCustody
+        self.cmbCustody = QComboBox(self)
+        custodyList = DaoCustody().getCustodyList()
+        for (row) in custodyList:
+            self.cmbCustody.addItem(row[1], row[0]) 
+        self.layout.addWidget(self.cmbCustody, 2, 1)
         #lblBuySell
         self.lblBuySell = QLabel("Buy Sell")
-        self.layout.addWidget(self.lblBuySell, 2, 0)
+        self.layout.addWidget(self.lblBuySell, 3, 0)
         #cmdBuySell
         self.cmdBuySell = QComboBox(self)
         self.cmdBuySell.addItem("BUY")
         self.cmdBuySell.addItem("SELL")
-        self.layout.addWidget(self.cmdBuySell, 2, 1)
+        self.layout.addWidget(self.cmdBuySell, 3, 1)
         #lblByAmount
         self.lblByAmount = QLabel("By Amount")
-        self.layout.addWidget(self.lblByAmount, 3, 0)
+        self.layout.addWidget(self.lblByAmount, 4, 0)
         #chkByAmount
         self.chkByAmount = QCheckBox(self)
-        self.layout.addWidget(self.chkByAmount, 3, 1)
+        self.layout.addWidget(self.chkByAmount, 4, 1)
         #lblGrossAmount
         self.lblGrossAmount = QLabel("Gross Amount")
-        self.layout.addWidget(self.lblGrossAmount, 4, 0)
+        self.layout.addWidget(self.lblGrossAmount, 5, 0)
         #txtGrossAmount
         self.txtGrossAmount = QLineEdit(self)
         self.txtGrossAmount.setValidator(QDoubleValidator(0, 99999999, 6, self))
-        self.layout.addWidget(self.txtGrossAmount, 4, 1)
+        self.layout.addWidget(self.txtGrossAmount, 5, 1)
         #lblAcquisitionDate
         self.lblAcquisitionDate = QLabel("Acquisition Date")
-        self.layout.addWidget(self.lblAcquisitionDate, 5, 0)
+        self.layout.addWidget(self.lblAcquisitionDate, 6, 0)
         #cmdAcquisitionDate
         self.dateAcquisitionDate = QDateEdit(self)
         self.dateAcquisitionDate.setDisplayFormat("dd-MM-yyyy")
         self.dateAcquisitionDate.setDate(datetime.datetime.now())
-        self.layout.addWidget(self.dateAcquisitionDate, 5, 1)
+        self.layout.addWidget(self.dateAcquisitionDate, 6, 1)
         #lblQuantity
         self.lblQuantity = QLabel("Quantity")
-        self.layout.addWidget(self.lblQuantity, 6, 0)
+        self.layout.addWidget(self.lblQuantity, 7, 0)
         #txtQuantity
         self.txtQuantity = QLineEdit(self)
         self.txtQuantity.setValidator(QIntValidator(0, 1000000000, self))
-        self.layout.addWidget(self.txtQuantity, 6, 1)
+        self.layout.addWidget(self.txtQuantity, 7, 1)
         #lblPrice
         self.lblPrice = QLabel("Price")
-        self.layout.addWidget(self.lblPrice, 7, 0)
+        self.layout.addWidget(self.lblPrice, 8, 0)
         #txtPrice
         self.txtPrice = QLineEdit(self)
         self.txtPrice.setValidator(QDoubleValidator(0, 99999999, 6, self))
-        self.layout.addWidget(self.txtPrice, 7, 1)
+        self.layout.addWidget(self.txtPrice, 8, 1)
         #lblRate
         self.lblRate = QLabel("Rate")
-        self.layout.addWidget(self.lblRate, 8, 0)
+        self.layout.addWidget(self.lblRate, 9, 0)
         #txtRate
         self.txtRate = QLineEdit(self)
         self.txtRate.setValidator(QDoubleValidator(0, 99999999, 4, self))
         self.txtRate.setEnabled(0)
-        self.layout.addWidget(self.txtRate, 8, 1)
+        self.layout.addWidget(self.txtRate, 9, 1)
         #lblNetAmount
         self.lblNetAmount = QLabel("Net Amount")
         self.layout.addWidget(self.lblNetAmount, 10, 0)
@@ -141,6 +150,7 @@ class MovementEditor(QWidget):
         self.txtQuantity.connect(self.txtQuantity,SIGNAL("textChanged(QString)"),self.calculateGrossAmount) 
         self.txtQuantity.connect(self.txtQuantity,SIGNAL("textChanged(QString)"),self.calculatePrice) 
         self.txtPrice.connect(self.txtPrice,SIGNAL("textChanged(QString)"),self.calculateGrossAmount) 
+        self.cmdAssetName.connect(self.cmdAssetName,SIGNAL("currentIndexChanged(const QString&)"),self.setDefaultCustody) 
         self.txtCommissionPercentage.connect(self.txtCommissionPercentage,SIGNAL("textChanged(QString)"),self.calculateCommission) 
         self.btnAdd.clicked.connect(self.addMovement)
         self.btnClear.clicked.connect(self.clearEditor)
@@ -149,6 +159,7 @@ class MovementEditor(QWidget):
         movement = Movement.constructMovementByType(self.cmdAssetType.currentText())
         movement.buySell = self.cmdBuySell.currentText()
         movement.assetOID = self.cmdAssetName.itemData(self.cmdAssetName.currentIndex())
+        movement.custody = self.cmbCustody.itemData(self.cmbCustody.currentIndex())
         movement.acquisitionDate = (self.dateAcquisitionDate.date()).toString("yyyy-M-dd")
         movement.quantity = self.txtQuantity.text()
         if self.cmdAssetType.currentText() == 'BOND':
@@ -184,6 +195,11 @@ class MovementEditor(QWidget):
         self.dateAcquisitionDate.setDate(datetime.datetime.now())
         self.configEditorByAmount()
         self.configEditorByAssetType()
+         
+    def setDefaultCustody(self):
+        defaultCustodyID = DaoCustody().getDefaultCustody(self.cmdAssetName.currentText())
+        for (row) in defaultCustodyID:
+            self.cmbCustody.setCurrentIndex(row[0])     
          
     def configEditorByAssetType(self):
         self.cmdAssetName.clear()
