@@ -25,7 +25,7 @@ class Position():
     asset = None
     tenor = 0
     row = 0
-    custody = None
+    custodyName = None
     
     def __init__(self, asset, movement):
         self.asset = asset
@@ -53,7 +53,7 @@ class Position():
             self.accumulatedAmount = 0
         else:
             self.ppp = self.accumulatedAmount / self.totalQuantity
-        self.custody = movement[Constant.CONST_MOVEMENT_CUSTODY] 
+        self.custodyName = movement[Constant.CONST_MOVEMENT_CUSTODY] 
     
     def addBondMovement(self, movement):
         self.movementList.append(movement)

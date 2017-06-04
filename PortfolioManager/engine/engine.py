@@ -9,18 +9,24 @@ from dao.dao import DaoMovement, DaoAsset
 from modelClass.constant import Constant
 from modelClass.movement import Asset, Movement
 from modelClass.position import Position    
+from modelClass.summaryItem import SummaryItem
 
 
 class Engine:
     
     @staticmethod
-    def getPositionByCustody(positionDict):
+    def getSummaryByCustody(positionDict):
         summaryDict = {}
         for (position) in positionDict:
-            summaryItem = summaryDict.get(position.custody)
+            key = position.custodyName + position.asset.assetType
+            summaryItem = summaryDict.get(key)
             if (summaryItem == None):
-                summaryDict[position.custody] = summaryItem
-    
+                summaryItem = SummaryItem()
+                summaryDict[key] = summaryItem
+            summaryItem.custodyName = position.custodyName
+            summaryItem.assetType = position.asset.assetType
+            
+                
     @staticmethod
     def getSubTotalInvestedAmount(positionDict, assetType ,isSIC):
         subTotalInvestedAmount = 0
