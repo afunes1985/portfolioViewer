@@ -23,8 +23,9 @@ class MainWidget(QtGui.QWidget):
     summaryTable = None
     movementFilterWidget = None
     row = 0
+    summaryRow = 0
     columnList = "Asset Name;Position;Unit Cost;Market Price;Invested amount;Valuated amount;Tenor;Maturity Date;Gross PNL;Net PNL;Gross%PNL;%Portfolio;WeightedPNL%".split(";");
-    summaryColumnList = "Custody;Gross%PNL;%Portfolio;WeightedPNL%".split(";");
+    summaryColumnList = "Custody;Asset type;Invested Amount;Valuated Amount;Gross%PNL;%Portfolio;WeightedPNL%".split(";");
     def __init__(self): 
         super(self.__class__, self).__init__()
         self.layout = QtGui.QGridLayout(self)
@@ -33,7 +34,7 @@ class MainWidget(QtGui.QWidget):
     
     def createSummaryTable(self):
         self.summaryTableWidget = QTableWidget()
-        self.summaryTableWidget.setRowCount(2)
+        self.summaryTableWidget.setRowCount(6)
         self.summaryTableWidget.setColumnCount(len(self.summaryColumnList) +1)
         self.summaryTableWidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.summaryTableWidget.setHorizontalHeaderLabels(self.summaryColumnList)
@@ -60,6 +61,25 @@ class MainWidget(QtGui.QWidget):
         self.positionTableWidget.resizeRowsToContents()
         self.layout.addWidget(self.positionTableWidget, 2, 0, 3, 3)   
         
+    def renderSummary(self, summaryDict):
+        for (key, summaryItem) in summaryDict.iteritems():
+            #custodyName
+            custodyNameItem = QTableWidgetItemString(summaryItem.custodyName)
+            self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_CUSTODY_NAME,custodyNameItem)
+            #assetTypeName
+            assetTypeNameItem = QTableWidgetItemString(summaryItem.assetType)
+            self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_ASSET_TYPE_NAME,assetTypeNameItem)
+            #InvestedAmount
+            investedAmountItem = QTableWidgetItemDecimal(summaryItem.investedAmount)
+            self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_INVESTED_AMOUNT,investedAmountItem)
+            #valuatedAmount
+            valuatedAmountItem = QTableWidgetItemDecimal(summaryItem.valuatedAmount)
+            self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_VALUATED_AMOUNT,valuatedAmountItem)
+            #grossPNLPercentage
+            grossPNLPercentageItem = QTableWidgetItemDecimal(summaryItem.getGrossPnLPercentage())
+            self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_GROSS_PNL_PERCENTAGE,grossPNLPercentageItem)
+            self.summaryRow += 1
+            
     def renderSubtotal(self, positionDict, assetType ,isSIC):  
         subTotalValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, assetType, isSIC)
         totalValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, 'ALL', isSIC)

@@ -15,17 +15,20 @@ from modelClass.summaryItem import SummaryItem
 class Engine:
     
     @staticmethod
-    def getSummaryByCustody(positionDict):
+    def buildSummaryByCustody(positionDict):
         summaryDict = {}
-        for (position) in positionDict:
-            key = position.custodyName + position.asset.assetType
-            summaryItem = summaryDict.get(key)
+        #positionList = Engine.getPositionByAssetType(positionDict, "ALL", 0)
+        for (positionKey, position) in positionDict.iteritems():
+            summaryKey = position.custodyName + position.asset.assetType
+            summaryItem = summaryDict.get(summaryKey)
             if (summaryItem == None):
                 summaryItem = SummaryItem()
-                summaryDict[key] = summaryItem
+                summaryDict[summaryKey] = summaryItem
             summaryItem.custodyName = position.custodyName
             summaryItem.assetType = position.asset.assetType
-            
+            summaryItem.valuatedAmount += position.getValuatedAmount()
+            summaryItem.investedAmount += position.getInvestedAmount()   
+        return summaryDict         
                 
     @staticmethod
     def getSubTotalInvestedAmount(positionDict, assetType ,isSIC):

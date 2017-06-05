@@ -62,6 +62,7 @@ class Position():
         self.ppp = movement[Constant.CONST_MOVEMENT_PRICE]
         self.rate = movement[Constant.CONST_MOVEMENT_RATE]
         self.tenor = movement[Constant.CONST_MOVEMENT_TENOR]
+        self.custodyName = movement[Constant.CONST_MOVEMENT_CUSTODY] 
         
     def getPPP(self):
         return self.ppp

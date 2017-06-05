@@ -36,6 +36,9 @@ class MainWindow(QtGui.QMainWindow):
     
     def renderPositions(self, positionDict, assetType ,isSIC):  
         self.mainWidget.renderPositions(positionDict, assetType, isSIC) 
+        
+    def renderSummary(self, summaryDict):  
+        self.mainWidget.renderSummary(summaryDict)     
     
     def paintEntireRow(self, row):
         for r in range(self.mainWidget.positionTableWidget.columnCount()+1):
@@ -49,5 +52,6 @@ class MainWindow(QtGui.QMainWindow):
     
     def clearTable(self):
         self.mainWidget.row = 0
+        self.mainWidget.summaryRow = 0
         self.mainWidget.createTable()
         self.mainWidget.createSummaryTable()

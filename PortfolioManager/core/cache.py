@@ -15,6 +15,7 @@ def Singleton(klass):
 class MainCache:
     _instance = None
     positionDict = None
+    summaryDict = None
     usdMXN = None
     
     def setUSDMXN(self, usdMXN):
