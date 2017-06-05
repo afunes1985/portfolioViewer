@@ -199,7 +199,7 @@ class MovementEditor(QWidget):
     def setDefaultCustody(self):
         defaultCustodyID = DaoCustody().getDefaultCustody(self.cmdAssetName.currentText())
         for (row) in defaultCustodyID:
-            self.cmbCustody.setCurrentIndex(row[0])     
+            self.cmbCustody.setCurrentIndex(self.cmbCustody.findData(row[0]))  
          
     def configEditorByAssetType(self):
         self.cmdAssetName.clear()

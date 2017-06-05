@@ -21,7 +21,6 @@ class MainEngine(object):
         mainWindow = Singleton(MainWindow)
         mainWindow.clearTable()
         mainCache.positionDict = Engine.buildPositions(fromDate, toDate)
-        #=======================================================================
         progressBar.setLabelText("EQUITY")
         progressBar.setValue(3)
         mainWindow.renderPositions(mainCache.positionDict, 'EQUITY', 0)
