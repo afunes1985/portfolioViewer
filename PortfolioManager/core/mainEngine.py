@@ -7,7 +7,7 @@ from PySide import QtGui, QtCore
 
 from core.cache import Singleton, MainCache
 from engine.engine import Engine
-from frame.mainWindow import MainWindow
+from frame.MainWindow import MainWindow
 
 
 class MainEngine(object):
@@ -23,13 +23,15 @@ class MainEngine(object):
         mainCache.positionDict = Engine.buildPositions(fromDate, toDate)
         progressBar.setLabelText("EQUITY")
         progressBar.setValue(3)
-        mainWindow.renderPositions(mainCache.positionDict, 'EQUITY', 0)
-        progressBar.setLabelText("EQUITY-SIC")
-        progressBar.setValue(6)
-        mainWindow.renderPositions(mainCache.positionDict, 'EQUITY', 1)
-        progressBar.setLabelText("FUND")
-        progressBar.setValue(8)
-        mainWindow.renderPositions(mainCache.positionDict, 'FUND', 0)
+        #=======================================================================
+        # mainWindow.renderPositions(mainCache.positionDict, 'EQUITY', 0)
+        # progressBar.setLabelText("EQUITY-SIC")
+        # progressBar.setValue(6)
+        # mainWindow.renderPositions(mainCache.positionDict, 'EQUITY', 1)
+        # progressBar.setLabelText("FUND")
+        # progressBar.setValue(8)
+        # mainWindow.renderPositions(mainCache.positionDict, 'FUND', 0)
+        #=======================================================================
         progressBar.setLabelText("BOND")
         progressBar.setValue(9)
         mainWindow.renderPositions(mainCache.positionDict, 'BOND', 0)

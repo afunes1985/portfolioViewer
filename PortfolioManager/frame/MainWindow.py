@@ -6,8 +6,8 @@ Created on May 3, 2017
 from PySide import QtGui
 from PySide.QtGui import QTableWidgetItem
 
-from frame.gui import MainWidget
-from frame.movementEditor import MovementEditor
+from frame.MainWidget import MainWidget
+from frame.MovementEditor import MovementEditor
 
 class MainWindow(QtGui.QMainWindow):
     _instance = None

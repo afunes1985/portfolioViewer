@@ -4,17 +4,15 @@ Created on Feb 19, 2017
 @author: afunes
 '''
 
-from datetime import date
-
 from PySide import QtGui
-from PySide.QtGui import  QTableWidget, QLabel, QDateEdit, \
-    QPushButton, QSizePolicy, QWidget
+from PySide.QtGui import QTableWidget
 
-from core.cache import Singleton
 from engine.engine import Engine
+from frame.MovementFilterWidget import MovementFilterWidget
+from frame.MovementView import MovementView
 from frame.framework import QTableWidgetItemDecimal, \
     QTableWidgetItemDecimalColor, QTableWidgetItemString, QTableWidgetItemInt, \
-    QTableWidgetItemDuoDecimal, QTableWidgetItem6Decimal, QTableWidgetItemDuoInt
+    QTableWidgetItemDuoDecimal, QTableWidgetItemDuoInt
 from modelClass.constant import Constant
 
 
@@ -174,91 +172,3 @@ class MainWidget(QtGui.QWidget):
         movementList = Engine.getMovementListByAsset(assetName, (self.movementFilterWidget.dateFromDate.date()).toString("yyyy-M-dd"),(self.movementFilterWidget.dateToDate.date()).toString("yyyy-M-dd"))
         self.movementView = MovementView(movementList)
         self.movementView.show()
-            
-class MovementFilterWidget(QtGui.QWidget):
-    def __init__(self):      
-        super(MovementFilterWidget, self).__init__()
-        self.layout = QtGui.QGridLayout(self)
-        #lblFromDate
-        self.lblFromDate = QLabel("From Date")
-        self.lblFromDate.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
-        self.layout.addWidget(self.lblFromDate, 1, 0)
-        #dateFromDate
-        self.dateFromDate = QDateEdit(self)
-        self.dateFromDate.setDisplayFormat("dd-MM-yyyy")
-        self.dateFromDate.setDate(date(2001, 7, 14))
-        self.dateFromDate.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
-        self.layout.addWidget(self.dateFromDate, 1, 1)
-        #lblToDate
-        self.lblToDate = QLabel("To Date")
-        self.lblToDate.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
-        self.layout.addWidget(self.lblToDate, 2, 0)
-        #dateToDate
-        self.dateToDate = QDateEdit(self)
-        self.dateToDate.setDisplayFormat("dd-MM-yyyy")
-        self.dateToDate.setDate(date(2020, 7, 14))
-        self.dateToDate.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
-        self.layout.addWidget(self.dateToDate, 2, 1)
-        #btnSubmit
-        self.btnSubmit = QPushButton("Submit", self)
-        self.btnSubmit.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
-        self.layout.addWidget(self.btnSubmit)
-        self.setFixedSize(190, 100) 
-        self.initListener() 
-    
-    def initListener(self):
-        self.btnSubmit.clicked.connect(self.doSubmit)
-    
-    def doSubmit(self):
-        from core.mainEngine import MainEngine
-        mainWindow = Singleton(MainEngine)
-        mainWindow.refreshAll((self.dateFromDate.date()).toString("yyyy-M-dd"),(self.dateToDate.date()).toString("yyyy-M-dd"))
-        
-class MovementView(QWidget):
-    positionTableWidget = None
-    row = 0
-    columnList = "Asset Name;Buy Sell;Acquisition Date;Quantity;Price;Gross Amount;Net Amount;Comm %;Comm Amount; Comm VAT Amount".split(";")
-    def __init__(self, movementList):
-        QWidget.__init__(self)
-        self.layout = QtGui.QGridLayout(self)
-        self.positionTableWidget = QTableWidget()
-        self.resize(1200, 400)
-        self.positionTableWidget.setRowCount(15)
-        self.positionTableWidget.setColumnCount(len(self.columnList)+1)
-        self.positionTableWidget.setHorizontalHeaderLabels(self.columnList)
-        self.layout.addWidget(self.positionTableWidget, 1, 0)   
-        for (movement) in movementList:
-            self.renderMovements(movement)
-        
-    def renderMovements(self, movement):
-        #assetName
-        assetNameItem = QTableWidgetItemString(movement.assetName)
-        self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_ASSET_NAME,assetNameItem)
-        #buysell
-        buySellItem = QTableWidgetItemString(movement.buySell)
-        self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_BUYSELL,buySellItem)
-        #acquisitionDate
-        acquisitionDateItem = QTableWidgetItemString(movement.getAcquisitionDate())
-        self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_ACQUISITION_DATE,acquisitionDateItem)
-        #quantity
-        quantityItem = QTableWidgetItem6Decimal(movement.quantity)
-        self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_QUANTITY,quantityItem)
-        #price
-        priceItem = QTableWidgetItem6Decimal(movement.price)
-        self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_PRICE,priceItem)
-        #grossAmount
-        grossAmountItem = QTableWidgetItem6Decimal(movement.grossAmount)
-        self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_GROSS_AMOUNT,grossAmountItem)
-        #netAmount
-        netAmountItem = QTableWidgetItem6Decimal(movement.netAmount)
-        self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_NET_AMOUNT,netAmountItem)
-        #commissionPercentage
-        commissionPercentageItem = QTableWidgetItem6Decimal(movement.commissionPercentage)
-        self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_COMMISSION_PERCENTAGE,commissionPercentageItem)
-        #commissionAmount
-        commissionAmountItem = QTableWidgetItem6Decimal(movement.commissionAmount)
-        self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_COMMISSION_AMOUNT,commissionAmountItem)
-        #commissionVATAmount
-        commissionVATAmountItem = QTableWidgetItem6Decimal(movement.commissionVATAmount)
-        self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_COMMISSION_VAT_AMOUNT,commissionVATAmountItem)
-        self.row +=1 
