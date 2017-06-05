@@ -147,3 +147,6 @@ class Position():
     def getGrossPnLPercentage(self):
         return (self.getValuatedAmount() / self.getInvestedAmount() -1 ) * 100
     
+    def getNetPnLPercentage(self):
+        return (self.getValuatedAmount() / (self.getInvestedAmount() + self.accumulatedCommission + self.accumulatedVATCommission) -1 ) * 100
+    

@@ -47,6 +47,22 @@ class Engine:
         return subTotalValuatedAmount
     
     @staticmethod
+    def getSubTotalCommissionAmount(positionDict, assetType ,isSIC):
+        subTotalCommissionAmount = 0
+        positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
+        for position in positionList:
+            subTotalCommissionAmount += position.accumulatedCommission
+        return subTotalCommissionAmount
+    
+    @staticmethod
+    def getSubTotalCommissionVATAmount(positionDict, assetType ,isSIC):
+        subTotalVATCommission = 0
+        positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
+        for position in positionList:
+            subTotalVATCommission += position.accumulatedVATCommission
+        return subTotalVATCommission
+    
+    @staticmethod
     def getPositionByAssetType(positionDict, assetType ,isSIC):
         positionList = []
         for key, position in positionDict.items():
