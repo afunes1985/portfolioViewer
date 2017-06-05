@@ -12,7 +12,7 @@ from modelClass.constant import Constant
 
 
 class Position():
-    ppp = 0
+    unitCost = 0
     rate = 0
     totalQuantity = 0
     accumulatedAmount = 0
@@ -45,27 +45,25 @@ class Position():
             self.totalQuantity = self.totalQuantity + abs(quantity)#quantity
             self.accumulatedAmount = self.accumulatedAmount + abs(grossAmount)#gross amount
         else:
-            self.accumulatedAmount = self.accumulatedAmount - abs(quantity) * self.getPPP()
+            self.accumulatedAmount = self.accumulatedAmount - abs(quantity) * self.unitCost
             self.totalQuantity = self.totalQuantity - abs(quantity)#quantity
         
         if self.totalQuantity == 0:        
-            self.ppp = 0
+            self.unitCost = 0
             self.accumulatedAmount = 0
         else:
-            self.ppp = self.accumulatedAmount / self.totalQuantity
+            self.unitCost = self.accumulatedAmount / self.totalQuantity
         self.custodyName = movement[Constant.CONST_MOVEMENT_CUSTODY] 
     
     def addBondMovement(self, movement):
         self.movementList.append(movement)
         self.totalQuantity = movement[Constant.CONST_MOVEMENT_QUANTITY]
         self.accumulatedAmount = movement[Constant.CONST_MOVEMENT_GROSS_AMOUNT]
-        self.ppp = movement[Constant.CONST_MOVEMENT_PRICE]
+        self.unitCost = movement[Constant.CONST_MOVEMENT_PRICE]
         self.rate = movement[Constant.CONST_MOVEMENT_RATE]
         self.tenor = movement[Constant.CONST_MOVEMENT_TENOR]
         self.custodyName = movement[Constant.CONST_MOVEMENT_CUSTODY] 
         
-    def getPPP(self):
-        return self.ppp
     
     def getAssetName(self):
         return self.asset.name
@@ -74,7 +72,7 @@ class Position():
         return self.totalQuantity;
     
     def getInvestedAmount(self):
-        return self.totalQuantity * self.ppp;
+        return self.totalQuantity * self.unitCost;
     
     def getElapsedDays(self):
         elapsedDays = datetime.datetime.now() - self.acquisitionDate
@@ -90,7 +88,7 @@ class Position():
             return self.accumulatedAmount * (1 + (self.getElapsedDays() * (self.rate / 360)))
         else:  
             if (self.marketPrice == 0):
-                return Decimal(self.totalQuantity) * self.getPPP()
+                return Decimal(self.totalQuantity) * self.unitCost
             else:
                 return Decimal(self.totalQuantity) * self.marketPrice
             

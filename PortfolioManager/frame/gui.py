@@ -41,12 +41,10 @@ class MainWidget(QtGui.QWidget):
         #self.summaryTableWidget.setSortingEnabled(True)  
         #self.summaryTableWidget.sortItems(0)  
         self.summaryTableWidget.resizeColumnsToContents()
-        self.summaryTableWidget.setFixedSize(250, 110) 
+        self.summaryTableWidget.resizeRowsToContents()
+        self.summaryTableWidget.setFixedSize(550, 150) 
         self.layout.addWidget(self.summaryTableWidget, 1, 1)
         
-    #def renderSummary(self, positionDict):   
-        
-    
     def createTable(self):
         self.positionTableWidget = QTableWidget()
         self.positionTableWidget.setRowCount(27)
@@ -88,9 +86,6 @@ class MainWidget(QtGui.QWidget):
         subTotalPnlPercentage = (subTotalValuatedAmount / subTotalInvestedAmount -1 ) * 100
         subTotalNetPNL = Engine.getSubtotalNetPNL(positionDict, assetType, isSIC)
         subTotalWeightedPNL = subTotalPnlPercentage * positionPercentage / 100
-        #=======================================================================
-        # self.paintEntireRow(self.row)
-        #=======================================================================
         #Invested amount
         investedAmountItem = QTableWidgetItemDecimal(subTotalInvestedAmount)
         self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_INVESTED_AMOUNT,investedAmountItem)
@@ -128,9 +123,13 @@ class MainWidget(QtGui.QWidget):
             #totalQuantity
             totalQuantityItem = QTableWidgetItemInt(position.getTotalQuantity())
             self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_QUANTITY,totalQuantityItem)
-            #PPP
-            pppItem = QTableWidgetItemDecimal(position.getPPP())
-            self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_PPP,pppItem)
+            #UnitCost
+            if position.asset.assetType == 'BOND':
+                unitCost = position.rate * 100 
+            else:
+                unitCost = position.unitCost 
+            unitCostItem = QTableWidgetItemDecimal(unitCost)
+            self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_PPP,unitCostItem)
             #Market price
             marketPriceItem = QTableWidgetItemDuoDecimal(position.getMarketPrice(), position.getMarketPriceOrig())
             self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_MARKET_PRICE,marketPriceItem)
