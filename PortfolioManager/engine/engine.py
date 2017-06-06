@@ -47,20 +47,28 @@ class Engine:
         return subTotalValuatedAmount
     
     @staticmethod
-    def getSubTotalCommissionAmount(positionDict, assetType ,isSIC):
-        subTotalCommissionAmount = 0
+    def getAccBuyCommissionAmount(positionDict, assetType ,isSIC):
+        accBuyCommissionAmount = 0
         positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
         for position in positionList:
-            subTotalCommissionAmount += position.accumulatedCommission
-        return subTotalCommissionAmount
+            accBuyCommissionAmount += position.accumulatedBuyCommission
+        return accBuyCommissionAmount
     
     @staticmethod
-    def getSubTotalCommissionVATAmount(positionDict, assetType ,isSIC):
-        subTotalVATCommission = 0
+    def getAccBuyCommissionVATAmount(positionDict, assetType ,isSIC):
+        accuBuyVATCommission = 0
         positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
         for position in positionList:
-            subTotalVATCommission += position.accumulatedVATCommission
-        return subTotalVATCommission
+            accuBuyVATCommission += position.accumulatedBuyVATCommission
+        return accuBuyVATCommission
+    
+    @staticmethod
+    def getAccRealizedPnL(positionDict, assetType ,isSIC):
+        accRealizedPnl = 0
+        positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
+        for position in positionList:
+            accRealizedPnl += position.realizedPnl
+        return accRealizedPnl
     
     @staticmethod
     def getPositionByAssetType(positionDict, assetType ,isSIC):

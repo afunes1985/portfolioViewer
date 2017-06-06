@@ -22,7 +22,7 @@ class MainWidget(QtGui.QWidget):
     movementFilterWidget = None
     row = 0
     summaryRow = 0
-    positionColumnList = "Asset Name;Position;Unit Cost;Market Price;Invested amount;Valuated amount;Tenor;Maturity Date;Gross PNL;Net PNL;Gross%PNL;Net%PNL;%Portfolio;WeightedPNL%".split(";");
+    positionColumnList = "Asset Name;Position;Unit Cost;Market Price;Invested amount;Valuated amount;Tenor;Maturity Date;Gross PNL;Net PNL;Gross%PNL;Net%PNL;Realized Pnl;%Portfolio;WeightedPNL%".split(";");
     summaryColumnList = "Custody;Asset type;Invested Amount;Valuated Amount;Gross%PNL;%Portfolio;WeightedPNL%".split(";");
     def __init__(self): 
         super(self.__class__, self).__init__()
@@ -79,12 +79,13 @@ class MainWidget(QtGui.QWidget):
     def renderSubtotal(self, positionDict, assetType ,isSIC):  
         subTotalValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, assetType, isSIC)
         totalValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, 'ALL', isSIC)
-        subTotalCommissionAmount = Engine.getSubTotalCommissionAmount(positionDict, assetType, isSIC)
-        subTotalVATCommissionAmount = Engine.getSubTotalCommissionVATAmount(positionDict, assetType, isSIC)
+        accBuyCommissionAmount = Engine.getAccBuyCommissionAmount(positionDict, assetType, isSIC)
+        accRealizedPnl = Engine.getAccRealizedPnL(positionDict, assetType, isSIC)
+        subTotalVATCommissionAmount = Engine.getAccBuyCommissionVATAmount(positionDict, assetType, isSIC)
         positionPercentage = (subTotalValuatedAmount * 100) / totalValuatedAmount
         subTotalInvestedAmount = Engine.getSubTotalInvestedAmount(positionDict, assetType, isSIC)
         subTotalGrossPnlPercentage = (subTotalValuatedAmount / subTotalInvestedAmount -1 ) * 100
-        subTotalNetPnlPercentage = (subTotalValuatedAmount / (subTotalInvestedAmount + subTotalCommissionAmount + subTotalVATCommissionAmount) -1 ) * 100
+        subTotalNetPnlPercentage = (subTotalValuatedAmount / (subTotalInvestedAmount + accBuyCommissionAmount + subTotalVATCommissionAmount) -1 ) * 100
         subTotalNetPNL = Engine.getSubtotalNetPNL(positionDict, assetType, isSIC)
         subTotalWeightedPNL = subTotalGrossPnlPercentage * positionPercentage / 100
         #Invested amount
@@ -105,6 +106,9 @@ class MainWidget(QtGui.QWidget):
         #pnLNetPercentage
         subTotalNetPnLPercentage = QTableWidgetItemDecimalColor(subTotalNetPnlPercentage, True)
         self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_GROSS_NET_PERCENTAGE,subTotalNetPnLPercentage)
+        #realizedPnL
+        realizedPnLItem = QTableWidgetItemDecimalColor(accRealizedPnl, False)
+        self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_REALIZED_PNL,realizedPnLItem)
         #positionPercentage
         positionPercentageItem = QTableWidgetItemDecimal(positionPercentage, True)
         self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_POSITION_PERCENTAGE,positionPercentageItem)
@@ -161,6 +165,9 @@ class MainWidget(QtGui.QWidget):
             #pnLNetPercentage
             pnLNetPercentageItem = QTableWidgetItemDecimalColor(position.getNetPnLPercentage(), False)
             self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_GROSS_NET_PERCENTAGE,pnLNetPercentageItem)
+            #realizedPnL
+            realizedPnLItem = QTableWidgetItemDecimalColor(position.realizedPnl, False)
+            self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_REALIZED_PNL,realizedPnLItem)
             #positionPercentage
             positionPercentage = (position.getValuatedAmount() * 100) / totalValuatedAmount
             positionPercentageItem = QTableWidgetItemDecimal(positionPercentage, False)
