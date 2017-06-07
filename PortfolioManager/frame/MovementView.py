@@ -20,7 +20,7 @@ class MovementView(QWidget):
         self.positionTableWidget = QTableWidget()
         self.resize(1200, 400)
         self.positionTableWidget.setRowCount(15)
-        self.positionTableWidget.setColumnCount(len(self.columnList)+1)
+        self.positionTableWidget.setColumnCount(len(self.columnList))
         self.positionTableWidget.setHorizontalHeaderLabels(self.columnList)
         self.layout.addWidget(self.positionTableWidget, 1, 0)   
         for (movement) in movementList:

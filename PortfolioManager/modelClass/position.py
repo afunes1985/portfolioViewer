@@ -56,7 +56,7 @@ class Position():
             self.accumulatedSellCommission += sellCommissionAmount
             self.accumulatedSellVATCommission += sellVATCommissionAmount
             self.realizedPnl += (grossAmount - (quantity * self.unitCost) - sellCommissionAmount - sellVATCommissionAmount)
-            # self.realizedPnlPercentage =
+            #self.realizedPnlPercentage = ((grossAmount / ((quantity * self.unitCost) - sellCommissionAmount - sellVATCommissionAmount)) -1) * 100
             
         if self.totalQuantity == 0:        
             self.unitCost = 0

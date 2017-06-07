@@ -23,7 +23,7 @@ class MainWidget(QtGui.QWidget):
     row = 0
     summaryRow = 0
     positionColumnList = "Asset Name;Position;Unit Cost;Market Price;Invested amount;Valuated amount;Tenor;Maturity Date;Gross PNL;Net PNL;Gross%PNL;Net%PNL;Realized Pnl;%Portfolio;WeightedPNL%".split(";");
-    summaryColumnList = "Custody;Asset type;Invested Amount;Valuated Amount;Gross%PNL;%Portfolio;WeightedPNL%".split(";");
+    summaryColumnList = "Custody;Asset type;Invested Amount;Valuated Amount;Net%PNL;%Portfolio;WeightedPNL%".split(";");
     def __init__(self): 
         super(self.__class__, self).__init__()
         self.layout = QtGui.QGridLayout(self)
@@ -58,7 +58,7 @@ class MainWidget(QtGui.QWidget):
         self.layout.addWidget(self.positionTableWidget, 2, 0, 3, 3)   
         
     def renderSummary(self, summaryDict):
-        for (key, summaryItem) in summaryDict.iteritems():
+        for (key, summaryItem) in sorted(summaryDict.iteritems()):
             #custodyName
             custodyNameItem = QTableWidgetItemString(summaryItem.custodyName, False)
             self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_CUSTODY_NAME,custodyNameItem)
@@ -72,8 +72,8 @@ class MainWidget(QtGui.QWidget):
             valuatedAmountItem = QTableWidgetItemDecimal(summaryItem.valuatedAmount, False)
             self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_VALUATED_AMOUNT,valuatedAmountItem)
             #grossPNLPercentage
-            grossPNLPercentageItem = QTableWidgetItemDecimal(summaryItem.getGrossPnLPercentage(), False)
-            self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_GROSS_PNL_PERCENTAGE,grossPNLPercentageItem)
+            netPNLPercentageItem = QTableWidgetItemDecimal(summaryItem.getNetPnLPercentage(), False)
+            self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_NET_PNL_PERCENTAGE,netPNLPercentageItem)
             self.summaryRow += 1
             
     def renderSubtotal(self, positionDict, assetType ,isSIC):  

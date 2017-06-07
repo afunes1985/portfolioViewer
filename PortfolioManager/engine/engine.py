@@ -22,12 +22,11 @@ class Engine:
             summaryKey = position.custodyName + position.asset.assetType
             summaryItem = summaryDict.get(summaryKey)
             if (summaryItem == None):
-                summaryItem = SummaryItem()
+                summaryItem = SummaryItem(position)
                 summaryDict[summaryKey] = summaryItem
-            summaryItem.custodyName = position.custodyName
-            summaryItem.assetType = position.asset.assetType
-            summaryItem.valuatedAmount += position.getValuatedAmount()
-            summaryItem.investedAmount += position.getInvestedAmount()   
+            else:
+                summaryItem.sumPosition(position)    
+            
         return summaryDict         
                 
     @staticmethod
