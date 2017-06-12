@@ -11,6 +11,7 @@ class SummaryItem:
     investedAmount = 0
     accumulatedBuyCommissionAmount = 0
     accumulatedBuyVATCommissionAmount = 0
+    realizedPnl = 0
     
     def __init__(self, position):
         self.sumPosition(position)
@@ -22,6 +23,10 @@ class SummaryItem:
         self.investedAmount += position.getInvestedAmount()  
         self.accumulatedBuyCommissionAmount += position.accumulatedBuyCommission
         self.accumulatedBuyVATCommissionAmount += position.accumulatedBuyVATCommission
+        self.realizedPnl += position.realizedPnl
+        
+    def addRealizedPnl(self, realizedPnl):
+            self.realizedPnl += realizedPnl
         
     def getGrossPnLPercentage(self):
         return (self.valuatedAmount / self.investedAmount -1 ) * 100

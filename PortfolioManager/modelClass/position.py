@@ -30,10 +30,16 @@ class Position():
     tenor = 0
     row = 0
     custodyName = None
+    isMatured = 0
+    maturityDate = None
     
     def __init__(self, asset, movement):
         self.asset = asset
+        print('New position ' + self.getAssetName())
         self.acquisitionDate = movement[Constant.CONST_MOVEMENT_ACQUISITION_DATE]
+        self.custodyName = movement[Constant.CONST_MOVEMENT_CUSTODY] 
+        self.getMarketPrice()
+        self.getMarketPriceOrig()
         if (self.asset.assetType == 'BOND'):
             self.addBondMovement(movement)
         else:    
@@ -63,7 +69,7 @@ class Position():
             self.accumulatedAmount = 0
         else:
             self.unitCost = self.accumulatedAmount / self.totalQuantity
-        self.custodyName = movement[Constant.CONST_MOVEMENT_CUSTODY] 
+        
     
     def addBondMovement(self, movement):
         self.movementList.append(movement)
@@ -72,8 +78,10 @@ class Position():
         self.unitCost = movement[Constant.CONST_MOVEMENT_PRICE]
         self.rate = movement[Constant.CONST_MOVEMENT_RATE]
         self.tenor = movement[Constant.CONST_MOVEMENT_TENOR]
-        self.custodyName = movement[Constant.CONST_MOVEMENT_CUSTODY] 
-        
+        self.maturityDate = self.acquisitionDate + datetime.timedelta(days = int(self.tenor))
+        today = datetime.datetime.now()
+        if((self.maturityDate)<today):
+            self.isMatured = 1
     
     def getAssetName(self):
         return self.asset.name
@@ -86,11 +94,13 @@ class Position():
     
     def getElapsedDays(self):
         elapsedDays = datetime.datetime.now() - self.acquisitionDate
+        if (elapsedDays.days > self.tenor):
+            return self.tenor
         return elapsedDays.days
     
     def getMaturityDate(self):
         if (self.asset.assetType == 'BOND'):
-            return (self.acquisitionDate + datetime.timedelta(days = int(self.tenor))).strftime("%Y-%m-%d")
+            return (self.maturityDate).strftime("%Y-%m-%d")
         return None
     
     def getValuatedAmount(self):
@@ -159,4 +169,18 @@ class Position():
     
     def getNetPnLPercentage(self):
         return (self.getValuatedAmount() / (self.getInvestedAmount() + self.accumulatedBuyCommission + self.accumulatedBuyVATCommission) -1 ) * 100
+    
+    def getPositionPercentage(self):
+        from core.cache import MainCache
+        from core.cache import Singleton
+        return (self.getValuatedAmount() * 100) / Singleton(MainCache).totalValuatedAmount
+    
+    def getWeightedPnl(self):
+        return self.getGrossPnLPercentage() * self.getPositionPercentage() / 100
+    
+    def getUnitCostOrRate(self):
+        if self.asset.assetType == 'BOND':
+            return self.rate * 100 
+        else:
+            return self.unitCost 
     

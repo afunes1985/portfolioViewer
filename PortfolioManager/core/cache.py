@@ -3,8 +3,11 @@ Created on Apr 26, 2017
 
 @author: afunes
 '''
-from engine.engine import Engine
 from decimal import Decimal
+
+import requests
+
+from engine.engine import Engine
 
 
 def Singleton(klass):
@@ -15,11 +18,19 @@ def Singleton(klass):
 class MainCache:
     _instance = None
     positionDict = None
+    oldPositionDict = None
     summaryDict = None
     usdMXN = None
+    totalValuatedAmount = None
     
     def setUSDMXN(self, usdMXN):
         self.usdMXN = Decimal(usdMXN)
     
     def __init__(self):
-        self.setUSDMXN(Engine.getMarketPriceByAssetName('MXN=X'))
+        try:
+            self.setUSDMXN(Engine.getMarketPriceByAssetName('MXN=X'))
+        except requests.exceptions.ConnectionError:
+            return self.setUSDMXN(1)
+        
+    def setGlobalAttribute(self, positionDict):    
+        self.totalValuatedAmount = Engine.getSubTotalValuatedAmount2(positionDict, 'ALL')

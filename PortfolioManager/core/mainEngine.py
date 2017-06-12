@@ -20,7 +20,7 @@ class MainEngine(object):
         mainCache = Singleton(MainCache)
         mainWindow = Singleton(MainWindow)
         mainWindow.clearTable()
-        mainCache.positionDict = Engine.buildPositions(fromDate, toDate)
+        Engine.buildPositions(fromDate, toDate)
         progressBar.setLabelText("EQUITY")
         progressBar.setValue(3)
         mainWindow.renderPositions(mainCache.positionDict, 'EQUITY', 0)
@@ -36,6 +36,6 @@ class MainEngine(object):
         progressBar.setValue(10)
         mainWindow.renderSubtotal(mainCache.positionDict, 'ALL', 0)
         #======================================================================
-        mainCache.summaryDict = Engine.buildSummaryByCustody(mainCache.positionDict)
+        mainCache.summaryDict = Engine.buildSummaryByCustody(mainCache.positionDict, mainCache.oldPositionDict)
         mainWindow.renderSummary(mainCache.summaryDict)
         

@@ -6,7 +6,8 @@ Created on 5 jun. 2017
 from PySide import QtGui
 from PySide.QtGui import QWidget, QTableWidget
 
-from frame.framework import QTableWidgetItemString, QTableWidgetItem6Decimal
+from frame.framework import QTableWidgetItemString, QTableWidgetItem6Decimal, \
+    QTableWidgetItemInt
 from modelClass.constant import Constant
 
 
@@ -22,6 +23,8 @@ class MovementView(QWidget):
         self.positionTableWidget.setRowCount(15)
         self.positionTableWidget.setColumnCount(len(self.columnList))
         self.positionTableWidget.setHorizontalHeaderLabels(self.columnList)
+        self.positionTableWidget.resizeColumnsToContents()
+        self.positionTableWidget.resizeRowsToContents()
         self.layout.addWidget(self.positionTableWidget, 1, 0)   
         for (movement) in movementList:
             self.renderMovements(movement)
@@ -37,7 +40,7 @@ class MovementView(QWidget):
         acquisitionDateItem = QTableWidgetItemString(movement.getAcquisitionDate(), False)
         self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_ACQUISITION_DATE,acquisitionDateItem)
         #quantity
-        quantityItem = QTableWidgetItem6Decimal(movement.quantity, False)
+        quantityItem = QTableWidgetItemInt(movement.quantity, False)
         self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_QUANTITY,quantityItem)
         #price
         priceItem = QTableWidgetItem6Decimal(movement.price, False)

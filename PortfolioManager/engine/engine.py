@@ -15,9 +15,8 @@ from modelClass.summaryItem import SummaryItem
 class Engine:
     
     @staticmethod
-    def buildSummaryByCustody(positionDict):
+    def buildSummaryByCustody(positionDict, oldPositionDict):
         summaryDict = {}
-        #positionList = Engine.getPositionByAssetType(positionDict, "ALL", 0)
         for (positionKey, position) in positionDict.iteritems():
             summaryKey = position.custodyName + position.asset.assetType
             summaryItem = summaryDict.get(summaryKey)
@@ -25,9 +24,20 @@ class Engine:
                 summaryItem = SummaryItem(position)
                 summaryDict[summaryKey] = summaryItem
             else:
-                summaryItem.sumPosition(position)    
-            
+                summaryItem.sumPosition(position) 
+        for (positionKey, position) in oldPositionDict.iteritems():
+            summaryKey = position.custodyName + position.asset.assetType
+            summaryItem = summaryDict.get(summaryKey)
+            if (summaryItem is not None):
+                summaryItem.addRealizedPnl(position.getNetPnL())         
         return summaryDict         
+    
+    @staticmethod
+    def getAccRealizedPnl(positionDict):
+        accRealizedPnl = 0
+        for key, position in positionDict.items():
+            accRealizedPnl += position.getNetPnL()
+        return accRealizedPnl       
                 
     @staticmethod
     def getSubTotalInvestedAmount(positionDict, assetType ,isSIC):
@@ -36,6 +46,10 @@ class Engine:
         for position in positionList:
             subTotalInvestedAmount += position.getInvestedAmount()
         return subTotalInvestedAmount
+    
+    @staticmethod
+    def getSubTotalValuatedAmount2(positionDict, assetType):
+        return Engine.getSubTotalValuatedAmount(positionDict, assetType ,None)
     
     @staticmethod
     def getSubTotalValuatedAmount(positionDict, assetType ,isSIC):
@@ -109,10 +123,13 @@ class Engine:
         
     @staticmethod
     def buildPositions(fromDate, toDate):
+        from core.cache import Singleton, MainCache
+        mainCache = Singleton(MainCache)
         assetDict = Engine.getAssetDict()
         movementRS = DaoMovement.getMovementsByDate(fromDate, toDate)
         positionDict = {}
-        position = 0
+        oldPositionDict = {}
+        position = None
         for (movement) in movementRS:
             asset = assetDict.get(movement[Constant.CONST_ASSET_NAME])
             assetName = asset.name
@@ -121,10 +138,15 @@ class Engine:
             position = positionDict.get(assetName)
             if (position is None):
                 position = Position(asset, movement)
-                positionDict[assetName] = position
+                if (position.isMatured):
+                    oldPositionDict[assetName] = position
+                else:
+                    positionDict[assetName] = position
             else:    
                 position.addMovement(movement)
-        return positionDict
+        mainCache.setGlobalAttribute(positionDict)
+        mainCache.positionDict = positionDict
+        mainCache.oldPositionDict = oldPositionDict
     
     @staticmethod
     def getMarketPriceByAssetName(assetName):
