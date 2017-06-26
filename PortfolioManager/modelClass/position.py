@@ -36,10 +36,12 @@ class Position():
     def __init__(self, asset, movement):
         self.asset = asset
         print('New position ' + self.getAssetName())
+        print(datetime.datetime.now())
         self.acquisitionDate = movement[Constant.CONST_MOVEMENT_ACQUISITION_DATE]
         self.custodyName = movement[Constant.CONST_MOVEMENT_CUSTODY] 
         self.getMarketPrice()
         self.getMarketPriceOrig()
+        print(datetime.datetime.now())
         if (self.asset.assetType == 'BOND'):
             self.addBondMovement(movement)
         else:    
@@ -140,8 +142,9 @@ class Position():
         from engine.engine import Engine
         if self.asset.isOnlinePrice:
             try:
-                marketPrice = Engine.getMarketPriceByAssetName(self.getAssetName())
-                self.setMarketPrice(marketPrice)
+                if (self.marketPrice == 0):
+                    marketPrice = Engine.getMarketPriceByAssetName(self.getAssetName())
+                    self.setMarketPrice(marketPrice)
             except requests.exceptions.ConnectionError:
                 return 0   
         return self.marketPrice
@@ -152,8 +155,9 @@ class Position():
         from core.cache import Singleton
         if self.asset.isOnlinePrice and self.asset.isSIC:
             try:
-                self.setMarketPriceOrig(Engine.getMarketPriceByAssetName(self.asset.originName))
-                self.marketPriceOrig = self.marketPriceOrig * Singleton(MainCache).usdMXN
+                if (self.marketPriceOrig == 0):
+                    self.setMarketPriceOrig(Engine.getMarketPriceByAssetName(self.asset.originName))
+                    self.marketPriceOrig = self.marketPriceOrig * Singleton(MainCache).usdMXN
             except requests.exceptions.ConnectionError:
                 return 0   
         return self.marketPriceOrig

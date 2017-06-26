@@ -52,6 +52,43 @@ class Engine:
         return Engine.getSubTotalValuatedAmount(positionDict, assetType ,None)
     
     @staticmethod
+    def getAccPositionPercentage(positionDict, assetType, isSIC):
+        from core.cache import Singleton, MainCache
+        mainCache = Singleton(MainCache)
+        accValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, assetType, isSIC)
+        accPositionPercentage = (accValuatedAmount * 100) / mainCache.totalValuatedAmount
+        return accPositionPercentage
+    
+    @staticmethod
+    def getAccGrossPnlPercentage(positionDict, assetType, isSIC):
+        accValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, assetType, isSIC)
+        accInvestedAmount = Engine.getSubTotalInvestedAmount(positionDict, assetType, isSIC)
+        accGrossPnlPercentage = (accValuatedAmount / accInvestedAmount -1 ) * 100
+        return accGrossPnlPercentage
+    
+    @staticmethod
+    def getAccWeightedPNL(positionDict, assetType, isSIC):
+        accGrossPnlPercentage = Engine.getAccGrossPnlPercentage(positionDict, assetType, isSIC)
+        accPositionPercentage = Engine.getAccPositionPercentage(positionDict, assetType, isSIC)
+        accWeightedPNL = accGrossPnlPercentage * accPositionPercentage / 100
+        return accWeightedPNL
+    
+    @staticmethod
+    def getAccNetPnlPercentage(positionDict, assetType, isSIC):
+        accBuyCommissionAmount = Engine.getAccBuyCommissionAmount(positionDict, assetType, isSIC)
+        accBuyVATCommissionAmount = Engine.getAccBuyCommissionVATAmount(positionDict, assetType, isSIC)
+        accValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, assetType, isSIC)
+        accInvestedAmount = Engine.getSubTotalInvestedAmount(positionDict, assetType, isSIC)
+        subTotalNetPnlPercentage = (accValuatedAmount / (accInvestedAmount + accBuyCommissionAmount + accBuyVATCommissionAmount) -1 ) * 100
+        return subTotalNetPnlPercentage
+    
+    @staticmethod
+    def getTotalValuatedAmount():
+        from core.cache import Singleton, MainCache
+        mainCache = Singleton(MainCache)
+        return mainCache.totalValuatedAmount
+    
+    @staticmethod
     def getSubTotalValuatedAmount(positionDict, assetType ,isSIC):
         subTotalValuatedAmount = 0
         positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
@@ -100,7 +137,7 @@ class Engine:
         return subTotalGrossPNL
     
     @staticmethod
-    def getSubtotalNetPNL(positionDict, assetType ,isSIC):
+    def getAccNetPNL(positionDict, assetType ,isSIC):
         subTotalNetPNL = 0
         positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
         for position in positionList:
