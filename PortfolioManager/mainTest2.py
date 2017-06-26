@@ -1,51 +1,31 @@
+from random import randint
+import threading
+import time
 
-import sys
-from PySide import QtGui
 
-class Example(QtGui.QWidget):
+def worker(semaphore):
+    """thread worker function"""
+    time.sleep(randint(0, 3))
+    print ('Worker')
+    semaphore.release()
+    return
+
     
-    def __init__(self):
-        super(Example, self).__init__()
-        
-        self.initUI()
-        
-    def initUI(self):
-        
-        title = QtGui.QLabel('Title')
-        author = QtGui.QLabel('Author')
-        review = QtGui.QLabel('Review')
-
-        titleEdit = QtGui.QLineEdit()
-        authorEdit = QtGui.QLineEdit()
-        reviewEdit = QtGui.QTextEdit()
-
-        grid = QtGui.QGridLayout()
-        #=======================================================================
-        # grid.setSpacing(10)
-        #=======================================================================
-
-        grid.addWidget(title, 1, 0)
-        grid.addWidget(titleEdit, 1, 1,1,1)
-
-        grid.addWidget(author, 2, 0)
-        grid.addWidget(authorEdit, 2, 1)
-
-        grid.addWidget(review, 3, 0)
-        grid.addWidget(reviewEdit, 3, 1, 5, 5)
-        
-        self.setLayout(grid) 
-        
-        self.setGeometry(300, 300, 350, 300)
-        self.setWindowTitle('Review')  
-        self.setFixedSize(400, 400)  
-        self.show()
-        
 def main():
+    semaphore = threading.Semaphore(value=5)
+    threads = []
+    for i in range(5):
+        semaphore.acquire()
+        t = threading.Thread(target=worker, args=(semaphore,))
+        t.start()
+        threads.append(t)
+    print ('Finish with starts')
     
-    app = QtGui.QApplication(sys.argv)
-    ex = Example()
-    sys.exit(app.exec_())
+    for thread in threads:
+        thread.join()
+    print ('Finish')
+ 
 
-
-if __name__ == '__main__':
+if __name__== '__main__':
     main()
+

@@ -3,6 +3,9 @@ Created on Mar 9, 2017
 
 @author: afunes
 '''
+import datetime
+import threading
+
 import requests
 
 from dao.dao import DaoMovement, DaoAsset
@@ -167,6 +170,7 @@ class Engine:
         positionDict = {}
         oldPositionDict = {}
         position = None
+        threads = []
         for (movement) in movementRS:
             asset = assetDict.get(movement[Constant.CONST_ASSET_NAME])
             assetName = asset.name
@@ -181,9 +185,17 @@ class Engine:
                     positionDict[assetName] = position
             else:    
                 position.addMovement(movement)
-        mainCache.setGlobalAttribute(positionDict)
+        print(datetime.datetime.now())
+        for key, position2 in positionDict.items():
+            t = threading.Thread(target=position2.refressMarketData)
+            t.start()
+            threads.append(t)
+        for thread in threads:
+            thread.join()
+        print(datetime.datetime.now())
         mainCache.positionDict = positionDict
         mainCache.oldPositionDict = oldPositionDict
+        mainCache.setGlobalAttribute(positionDict)
     
     @staticmethod
     def getMarketPriceByAssetName(assetName):

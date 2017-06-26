@@ -36,16 +36,16 @@ class Position():
     def __init__(self, asset, movement):
         self.asset = asset
         print('New position ' + self.getAssetName())
-        print(datetime.datetime.now())
         self.acquisitionDate = movement[Constant.CONST_MOVEMENT_ACQUISITION_DATE]
         self.custodyName = movement[Constant.CONST_MOVEMENT_CUSTODY] 
-        self.getMarketPrice()
-        self.getMarketPriceOrig()
-        print(datetime.datetime.now())
         if (self.asset.assetType == 'BOND'):
             self.addBondMovement(movement)
         else:    
             self.addMovement(movement)
+    
+    def refressMarketData(self):
+        self.getMarketPrice()
+        self.getMarketPriceOrig()
         
     def addMovement(self, movement):   
         self.movementList.append(movement)
