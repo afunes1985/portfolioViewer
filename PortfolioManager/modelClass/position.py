@@ -32,6 +32,7 @@ class Position():
     custodyName = None
     isMatured = 0
     maturityDate = None
+    changePercentage = 0
     
     def __init__(self, asset, movement):
         self.asset = asset
@@ -43,9 +44,25 @@ class Position():
         else:    
             self.addMovement(movement)
     
-    def refressMarketData(self):
-        self.getMarketPrice()
-        self.getMarketPriceOrig()
+    def refreshMarketData(self):
+        from engine.engine import Engine
+        if(self.asset.isOnlinePrice):
+            if(self.asset.isSIC):
+                rfList = Engine.getReferenceDataByAssetNames(self.asset.name+","+self.asset.originName)
+            else:
+                rfList = Engine.getReferenceDataByAssetNames(self.asset.name)     
+            for referenceDataLevel1 in rfList:
+                for referenceDataLevel2 in referenceDataLevel1.split(): 
+                    self.setReferenceData(referenceDataLevel2[0], referenceDataLevel2[1], referenceDataLevel2[2])
+
+        
+    def setReferenceData(self, assetName, price, changePercentage):
+        if(assetName == self.asset.name):
+            self.setMarketPrice(price)
+            self.changePercentage = changePercentage
+        elif(assetName == self.asset.originName):
+            self.setMarketPriceOrig(price)
+            self.changePercentage = changePercentage
         
     def addMovement(self, movement):   
         self.movementList.append(movement)

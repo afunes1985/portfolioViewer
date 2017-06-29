@@ -187,7 +187,7 @@ class Engine:
                 position.addMovement(movement)
         print(datetime.datetime.now())
         for key, position2 in positionDict.items():
-            t = threading.Thread(target=position2.refressMarketData)
+            t = threading.Thread(target=position2.refreshMarketData)
             t.start()
             threads.append(t)
         for thread in threads:
@@ -199,8 +199,13 @@ class Engine:
     
     @staticmethod
     def getMarketPriceByAssetName(assetName):
-        result = requests.get('http://finance.yahoo.com/d/quotes.csv?s='+assetName+'&f=l1')
+        result = requests.get('http://download.finance.yahoo.com/d/quotes.csv?s='+assetName+'&f=l1')
         return result.text
+    
+    @staticmethod
+    def getReferenceDataByAssetNames(assetNames):
+        result = requests.get('http://download.finance.yahoo.com/d/quotes.csv?s='+assetNames+'&f=l1p2')
+        return result.text.split()
     
     @staticmethod
     def getMovementListByAsset(assetName, fromDate, toDate):
