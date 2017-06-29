@@ -12,7 +12,8 @@ from frame.MovementFilterWidget import MovementFilterWidget
 from frame.MovementView import MovementView
 from frame.framework import QTableWidgetItemDecimal, \
     QTableWidgetItemDecimalColor, QTableWidgetItemString, QTableWidgetItemInt, \
-    QTableWidgetItemDuoDecimal, QTableWidgetItemDuoInt
+    QTableWidgetItemDuoDecimal, QTableWidgetItemDuoInt, \
+    QTableWidgetItemStringPlusMinus
 from modelClass.constant import Constant
 
 
@@ -22,7 +23,7 @@ class MainWidget(QtGui.QWidget):
     movementFilterWidget = None
     row = 0
     summaryRow = 0
-    positionColumnList = "Asset Name;Position;Unit Cost;Market Price;Invested amount;Valuated amount;Tenor;Maturity Date;Gross PNL;Net PNL;Gross%PNL;Net%PNL;Realized Pnl;%Portfolio;WeightedPNL%".split(";");
+    positionColumnList = "Asset Name;Position;Unit Cost;Market Price;Change%;Invested amount;Valuated amount;Tenor;Maturity Date;Gross PNL;Net PNL;Gross%PNL;Net%PNL;Realized Pnl;%Portfolio;WeightedPNL%".split(";");
     summaryColumnList = "Custody;Asset type;Invested Amount;Valuated Amount;Net%PNL;Realized Pnl;%Portfolio;WeightedPNL%".split(";");
     def __init__(self): 
         super(self.__class__, self).__init__()
@@ -137,6 +138,9 @@ class MainWidget(QtGui.QWidget):
                 #Market price
                 marketPriceItem = QTableWidgetItemDuoDecimal(position.getMarketPrice(), position.getMarketPriceOrig())
                 self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_MARKET_PRICE,marketPriceItem)
+                #changePercentage
+                changePercentageItem = QTableWidgetItemStringPlusMinus(position.changePercentage, False)
+                self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_CHANGE_PERCENTAGE,changePercentageItem)
                 #Invested amount
                 investedAmountItem = QTableWidgetItemDecimal(position.getInvestedAmount(), False)
                 self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_INVESTED_AMOUNT,investedAmountItem)

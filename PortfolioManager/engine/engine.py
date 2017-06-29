@@ -4,6 +4,7 @@ Created on Mar 9, 2017
 @author: afunes
 '''
 import datetime
+import string
 import threading
 
 import requests
@@ -204,8 +205,9 @@ class Engine:
     
     @staticmethod
     def getReferenceDataByAssetNames(assetNames):
-        result = requests.get('http://download.finance.yahoo.com/d/quotes.csv?s='+assetNames+'&f=l1p2')
-        return result.text.split()
+        result = requests.get('http://download.finance.yahoo.com/d/quotes.csv?s='+assetNames+'&f=sl1p2')
+        wsResult = string.replace(result.text,'"', '')
+        return wsResult.split()
     
     @staticmethod
     def getMovementListByAsset(assetName, fromDate, toDate):

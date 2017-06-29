@@ -32,7 +32,7 @@ class Position():
     custodyName = None
     isMatured = 0
     maturityDate = None
-    changePercentage = 0
+    changePercentage = None
     
     def __init__(self, asset, movement):
         self.asset = asset
@@ -52,16 +52,18 @@ class Position():
             else:
                 rfList = Engine.getReferenceDataByAssetNames(self.asset.name)     
             for referenceDataLevel1 in rfList:
-                for referenceDataLevel2 in referenceDataLevel1.split(): 
-                    self.setReferenceData(referenceDataLevel2[0], referenceDataLevel2[1], referenceDataLevel2[2])
+                referenceDataLevel2 = referenceDataLevel1.split(',')
+                self.setReferenceData(referenceDataLevel2[0], referenceDataLevel2[1], referenceDataLevel2[2])
 
         
     def setReferenceData(self, assetName, price, changePercentage):
+        from core.cache import MainCache
+        from core.cache import Singleton
         if(assetName == self.asset.name):
             self.setMarketPrice(price)
             self.changePercentage = changePercentage
         elif(assetName == self.asset.originName):
-            self.setMarketPriceOrig(price)
+            self.setMarketPriceOrig(price* Singleton(MainCache).usdMXN)
             self.changePercentage = changePercentage
         
     def addMovement(self, movement):   
