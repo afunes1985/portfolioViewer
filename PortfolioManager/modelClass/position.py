@@ -63,7 +63,7 @@ class Position():
             self.setMarketPrice(price)
             self.changePercentage = changePercentage
         elif(assetName == self.asset.originName):
-            self.setMarketPriceOrig(price* Singleton(MainCache).usdMXN)
+            self.setMarketPriceOrig(Decimal(price) * Singleton(MainCache).usdMXN)
             self.changePercentage = changePercentage
         
     def addMovement(self, movement):   
