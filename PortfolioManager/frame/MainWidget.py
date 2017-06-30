@@ -30,6 +30,12 @@ class MainWidget(QtGui.QWidget):
         self.layout = QtGui.QGridLayout(self)
         self.movementFilterWidget = MovementFilterWidget()
         self.layout.addWidget(self.movementFilterWidget, 1, 0)
+        
+    def clearTables(self):    
+        self.row = 0
+        self.summaryRow = 0
+        self.createTable()
+        self.createSummaryTable()
     
     def createSummaryTable(self):
         self.summaryTableWidget = QTableWidget()

@@ -61,7 +61,4 @@ class MainWindow(QtGui.QMainWindow):
         self.corporateEditor.show()
     
     def clearTable(self):
-        self.mainWidget.row = 0
-        self.mainWidget.summaryRow = 0
-        self.mainWidget.createTable()
-        self.mainWidget.createSummaryTable()
+        self.mainWidget.clearTables()
