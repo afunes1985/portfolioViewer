@@ -96,3 +96,14 @@ class DaoCustody():
         query = "SELECT C.ID FROM CUSTODY AS C INNER JOIN ASSET AS A ON A.DEFAULT_CUSTODY_OID = C.ID WHERE A.NAME = %s"
         resultSet = DbConnector().doQuery(query,(name,))
         return resultSet  
+    
+class DaoCorporateEventType():
+        def getCorporateEventTypeList(self):
+            query = """SELECT ID, NAME FROM CORPORATE_EVENT_TYPE"""
+            resultSet = DbConnector().doQuery(query, "")
+            return resultSet  
+    
+        def insert(self, corporateEvent):
+            insertSentence = """insert corporate_event(corporate_event_type, asset_oid, payment_date, gross_amount, custody_oid) 
+                           values (%s,%s,%s,%s,%s)"""
+            DbConnector().doInsert(insertSentence, (corporateEvent.corporateEventTypeOID,  corporateEvent.assetOID, corporateEvent.paymentDate, corporateEvent.grossAmount, corporateEvent.custody))

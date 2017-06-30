@@ -8,6 +8,8 @@ from PySide.QtGui import QTableWidgetItem
 
 from frame.MainWidget import MainWidget
 from frame.MovementEditor import MovementEditor
+from modelClass.corporateEvent import CorporateEvent
+from frame.CorporateEventEditor import CorporateEventEditor
 
 class MainWindow(QtGui.QMainWindow):
     _instance = None
@@ -25,11 +27,15 @@ class MainWindow(QtGui.QMainWindow):
         return self.mainWidget
         
     def createMenu(self):
-        self.fileMenu = self.menuBar().addMenu("&Movement")
+        self.fileMenu = self.menuBar().addMenu("&Add")
         self.actionOpenMovementEditor = QtGui.QAction("&Add movement", self, checkable=True,
             shortcut="Ctrl+M", statusTip="Add movement",
             triggered=self.openMovementEditor)
         self.fileMenu.addAction(self.actionOpenMovementEditor)
+        self.actionOpenCorporateEventEditor = QtGui.QAction("&Add corporate event", self, checkable=True,
+            shortcut="Ctrl+C", statusTip="Add movement",
+            triggered=self.openCorporateEventEditor)
+        self.fileMenu.addAction(self.actionOpenCorporateEventEditor)
 
     def renderSubtotal(self, positionDict, assetType ,isSIC):
         self.mainWidget.renderSubtotal(positionDict, assetType, isSIC)
@@ -49,6 +55,10 @@ class MainWindow(QtGui.QMainWindow):
     def openMovementEditor(self):
         self.movementEditor = MovementEditor()
         self.movementEditor.show()
+    
+    def openCorporateEventEditor(self):
+        self.corporateEditor = CorporateEventEditor()
+        self.corporateEditor.show()
     
     def clearTable(self):
         self.mainWidget.row = 0
