@@ -33,7 +33,7 @@ class MainWindow(QtGui.QMainWindow):
             triggered=self.openMovementEditor)
         self.fileMenu.addAction(self.actionOpenMovementEditor)
         self.actionOpenCorporateEventEditor = QtGui.QAction("&Add corporate event", self, checkable=True,
-            shortcut="Ctrl+C", statusTip="Add movement",
+            shortcut="Ctrl+E", statusTip="Add movement",
             triggered=self.openCorporateEventEditor)
         self.fileMenu.addAction(self.actionOpenCorporateEventEditor)
 
