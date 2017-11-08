@@ -20,7 +20,6 @@ class PricingInterface:
             return 0   
         except InvalidOperation:
             return 0
-        
     
     @staticmethod
     def getReferenceDataByAssetNames(assetNames):
