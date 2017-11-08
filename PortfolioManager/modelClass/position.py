@@ -4,9 +4,7 @@ Created on Mar 18, 2017
 @author: afunes
 '''
 import datetime
-from decimal import Decimal, InvalidOperation
-
-import requests
+from decimal import Decimal
 
 from modelClass.constant import Constant
 
@@ -45,12 +43,12 @@ class Position():
             self.addMovement(movement)
     
     def refreshMarketData(self):
-        from engine.engine import Engine
+        from pricingAPI.PricingInterface import PricingInterface
         if(self.asset.isOnlinePrice):
             if(self.asset.isSIC):
-                rfList = Engine.getReferenceDataByAssetNames(self.asset.name+","+self.asset.originName)
+                rfList = PricingInterface.getReferenceDataByAssetNames(self.asset.name+","+self.asset.originName)
             else:
-                rfList = Engine.getReferenceDataByAssetNames(self.asset.name)     
+                rfList = PricingInterface.getReferenceDataByAssetNames(self.asset.name)     
             for referenceDataLevel1 in rfList:
                 referenceDataLevel2 = referenceDataLevel1.split(',')
                 self.setReferenceData(referenceDataLevel2[0], referenceDataLevel2[1], referenceDataLevel2[2])
@@ -146,39 +144,26 @@ class Position():
         return self.movementList
     
     def setMarketPriceOrig(self, marketPriceOrig):
-        try:
-            self.marketPriceOrig = Decimal(marketPriceOrig)
-        except InvalidOperation:
-            self.marketPriceOrig = 0
+        self.marketPriceOrig = Decimal(marketPriceOrig)
     
     def setMarketPrice(self, marketPrice):
-        try:
-            self.marketPrice = Decimal(marketPrice)
-        except InvalidOperation:
-            self.marketPrice = 0
+        self.marketPrice = Decimal(marketPrice)
         
     def getMarketPrice(self):
-        from engine.engine import Engine
+        from pricingAPI.PricingInterface import PricingInterface
         if self.asset.isOnlinePrice:
-            try:
-                if (self.marketPrice == 0):
-                    marketPrice = Engine.getMarketPriceByAssetName(self.getAssetName())
-                    self.setMarketPrice(marketPrice)
-            except requests.exceptions.ConnectionError:
-                return 0   
+            if (self.marketPrice == 0):
+                self.setMarketPrice(PricingInterface.getMarketPriceByAssetName(self.getAssetName()))
         return self.marketPrice
     
     def getMarketPriceOrig(self):
-        from engine.engine import Engine
+        from pricingAPI.PricingInterface import PricingInterface
         from core.cache import MainCache
         from core.cache import Singleton
         if self.asset.isOnlinePrice and self.asset.isSIC:
-            try:
-                if (self.marketPriceOrig == 0):
-                    self.setMarketPriceOrig(Engine.getMarketPriceByAssetName(self.asset.originName))
-                    self.marketPriceOrig = self.marketPriceOrig * Singleton(MainCache).usdMXN
-            except requests.exceptions.ConnectionError:
-                return 0   
+            if (self.marketPriceOrig == 0):
+                self.setMarketPriceOrig(PricingInterface.getMarketPriceByAssetName(self.asset.originName))
+                self.marketPriceOrig = self.marketPriceOrig * Singleton(MainCache).usdMXN
         return self.marketPriceOrig
     
     def getGrossPnL(self):

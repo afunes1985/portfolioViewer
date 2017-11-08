@@ -6,8 +6,8 @@ Created on Apr 26, 2017
 from decimal import Decimal
 
 import requests
-
 from engine.engine import Engine
+from pricingAPI.PricingInterface import PricingInterface
 
 
 def Singleton(klass):
@@ -29,8 +29,10 @@ class MainCache:
     
     def __init__(self):
         try:
-            #self.setUSDMXN(Engine.getMarketPriceByAssetName('MXN=X'))
-            self.setUSDMXN(19)
+            USDMXN = PricingInterface.getMarketPriceByAssetName('MXN=X')
+            if USDMXN == 0:
+                USDMXN = 1
+            self.setUSDMXN(USDMXN)
         except requests.exceptions.ConnectionError:
             return self.setUSDMXN(1)
         

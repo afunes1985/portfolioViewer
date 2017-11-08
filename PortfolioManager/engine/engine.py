@@ -3,11 +3,7 @@ Created on Mar 9, 2017
 
 @author: afunes
 '''
-import datetime
-import string
 import threading
-
-import requests
 
 from dao.dao import DaoMovement, DaoAsset, DaoCorporateEvent
 from modelClass.constant import Constant
@@ -221,16 +217,3 @@ class Engine:
             movementList.append(movement)
         return movementList
             
-    
-    ######################################################## PRICE #####################################################
-            
-    @staticmethod
-    def getMarketPriceByAssetName(assetName):
-        result = requests.get('http://download.finance.yahoo.com/d/quotes.csv?s='+assetName+'&f=l1')
-        return result.text
-    
-    @staticmethod
-    def getReferenceDataByAssetNames(assetNames):
-        result = requests.get('http://download.finance.yahoo.com/d/quotes.csv?s='+assetNames+'&f=sl1p2')
-        wsResult = string.replace(result.text,'"', '')
-        return wsResult.split()
