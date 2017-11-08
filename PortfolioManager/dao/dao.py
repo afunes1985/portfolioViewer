@@ -97,9 +97,20 @@ class DaoCustody():
         resultSet = DbConnector().doQuery(query,(name,))
         return resultSet  
     
-class DaoCorporateEventType():
+class DaoCorporateEvent():
         def getCorporateEventTypeList(self):
             query = """SELECT ID, NAME FROM CORPORATE_EVENT_TYPE"""
+            resultSet = DbConnector().doQuery(query, "")
+            return resultSet  
+    
+        @staticmethod
+        def getCorporateEventList():
+            query = """SELECT ce.id, C.NAME, CET.NAME,  A.NAME, CE.PAYMENT_DATE, CE.GROSS_AMOUNT
+                        FROM CORPORATE_EVENT CE 
+                        INNER JOIN CORPORATE_EVENT_TYPE CET ON CE.CORPORATE_EVENT_TYPE = CE.ID
+                        INNER JOIN CUSTODY C ON C.ID = CE.CUSTODY_OID
+                        INNER JOIN ASSET A ON A.ID = CE.ASSET_OID
+                    order by CE.PAYMENT_DATE desc"""
             resultSet = DbConnector().doQuery(query, "")
             return resultSet  
     

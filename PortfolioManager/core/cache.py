@@ -22,13 +22,15 @@ class MainCache:
     summaryDict = None
     usdMXN = None
     totalValuatedAmount = None
+    corpEventList = None
     
     def setUSDMXN(self, usdMXN):
         self.usdMXN = Decimal(usdMXN)
     
     def __init__(self):
         try:
-            self.setUSDMXN(Engine.getMarketPriceByAssetName('MXN=X'))
+            #self.setUSDMXN(Engine.getMarketPriceByAssetName('MXN=X'))
+            self.setUSDMXN(19)
         except requests.exceptions.ConnectionError:
             return self.setUSDMXN(1)
         

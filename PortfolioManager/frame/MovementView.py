@@ -4,7 +4,7 @@ Created on 5 jun. 2017
 @author: afunes
 '''
 from PySide import QtGui
-from PySide.QtGui import QWidget, QTableWidget
+from PySide.QtGui import QWidget, QTableWidget, QSizePolicy
 
 from frame.framework import QTableWidgetItemString, QTableWidgetItem6Decimal, \
     QTableWidgetItemInt
@@ -19,7 +19,7 @@ class MovementView(QWidget):
         QWidget.__init__(self)
         self.layout = QtGui.QGridLayout(self)
         self.positionTableWidget = QTableWidget()
-        self.resize(1200, 400)
+        self.resize(800, 400)
         self.positionTableWidget.setRowCount(15)
         self.positionTableWidget.setColumnCount(len(self.columnList))
         self.positionTableWidget.setHorizontalHeaderLabels(self.columnList)

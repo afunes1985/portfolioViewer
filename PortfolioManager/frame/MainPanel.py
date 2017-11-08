@@ -17,7 +17,7 @@ from frame.framework import QTableWidgetItemDecimal, \
 from modelClass.constant import Constant
 
 
-class MainWidget(QtGui.QWidget):
+class MainPanel(QtGui.QWidget):
     positionTableWidget = None
     summaryTable = None
     movementFilterWidget = None

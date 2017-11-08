@@ -10,7 +10,7 @@ from PySide.QtCore import SIGNAL, QRect
 from PySide.QtGui import QWidget, QLabel, QComboBox, QLineEdit, \
     QDoubleValidator, QDateEdit, QPushButton
 
-from dao.dao import DaoAsset, DaoCustody, DaoCorporateEventType
+from dao.dao import DaoAsset, DaoCustody, DaoCorporateEvent
 from modelClass.corporateEvent import CorporateEvent
 
 
@@ -24,7 +24,7 @@ class CorporateEventEditor(QWidget):
         self.layout.addWidget(self.lblCorporateEventType, 0, 0)
         #cmbCorporateEventType
         self.cmbCorporateEventType = QComboBox(self)
-        corporateEventTypeList = DaoCorporateEventType().getCorporateEventTypeList()
+        corporateEventTypeList = DaoCorporateEvent().getCorporateEventTypeList()
         for (corporateEventType) in corporateEventTypeList:
             self.cmbCorporateEventType.addItem(corporateEventType[1], corporateEventType[0])
         self.layout.addWidget(self.cmbCorporateEventType, 0, 1)
@@ -83,7 +83,7 @@ class CorporateEventEditor(QWidget):
         corporateEvent.custody = self.cmbCustody.itemData(self.cmbCustody.currentIndex())
         corporateEvent.paymentDate = (self.cmbPaymentDate.date()).toString("yyyy-M-dd")
         corporateEvent.grossAmount = self.txtGrossAmount.text()
-        DaoCorporateEventType().insert(corporateEvent)
+        DaoCorporateEvent().insert(corporateEvent)
         self.clearEditor()
      
     def clearEditor(self):

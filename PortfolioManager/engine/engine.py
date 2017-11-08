@@ -9,11 +9,12 @@ import threading
 
 import requests
 
-from dao.dao import DaoMovement, DaoAsset
+from dao.dao import DaoMovement, DaoAsset, DaoCorporateEvent
 from modelClass.constant import Constant
 from modelClass.movement import Asset, Movement
 from modelClass.position import Position    
 from modelClass.summaryItem import SummaryItem
+from modelClass.corporateEvent import CorporateEvent
 
 
 class Engine:
@@ -105,7 +106,8 @@ class Engine:
         accBuyCommissionAmount = 0
         positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
         for position in positionList:
-            accBuyCommissionAmount += position.accumulatedBuyCommission
+            if position.totalQuantity != 0:
+                accBuyCommissionAmount += position.accumulatedBuyCommission
         return accBuyCommissionAmount
     
     @staticmethod
@@ -113,7 +115,8 @@ class Engine:
         accuBuyVATCommission = 0
         positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
         for position in positionList:
-            accuBuyVATCommission += position.accumulatedBuyVATCommission
+            if position.totalQuantity != 0:
+                accuBuyVATCommission += position.accumulatedBuyVATCommission
         return accuBuyVATCommission
     
     @staticmethod
@@ -137,7 +140,8 @@ class Engine:
         subTotalGrossPNL = 0
         positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
         for position in positionList:
-            subTotalGrossPNL += position.getGrossPnL()
+            if position.totalQuantity != 0:
+                subTotalGrossPNL += position.getGrossPnL()
         return subTotalGrossPNL
     
     @staticmethod
@@ -145,7 +149,8 @@ class Engine:
         subTotalNetPNL = 0
         positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
         for position in positionList:
-            subTotalNetPNL += position.getNetPnL()
+            if position.totalQuantity != 0:
+                subTotalNetPNL += position.getNetPnL()
         return subTotalNetPNL
     
     @staticmethod
@@ -186,28 +191,26 @@ class Engine:
                     positionDict[assetName] = position
             else:    
                 position.addMovement(movement)
-        print(datetime.datetime.now())
+        #print(datetime.datetime.now())
         for key, position2 in positionDict.items():
             t = threading.Thread(target=position2.refreshMarketData)
             t.start()
             threads.append(t)
         for thread in threads:
             thread.join()
-        print(datetime.datetime.now())
+        #print(datetime.datetime.now())
         mainCache.positionDict = positionDict
         mainCache.oldPositionDict = oldPositionDict
         mainCache.setGlobalAttribute(positionDict)
     
     @staticmethod
-    def getMarketPriceByAssetName(assetName):
-        result = requests.get('http://download.finance.yahoo.com/d/quotes.csv?s='+assetName+'&f=l1')
-        return result.text
-    
-    @staticmethod
-    def getReferenceDataByAssetNames(assetNames):
-        result = requests.get('http://download.finance.yahoo.com/d/quotes.csv?s='+assetNames+'&f=sl1p2')
-        wsResult = string.replace(result.text,'"', '')
-        return wsResult.split()
+    def getCorporateEventList(self):
+        resultList = []
+        resultSet = DaoCorporateEvent.getCorporateEventList()
+        for (row) in resultSet:
+            o = CorporateEvent(row)
+            resultList.append(o)
+        return resultList
     
     @staticmethod
     def getMovementListByAsset(assetName, fromDate, toDate):
@@ -218,3 +221,16 @@ class Engine:
             movementList.append(movement)
         return movementList
             
+    
+    ######################################################## PRICE #####################################################
+            
+    @staticmethod
+    def getMarketPriceByAssetName(assetName):
+        result = requests.get('http://download.finance.yahoo.com/d/quotes.csv?s='+assetName+'&f=l1')
+        return result.text
+    
+    @staticmethod
+    def getReferenceDataByAssetNames(assetNames):
+        result = requests.get('http://download.finance.yahoo.com/d/quotes.csv?s='+assetNames+'&f=sl1p2')
+        wsResult = string.replace(result.text,'"', '')
+        return wsResult.split()
