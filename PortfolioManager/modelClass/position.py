@@ -49,9 +49,9 @@ class Position():
                 rfList = PricingInterface.getReferenceDataByAssetNames(self.asset.name+","+self.asset.originName)
             else:
                 rfList = PricingInterface.getReferenceDataByAssetNames(self.asset.name)     
-            for referenceDataLevel1 in rfList:
-                referenceDataLevel2 = referenceDataLevel1.split(',')
-                self.setReferenceData(referenceDataLevel2[0], referenceDataLevel2[1], referenceDataLevel2[2])
+            #for referenceDataLevel1 in rfList:
+            #    referenceDataLevel2 = referenceDataLevel1.split(',')
+            #   self.setReferenceData(referenceDataLevel2[0], referenceDataLevel2[1], referenceDataLevel2[2])
 
         
     def setReferenceData(self, assetName, price, changePercentage):

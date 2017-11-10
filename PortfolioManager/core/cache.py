@@ -5,7 +5,6 @@ Created on Apr 26, 2017
 '''
 from decimal import Decimal
 
-import requests
 from engine.engine import Engine
 from pricingAPI.PricingInterface import PricingInterface
 
@@ -28,13 +27,10 @@ class MainCache:
         self.usdMXN = Decimal(usdMXN)
     
     def __init__(self):
-        try:
-            USDMXN = PricingInterface.getMarketPriceByAssetName('MXN=X')
+            USDMXN = PricingInterface.getExchangeRateByCurrency('USD','MXN')
             if USDMXN == 0:
                 USDMXN = 1
             self.setUSDMXN(USDMXN)
-        except requests.exceptions.ConnectionError:
-            return self.setUSDMXN(1)
         
     def setGlobalAttribute(self, positionDict):    
         self.totalValuatedAmount = Engine.getSubTotalValuatedAmount2(positionDict, 'ALL')
