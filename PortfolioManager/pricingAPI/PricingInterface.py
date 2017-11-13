@@ -33,7 +33,7 @@ class PricingInterface:
             return PricingInterfaceTradier.getReferenceDataByAssetNames(assetNames)
         except Exception as e:
             logging.warning(e)
-            return 0
+            return []
 
 
 
@@ -82,6 +82,33 @@ class PricingInterfaceTradier:
     
     @staticmethod
     def getReferenceDataByAssetNames(assetNames):
-        result = requests.get('http://download.finance.yahoo.com/d/quotes.csv?s='+assetNames+'&f=sl1p2')
-        wsResult = string.replace(result.text,'"', '')
-        return wsResult.split()
+        import httplib
+        import json
+        returnList = []
+        # Request: Market Quotes (https://sandbox.tradier.com/v1/markets/quotes?symbols=spy)
+        connection = httplib.HTTPSConnection('sandbox.tradier.com', 443, timeout = 30)
+        # Headers
+        headers = {"Accept":"application/json",
+                   "Authorization":"Bearer XGabnWN7VqBkIuSVvS6QrhwtiQcK"}
+        # Send synchronously
+        connection.request('GET', '/v1/markets/quotes?symbols='+assetNames, None, headers)
+        response = connection.getresponse()
+        content = response.read()
+        json_data = json.loads(content)
+        if isinstance(json_data['quotes']['quote'], list): 
+            for row in json_data['quotes']['quote']:
+                print (row['symbol'])
+                print (row['bid'])
+                print (row['change_percentage'])
+                returnRow = []
+                returnRow.append(row['symbol'])
+                returnRow.append(row['bid'])
+                returnRow.append(row['change_percentage'])
+                returnList.append(returnRow)
+        else:
+            returnRow = []
+            returnRow.append(json_data['quotes']['quote']['symbol'])
+            returnRow.append(json_data['quotes']['quote']['bid'])
+            returnRow.append(json_data['quotes']['quote']['change_percentage'])
+            returnList.append(returnRow)
+        return returnList

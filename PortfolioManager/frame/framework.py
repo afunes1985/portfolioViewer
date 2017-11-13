@@ -13,7 +13,7 @@ class QTableWidgetItemStringPlusMinus(QTableWidgetItem):
         font = self.font()
         font.setBold(bold)
         self.setFont(font)
-        if(value is not None and value[0]=='+'):
+        if(value is not None and value[0]!='-'):
             self.setBackground(QtGui.QColor(102,204,51))
         elif(value is not None):
             self.setBackground(QtGui.QColor(255,000,51))
