@@ -150,10 +150,15 @@ class Position():
         self.marketPrice = Decimal(marketPrice)
         
     def getMarketPrice(self):
+        from core.cache import MainCache
+        from core.cache import Singleton
         from pricingAPI.PricingInterface import PricingInterface
         if self.asset.isOnlinePrice:
             if (self.marketPrice == 0):
                 self.setMarketPrice(PricingInterface.getMarketPriceByAssetName(self.getAssetName()))
+                if (self.marketPrice == 0 and self.asset.isSIC):
+                    marketPriceOrigAux = PricingInterface.getMarketPriceByAssetName(self.asset.originName)
+                    self.setMarketPrice(marketPriceOrigAux * Singleton(MainCache).usdMXN)
         return self.marketPrice
     
     def getMarketPriceOrig(self):
