@@ -82,7 +82,7 @@ class DaoAsset():
         return resultSet  
     
     def getAssetList(self):
-        query = '''SELECT ID, ASSET_TYPE, NAME, ORIGIN_NAME, IS_SIC, IS_ONLINE_PRICE FROM ASSET'''
+        query = '''SELECT ID, ASSET_TYPE, NAME, ORIGIN_NAME, IS_SIC, IS_ONLINE_PRICE, PRICE_SOURCE FROM ASSET'''
         resultSet = DbConnector().doQuery(query, "")
         return resultSet  
         

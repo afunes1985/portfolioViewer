@@ -6,31 +6,40 @@ Created on 8 nov. 2017
 from decimal import Decimal
 import logging
 import string
-
+import httplib
+import json
 import requests
 
 
 class PricingInterface:
+    
+    @staticmethod
+    def getPriceInterfacesDict():
+        return dict({"EXCEL":PricingInterfaceExcel, 
+                    "YAHOO":PricingInterfaceYahoo,
+                    "TRADIER":PricingInterfaceTradier,
+                    "ALPHAVANTAGE":PricingInterfaceAlphaVantage}) 
+        
     @staticmethod
     def getExchangeRateByCurrency(fromCurrency, toCurrency):
         try:
-            return PricingInterfaceAlphaVantage.getExchangeRateByCurrency(fromCurrency, toCurrency)
+            return PricingInterface.getPriceInterfacesDict()["ALPHAVANTAGE"].getExchangeRateByCurrency(fromCurrency, toCurrency)
         except Exception as e:
             logging.warning(e)
             return 0
         
     @staticmethod
-    def getMarketPriceByAssetName(assetName):
+    def getMarketPriceByAssetName(assetName, priceSource):
         try:
-            return PricingInterfaceTradier.getMarketPriceByAssetName(assetName)
+            return PricingInterface.getPriceInterfacesDict()[priceSource].getMarketPriceByAssetName(assetName)
         except Exception as e:
             logging.warning(e)
             return 0
         
     @staticmethod
-    def getReferenceDataByAssetNames(assetNames):
+    def getReferenceDataByAssetNames(assetNames, priceSource):
         try:    
-            return PricingInterfaceTradier.getReferenceDataByAssetNames(assetNames)
+            return PricingInterface.getPriceInterfacesDict()[priceSource].getReferenceDataByAssetNames(assetNames)
         except Exception as e:
             logging.warning(e)
             return []
@@ -56,7 +65,6 @@ class PricingInterfaceYahoo:
 class PricingInterfaceAlphaVantage:
     @staticmethod
     def getExchangeRateByCurrency(fromCurrency, toCurrency):
-        import json
         result = requests.get('https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency='+fromCurrency+'&to_currency='+toCurrency+'&apikey=Z09WI322376KBA3P')
         json_data = json.loads(result.text)
         return Decimal(json_data['Realtime Currency Exchange Rate']['5. Exchange Rate'])
@@ -66,8 +74,6 @@ class PricingInterfaceAlphaVantage:
 class PricingInterfaceTradier:
     @staticmethod
     def getMarketPriceByAssetName(assetName):
-        import httplib
-        import json
         # Request: Market Quotes (https://sandbox.tradier.com/v1/markets/quotes?symbols=spy)
         connection = httplib.HTTPSConnection('sandbox.tradier.com', 443, timeout = 30)
         # Headers
@@ -82,8 +88,6 @@ class PricingInterfaceTradier:
     
     @staticmethod
     def getReferenceDataByAssetNames(assetNames):
-        import httplib
-        import json
         returnList = []
         # Request: Market Quotes (https://sandbox.tradier.com/v1/markets/quotes?symbols=spy)
         connection = httplib.HTTPSConnection('sandbox.tradier.com', 443, timeout = 30)
@@ -111,4 +115,30 @@ class PricingInterfaceTradier:
             returnRow.append(json_data['quotes']['quote']['bid'])
             returnRow.append(json_data['quotes']['quote']['change_percentage'])
             returnList.append(returnRow)
+        return returnList
+    
+class PricingInterfaceExcel:
+    @staticmethod
+    def getMarketPriceByAssetName(assetName):
+        return 0
+    
+    @staticmethod
+    def getReferenceDataByAssetNames(assetNames):
+        import pandas
+        #df = pandas.read_excel('C://Users//afunes//iCloudDrive//PortfolioViewer//import//quotes.csv')
+        df = pandas.read_csv('C://Users//afunes//iCloudDrive//PortfolioViewer//import//quotes.csv');
+        #get the values for a given column
+        symbolValues = df['Symbol'].values
+        curPriceValues = df['Current Price'].values
+        changeValues = df['Change'].values
+        returnList = []
+        for index, rfRow in enumerate(symbolValues):
+            if assetNames == rfRow:
+                returnRow = []
+                returnRow.append(rfRow)
+                currentPrice = curPriceValues[index]
+                returnRow.append(round(currentPrice,2))
+                change = changeValues[index]
+                returnRow.append(round((((currentPrice)/(currentPrice-change)-1)*100), 2))
+                returnList.append(returnRow)
         return returnList

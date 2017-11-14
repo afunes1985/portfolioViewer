@@ -46,9 +46,9 @@ class Position():
         from pricingAPI.PricingInterface import PricingInterface
         if(self.asset.isOnlinePrice):
             if(self.asset.isSIC):
-                rfList = PricingInterface.getReferenceDataByAssetNames(self.asset.name+","+self.asset.originName)
+                rfList = PricingInterface.getReferenceDataByAssetNames(self.asset.name+","+self.asset.originName, self.asset.priceSource)
             else:
-                rfList = PricingInterface.getReferenceDataByAssetNames(self.asset.name)     
+                rfList = PricingInterface.getReferenceDataByAssetNames(self.asset.name, self.asset.priceSource)     
             for rfRow in rfList:
                 self.setReferenceData(rfRow[0], rfRow[1], rfRow[2])
 
@@ -58,7 +58,7 @@ class Position():
         from core.cache import Singleton
         if(assetName == self.asset.name):
             self.setMarketPrice(price)
-            self.changePercentage = changePercentage
+            self.changePercentage = str(changePercentage) + '%'
         elif(assetName == self.asset.originName):
             self.setMarketPriceOrig(Decimal(price) * Singleton(MainCache).usdMXN) 
             self.setMarketPrice(Decimal(price) * Singleton(MainCache).usdMXN)#Tal vez hay que quitar esta linea
@@ -155,9 +155,9 @@ class Position():
         from pricingAPI.PricingInterface import PricingInterface
         if self.asset.isOnlinePrice:
             if (self.marketPrice == 0):
-                self.setMarketPrice(PricingInterface.getMarketPriceByAssetName(self.getAssetName()))
+                self.setMarketPrice(PricingInterface.getMarketPriceByAssetName(self.getAssetName(), self.asset.priceSource))
                 if (self.marketPrice == 0 and self.asset.isSIC):
-                    marketPriceOrigAux = PricingInterface.getMarketPriceByAssetName(self.asset.originName)
+                    marketPriceOrigAux = PricingInterface.getMarketPriceByAssetName(self.asset.originName, self.asset.priceSource)
                     self.setMarketPrice(marketPriceOrigAux * Singleton(MainCache).usdMXN)
         return self.marketPrice
     
@@ -167,7 +167,7 @@ class Position():
         from core.cache import Singleton
         if self.asset.isOnlinePrice and self.asset.isSIC:
             if (self.marketPriceOrig == 0):
-                self.setMarketPriceOrig(PricingInterface.getMarketPriceByAssetName(self.asset.originName))
+                self.setMarketPriceOrig(PricingInterface.getMarketPriceByAssetName(self.asset.originName, self.asset.priceSource))
                 self.marketPriceOrig = self.marketPriceOrig * Singleton(MainCache).usdMXN
         return self.marketPriceOrig
     

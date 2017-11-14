@@ -63,6 +63,7 @@ class Asset():
     originName = None
     isSIC = 0
     isOnlinePrice = 0
+    priceSource = None
     def __init__(self, assetRow):
             self.OID = assetRow[0]
             self.assetType = assetRow[1]
@@ -70,4 +71,5 @@ class Asset():
             self.originName = assetRow[3]
             self.isSIC = assetRow[4]
             self.isOnlinePrice = assetRow[5]
+            self.priceSource = assetRow[6]
 
