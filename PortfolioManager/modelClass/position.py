@@ -60,7 +60,7 @@ class Position():
             self.setMarketPrice(price)
             self.changePercentage = str(changePercentage) + '%'
         elif(assetName == self.asset.originName):
-            self.setMarketPriceOrig(Decimal(price) * Singleton(MainCache).usdMXN) 
+            self.setMarketPriceOrig(Decimal(price)) 
             self.setMarketPrice(Decimal(price) * Singleton(MainCache).usdMXN)#Tal vez hay que quitar esta linea
             self.changePercentage = str(changePercentage) + '%'
         
