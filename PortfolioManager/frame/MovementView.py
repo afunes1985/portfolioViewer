@@ -4,7 +4,7 @@ Created on 5 jun. 2017
 @author: afunes
 '''
 from PySide import QtGui
-from PySide.QtGui import QWidget, QTableWidget, QSizePolicy
+from PySide.QtGui import QWidget, QTableWidget
 
 from frame.framework import QTableWidgetItemString, QTableWidgetItem6Decimal, \
     QTableWidgetItemInt

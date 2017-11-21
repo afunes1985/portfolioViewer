@@ -30,7 +30,7 @@ class Engine:
             summaryKey = position.custodyName + position.asset.assetType
             summaryItem = summaryDict.get(summaryKey)
             if (summaryItem is not None):
-                summaryItem.addRealizedPnl(position.getNetPnL())         
+                summaryItem.addRealizedPnl(position.realizedPnl)
         return summaryDict         
     
     @staticmethod
@@ -173,20 +173,29 @@ class Engine:
         oldPositionDict = {}
         position = None
         threads = []
+        previousAssetName  = None
+        position = None
         for (movement) in movementRS:
             asset = assetDict.get(movement[Constant.CONST_ASSET_NAME])
             assetName = asset.name
+            if previousAssetName is None:
+                previousAssetName = asset.name
             if(asset.assetType == 'BOND'):
                 assetName = assetName + str(movement[Constant.CONST_MOVEMENT_OID])
-            position = positionDict.get(assetName)
-            if (position is None):
-                position = Position(asset, movement)
-                if (position.isMatured):
+              
+            if position == None:
+                    position = Position(asset, movement)
+                        
+            if previousAssetName == assetName:
+                    position.addMovement(movement)
+            else:
+                if (position.isMatured or position.totalQuantity == 0):
                     oldPositionDict[assetName] = position
                 else:
                     positionDict[assetName] = position
-            else:    
-                position.addMovement(movement)
+                position = Position(asset, movement)
+                previousAssetName = asset.name
+                    
         #print(datetime.datetime.now())
         for key, position2 in positionDict.items():
             t = threading.Thread(target=position2.refreshMarketData)

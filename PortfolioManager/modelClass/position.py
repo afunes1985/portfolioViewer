@@ -105,6 +105,7 @@ class Position():
         today = datetime.datetime.now()
         if((self.maturityDate)<today):
             self.isMatured = 1
+            self.realizedPnl = self.getNetPnL()
     
     def getAssetName(self):
         return self.asset.name

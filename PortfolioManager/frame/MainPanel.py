@@ -84,6 +84,12 @@ class MainPanel(QtGui.QWidget):
             #realizedPnl
             realizedPnlItem = QTableWidgetItemDecimal(summaryItem.realizedPnl, False)
             self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_REALIZED_PNL,realizedPnlItem)
+            #positionPercentage
+            positionPercentageItem = QTableWidgetItemDecimal(summaryItem.positionPercentage, False)
+            self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_POSITION_PERCENTAGE,positionPercentageItem)
+            #weightedPnL
+            weightedPnLItem = QTableWidgetItemDecimal(summaryItem.weightedPnL, False)
+            self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_WEIGHTED_PNL,weightedPnLItem)
             self.summaryRow += 1
             
     def renderSubtotal(self, positionDict, assetType ,isSIC):  

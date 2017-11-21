@@ -12,6 +12,8 @@ class SummaryItem:
     accumulatedBuyCommissionAmount = 0
     accumulatedBuyVATCommissionAmount = 0
     realizedPnl = 0
+    positionPercentage = 0
+    weightedPnL = 0
     
     def __init__(self, position):
         self.sumPosition(position)
@@ -24,6 +26,8 @@ class SummaryItem:
         self.accumulatedBuyCommissionAmount += position.accumulatedBuyCommission
         self.accumulatedBuyVATCommissionAmount += position.accumulatedBuyVATCommission
         self.realizedPnl += position.realizedPnl
+        self.positionPercentage += position.getPositionPercentage()
+        self.weightedPnL += position.getWeightedPnl()
         
     def addRealizedPnl(self, realizedPnl):
             self.realizedPnl += realizedPnl

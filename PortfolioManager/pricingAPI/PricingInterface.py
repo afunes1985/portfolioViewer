@@ -84,7 +84,7 @@ class PricingInterfaceTradier:
         response = connection.getresponse()
         content = response.read()
         json_data = json.loads(content)
-        return Decimal(json_data['quotes']['quote']['bid']) 
+        return Decimal(json_data['quotes']['quote']['last']) 
     
     @staticmethod
     def getReferenceDataByAssetNames(assetNames):
@@ -101,18 +101,15 @@ class PricingInterfaceTradier:
         json_data = json.loads(content)
         if isinstance(json_data['quotes']['quote'], list): 
             for row in json_data['quotes']['quote']:
-                print (row['symbol'])
-                print (row['bid'])
-                print (row['change_percentage'])
                 returnRow = []
                 returnRow.append(row['symbol'])
-                returnRow.append(row['bid'])
+                returnRow.append(row['last'])
                 returnRow.append(row['change_percentage'])
                 returnList.append(returnRow)
         else:
             returnRow = []
             returnRow.append(json_data['quotes']['quote']['symbol'])
-            returnRow.append(json_data['quotes']['quote']['bid'])
+            returnRow.append(json_data['quotes']['quote']['last'])
             returnRow.append(json_data['quotes']['quote']['change_percentage'])
             returnList.append(returnRow)
         return returnList
