@@ -22,15 +22,17 @@ class MainCache:
     usdMXN = None
     totalValuatedAmount = None
     corpEventList = None
+    custodyDictOID = Engine.getCustodyDictOID()
+    corporateEventTypeOID = Engine.getCustodyDictOID()
+    
+    def __init__(self):
+        USDMXN = PricingInterface.getExchangeRateByCurrency('USD','MXN')
+        if USDMXN == 0:
+            USDMXN = 1
+        self.setUSDMXN(USDMXN)
     
     def setUSDMXN(self, usdMXN):
         self.usdMXN = Decimal(usdMXN)
     
-    def __init__(self):
-            USDMXN = PricingInterface.getExchangeRateByCurrency('USD','MXN')
-            if USDMXN == 0:
-                USDMXN = 1
-            self.setUSDMXN(USDMXN)
-        
     def setGlobalAttribute(self, positionDict):    
         self.totalValuatedAmount = Engine.getSubTotalValuatedAmount2(positionDict, 'ALL')

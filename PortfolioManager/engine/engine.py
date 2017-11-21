@@ -5,12 +5,13 @@ Created on Mar 9, 2017
 '''
 import threading
 
-from dao.dao import DaoMovement, DaoAsset, DaoCorporateEvent
+from dao.dao import DaoMovement, DaoAsset, DaoCorporateEvent, DaoCustody
 from modelClass.constant import Constant
+from modelClass.corporateEvent import CorporateEvent, Custody, \
+    CorporateEventType
 from modelClass.movement import Asset, Movement
 from modelClass.position import Position    
 from modelClass.summaryItem import SummaryItem
-from modelClass.corporateEvent import CorporateEvent
 
 
 class Engine:
@@ -164,6 +165,24 @@ class Engine:
         return assetDict 
         
     @staticmethod
+    def getCustodyDictName():
+        rs = DaoCustody().getCustodyList()
+        returnDict = {}
+        for (row) in rs:
+            obj = Custody(row)
+            returnDict[obj.name] = obj
+        return returnDict
+    
+    @staticmethod
+    def getCustodyDictOID():
+        rs = DaoCustody().getCustodyList()
+        returnDict = {}
+        for (row) in rs:
+            obj = Custody(row)
+            returnDict[obj.OID] = obj
+        return returnDict      
+    
+    @staticmethod
     def buildPositions(fromDate, toDate):
         from core.cache import Singleton, MainCache
         mainCache = Singleton(MainCache)
@@ -225,4 +244,13 @@ class Engine:
             movement = Movement(movementRow)
             movementList.append(movement)
         return movementList
+    
+    @staticmethod
+    def getCorporateEventDictOID():
+        rs = DaoCorporateEvent().getCorporateEventTypeList()
+        returnDict = {}
+        for (row) in rs:
+            obj = CorporateEventType(row)
+            returnDict[obj.OID] = obj
+        return returnDict   
             

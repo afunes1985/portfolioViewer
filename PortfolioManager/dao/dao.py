@@ -66,7 +66,6 @@ class DaoMovement():
                                                 movement.commissionPercentage, movement.commissionAmount, movement.commissionVATAmount, movement.tenor, movement.custody))
 
 class DaoAsset():
-
     def getAssetTypes(self):
         query = '''SELECT DISTINCT ASSET_TYPE
                     FROM ASSET'''
@@ -82,7 +81,7 @@ class DaoAsset():
         return resultSet  
     
     def getAssetList(self):
-        query = '''SELECT ID, ASSET_TYPE, NAME, ORIGIN_NAME, IS_SIC, IS_ONLINE_PRICE, PRICE_SOURCE FROM ASSET'''
+        query = '''SELECT ID, ASSET_TYPE, NAME, ORIGIN_NAME, IS_SIC, IS_ONLINE_PRICE, PRICE_SOURCE, DEFAULT_CUSTODY_OID FROM ASSET'''
         resultSet = DbConnector().doQuery(query, "")
         return resultSet  
         
@@ -98,23 +97,28 @@ class DaoCustody():
         return resultSet  
     
 class DaoCorporateEvent():
-        def getCorporateEventTypeList(self):
-            query = """SELECT ID, NAME FROM CORPORATE_EVENT_TYPE"""
-            resultSet = DbConnector().doQuery(query, "")
-            return resultSet  
+    @staticmethod
+    def getCorporateEventTypeList():
+        query = """SELECT ID, NAME FROM CORPORATE_EVENT_TYPE"""
+        resultSet = DbConnector().doQuery(query, "")
+        return resultSet  
+
+    @staticmethod
+    def getCorporateEventList():
+        query = """SELECT ce.id, C.NAME, CET.NAME,  A.NAME, CE.PAYMENT_DATE, CE.GROSS_AMOUNT
+                    FROM CORPORATE_EVENT CE 
+                    INNER JOIN CORPORATE_EVENT_TYPE CET ON CE.CORPORATE_EVENT_TYPE = CE.ID
+                    INNER JOIN CUSTODY C ON C.ID = CE.CUSTODY_OID
+                    INNER JOIN ASSET A ON A.ID = CE.ASSET_OID
+                order by CE.PAYMENT_DATE desc"""
+        resultSet = DbConnector().doQuery(query, "")
+        return resultSet  
+   
+    @staticmethod
+    def insert(corporateEvent):
+        insertSentence = """insert corporate_event(corporate_event_type, asset_oid, payment_date, gross_amount, custody_oid, net_amount, comment) 
+                       values (%s,%s,%s,%s,%s,%s,%s)"""
+        DbConnector().doInsert(insertSentence, (corporateEvent.corporateEventType.OID,  corporateEvent.asset.OID, corporateEvent.paymentDate, corporateEvent.grossAmount, corporateEvent.custody.OID, corporateEvent.netAmount, corporateEvent.comment))
+
+
     
-        @staticmethod
-        def getCorporateEventList():
-            query = """SELECT ce.id, C.NAME, CET.NAME,  A.NAME, CE.PAYMENT_DATE, CE.GROSS_AMOUNT
-                        FROM CORPORATE_EVENT CE 
-                        INNER JOIN CORPORATE_EVENT_TYPE CET ON CE.CORPORATE_EVENT_TYPE = CE.ID
-                        INNER JOIN CUSTODY C ON C.ID = CE.CUSTODY_OID
-                        INNER JOIN ASSET A ON A.ID = CE.ASSET_OID
-                    order by CE.PAYMENT_DATE desc"""
-            resultSet = DbConnector().doQuery(query, "")
-            return resultSet  
-    
-        def insert(self, corporateEvent):
-            insertSentence = """insert corporate_event(corporate_event_type, asset_oid, payment_date, gross_amount, custody_oid) 
-                           values (%s,%s,%s,%s,%s)"""
-            DbConnector().doInsert(insertSentence, (corporateEvent.corporateEventTypeOID,  corporateEvent.assetOID, corporateEvent.paymentDate, corporateEvent.grossAmount, corporateEvent.custody))

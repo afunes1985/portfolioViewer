@@ -3,6 +3,7 @@ Created on Mar 18, 2017
 
 @author: afunes
 '''
+
 class CorporateEvent():
     OID = None
     assetName = None
@@ -10,17 +11,47 @@ class CorporateEvent():
     asset = None
     paymentDate = None
     grossAmount = 0
-    custodyName = None
-    corporateEventTypeName = None
+    custody = None
+    corporateEventType = None
+    netAmount = 0
+    comment = None
         
     def __init__(self, corporateEventRow):
+        from core.cache import Singleton, MainCache
         if(corporateEventRow is not None):
-            self.OID = corporateEventRow[0]
-            self.custodyName = corporateEventRow[1]
-            self.corporateEventTypeName = corporateEventRow[2]
-            self.assetName = corporateEventRow[3]
-            self.paymentDate = corporateEventRow[4]
-            self.grossAmount = corporateEventRow[5]
+            mainCache = Singleton(MainCache)
+            self.setAttr(self, corporateEventRow[0], mainCache.corporateEventTypeOID[corporateEventRow[1]], corporateEventRow[2], corporateEventRow[3], corporateEventRow[4], corporateEventRow[5], corporateEventRow[6], corporateEventRow[7])
     
-    def getPaymentDate(self):
-        return self.acquisitionDate.strftime("%Y-%m-%d")
+    def setAttr(self, OID, custody, corporateEventType, asset, paymentDate, grossAmount, netAmount, comment):
+        self.OID = OID
+        self.custody = custody
+        self.corporateEventType = corporateEventType
+        self.asset = asset
+        self.paymentDate = paymentDate
+        self.grossAmount = grossAmount
+        self.netAmount = netAmount
+        self.comment = comment
+        
+class Custody():
+    OID = None
+    name = None
+    
+    def __init__(self, row):
+        if(row is not None):
+            self.setAttr(row[0], row[1])
+    
+    def setAttr(self, OID, name):
+        self.OID = OID
+        self.name = name
+
+class CorporateEventType():
+    OID = None
+    name = None
+    
+    def __init__(self, row):
+        if(row is not None):
+            self.setAttr(row[0], row[1])
+    
+    def setAttr(self, OID, name):
+        self.OID = OID
+        self.name = name
