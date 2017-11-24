@@ -40,14 +40,14 @@ class MainPanel(QtGui.QWidget):
     def createSummaryTable(self):
         self.summaryTableWidget = QTableWidget()
         self.summaryTableWidget.setRowCount(6)
-        self.summaryTableWidget.setColumnCount(len(self.summaryColumnList) +1)
+        self.summaryTableWidget.setColumnCount(len(self.summaryColumnList))
         self.summaryTableWidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.summaryTableWidget.setHorizontalHeaderLabels(self.summaryColumnList)
         #self.summaryTableWidget.setSortingEnabled(True)  
         #self.summaryTableWidget.sortItems(0)  
         self.summaryTableWidget.resizeColumnsToContents()
         self.summaryTableWidget.resizeRowsToContents()
-        self.summaryTableWidget.setFixedSize(550, 150) 
+        self.summaryTableWidget.setFixedSize(700, 150) 
         self.layout.addWidget(self.summaryTableWidget, 1, 1)
         
     def createTable(self):

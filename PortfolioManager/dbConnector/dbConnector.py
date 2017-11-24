@@ -34,8 +34,11 @@ class DbConnector():
         cnx = self.initConnection()
         cursor = cnx.cursor()
         cursor.execute(sentence,params)
+        cursor.fetchone()
+        lastRowID = cursor.lastrowid
         cnx.commit()
-        self.closeConnection(cnx);
+        self.closeConnection(cnx)
+        return lastRowID
  
     def doQuery(self, query, params):
         cnx = self.initConnection()

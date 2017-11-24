@@ -21,7 +21,7 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setWindowTitle('Portfolio Viewer')
-        self.resize(1200, 800)
+        self.resize(1300, 800)
         self.createMenu()
         self.setCentralWidget(self.createTabWidget()) 
         self.show()
