@@ -9,6 +9,7 @@ from dao.dao import DaoMovement, DaoAsset, DaoCorporateEvent, DaoCustody
 from modelClass.constant import Constant
 from modelClass.corporateEvent import CorporateEvent, Custody, \
     CorporateEventType
+from modelClass.corporateEventPosition import CorporateEventPosition
 from modelClass.movement import Asset, Movement
 from modelClass.position import Position    
 from modelClass.summaryItem import SummaryItem
@@ -17,7 +18,7 @@ from modelClass.summaryItem import SummaryItem
 class Engine:
     
     @staticmethod
-    def buildSummaryByCustody(positionDict, oldPositionDict):
+    def buildSummaryByCustody(positionDict, oldPositionDict, corporateEventPositionDict):
         summaryDict = {}
         for (positionKey, position) in positionDict.iteritems():
             summaryKey = position.custodyName + position.asset.assetType
@@ -32,6 +33,11 @@ class Engine:
             summaryItem = summaryDict.get(summaryKey)
             if (summaryItem is not None):
                 summaryItem.addRealizedPnl(position.realizedPnl)
+        for (positionKey, corporateEventPosition) in corporateEventPositionDict.iteritems():
+            summaryKey = corporateEventPosition.custody.name + corporateEventPosition.asset.assetType
+            summaryItem = summaryDict.get(summaryKey)
+            if (summaryItem is not None):
+                summaryItem.addRealizedPnl(corporateEventPosition.accNetAmount)
         return summaryDict         
     
     @staticmethod
@@ -163,6 +169,15 @@ class Engine:
             asset = Asset(assetRow)
             assetDict[asset.name] = asset
         return assetDict 
+     
+    @staticmethod
+    def getAssetDictOID():
+        assetRS = DaoAsset().getAssetList()
+        assetDict = {}
+        for (assetRow) in assetRS:
+            asset = Asset(assetRow)
+            assetDict[asset.OID] = asset
+        return assetDict  
         
     @staticmethod
     def getCustodyDictName():
@@ -190,7 +205,6 @@ class Engine:
         movementRS = DaoMovement.getMovementsByDate(fromDate, toDate)
         positionDict = {}
         oldPositionDict = {}
-        position = None
         threads = []
         previousAssetName  = None
         position = None
@@ -203,10 +217,10 @@ class Engine:
                 assetName = assetName + str(movement[Constant.CONST_MOVEMENT_OID])
               
             if position == None:
-                    position = Position(asset, movement)
+                position = Position(asset, movement)
                         
             if previousAssetName == assetName:
-                    position.addMovement(movement)
+                position.addMovement(movement)
             else:
                 if (position.isMatured or position.totalQuantity == 0):
                     oldPositionDict[assetName] = position
@@ -228,15 +242,6 @@ class Engine:
         mainCache.setGlobalAttribute(positionDict)
     
     @staticmethod
-    def getCorporateEventList(self):
-        resultList = []
-        resultSet = DaoCorporateEvent.getCorporateEventList()
-        for (row) in resultSet:
-            o = CorporateEvent(row)
-            resultList.append(o)
-        return resultList
-    
-    @staticmethod
     def getMovementListByAsset(assetName, fromDate, toDate):
         movementRS = DaoMovement.getMovementsByAsset(assetName, fromDate, toDate)
         movementList = []
@@ -246,11 +251,26 @@ class Engine:
         return movementList
     
     @staticmethod
+    def buildCorporateEventPosition():
+        from core.cache import Singleton, MainCache
+        mainCache = Singleton(MainCache)
+        resultDict = {}
+        resultSet = DaoCorporateEvent.getCorporateEventList()
+        for (row) in resultSet:
+            o = CorporateEvent(row)
+            corporateEventPosition = resultDict.get(o.asset.name)
+            if corporateEventPosition == None:
+                resultDict[o.asset.name] = CorporateEventPosition(o)
+            else:
+                corporateEventPosition.addCorporateEvent(o)
+        mainCache.corporateEventPositionDict = resultDict
+    
+    @staticmethod
     def getCorporateEventDictOID():
-        rs = DaoCorporateEvent().getCorporateEventTypeList()
+        rs = DaoCorporateEvent().getCorporateEventList()
         returnDict = {}
         for (row) in rs:
             obj = CorporateEventType(row)
             returnDict[obj.OID] = obj
-        return returnDict   
+        return returnDict
             

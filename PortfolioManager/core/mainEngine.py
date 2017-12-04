@@ -15,9 +15,12 @@ class MainEngine(object):
 
     def refreshAll(self, fromDate, toDate):
         progressBar = QtGui.QProgressDialog("Progress", "Stop", 0, 10)
+        progressBar.setLabelText("BUILD POSITION")
+        progressBar.setValue(1)
         progressBar.setWindowModality(QtCore.Qt.WindowModal)
         progressBar.setMinimumDuration(0)
         mainCache = Singleton(MainCache)
+        mainCache.refreshReferenceData()
         mainWindow = Singleton(MainWindow)
         mainWindow.clearTable()
         Engine.buildPositions(fromDate, toDate)
@@ -37,9 +40,9 @@ class MainEngine(object):
         mainWindow.renderSubtotal(mainCache.positionDict, 'ALL', 0)
         progressBar.setLabelText("CORPORATE EVENT")
         progressBar.setValue(10)
-        corpEventList = Engine.getCorporateEventList(self)
+        Engine.buildCorporateEventPosition()
         #mainWindow.renderCorpEvent(corpEventList)
         #======================================================================
-        mainCache.summaryDict = Engine.buildSummaryByCustody(mainCache.positionDict, mainCache.oldPositionDict)
+        mainCache.summaryDict = Engine.buildSummaryByCustody(mainCache.positionDict, mainCache.oldPositionDict, mainCache.corporateEventPositionDict)
         mainWindow.renderSummary(mainCache.summaryDict)
         

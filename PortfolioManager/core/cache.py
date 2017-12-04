@@ -16,14 +16,20 @@ def Singleton(klass):
 
 class MainCache:
     _instance = None
+    #DICTIONARY
     positionDict = None
     oldPositionDict = None
     summaryDict = None
+    corpEventDict = None
+    corporateEventPositionDict = None
+    #REFERENCE DATA
+    custodyDictOID = None
+    corporateEventTypeOID = None
+    assetDictOID = None
+    #COMMON VALUE
     usdMXN = None
     totalValuatedAmount = None
-    corpEventList = None
-    custodyDictOID = Engine.getCustodyDictOID()
-    corporateEventTypeOID = Engine.getCustodyDictOID()
+    
     
     def __init__(self):
         USDMXN = PricingInterface.getExchangeRateByCurrency('USD','MXN')
@@ -36,3 +42,8 @@ class MainCache:
     
     def setGlobalAttribute(self, positionDict):    
         self.totalValuatedAmount = Engine.getSubTotalValuatedAmount2(positionDict, 'ALL')
+    
+    def refreshReferenceData(self):
+        self.custodyDictOID = Engine.getCustodyDictOID()
+        self.corporateEventTypeOID = Engine.getCustodyDictOID()
+        self.assetDictOID = Engine.getAssetDictOID()

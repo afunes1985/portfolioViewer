@@ -6,8 +6,6 @@ Created on Mar 18, 2017
 
 class CorporateEvent():
     OID = None
-    assetName = None
-    assetOID = None
     asset = None
     paymentDate = None
     grossAmount = 0
@@ -20,7 +18,7 @@ class CorporateEvent():
         from core.cache import Singleton, MainCache
         if(corporateEventRow is not None):
             mainCache = Singleton(MainCache)
-            self.setAttr(self, corporateEventRow[0], mainCache.corporateEventTypeOID[corporateEventRow[1]], corporateEventRow[2], corporateEventRow[3], corporateEventRow[4], corporateEventRow[5], corporateEventRow[6], corporateEventRow[7])
+            self.setAttr(corporateEventRow[0], mainCache.custodyDictOID[corporateEventRow[1]], mainCache.corporateEventTypeOID[corporateEventRow[2]], mainCache.assetDictOID[corporateEventRow[3]], corporateEventRow[4], corporateEventRow[5], corporateEventRow[6], corporateEventRow[7])
     
     def setAttr(self, OID, custody, corporateEventType, asset, paymentDate, grossAmount, netAmount, comment):
         self.OID = OID
