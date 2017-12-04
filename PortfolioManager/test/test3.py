@@ -13,6 +13,7 @@ paymentDateValues = df['Payment date'].values
 descriptionValues = df['Description'].values
 assetNameValues = df['Asset name'].values
 amountValues = df['Amount'].values
+commentValues = df['Comment'].values
 returnList = []
 grossAmount = 0
 isrAmount = 0
@@ -26,18 +27,21 @@ for index, rfRow in enumerate(assetNameValues):
         else:
             grossAmount = float(amountValues[index])
             netAmount = round(grossAmount - isrAmount, 2)
+            comment = commentValues[index]
             paymentDate =  pandas.to_datetime(str(paymentDateValues[index])).to_pydatetime()  
             asset = assetDict[assetName]
             ce = CorporateEvent(None)
-            ce.setAttr(None, asset.defaultCustody, corporateEventTypeDictOID[1], asset, paymentDate, grossAmount, netAmount, 'TEST')
+            ce.setAttr(None, asset.defaultCustody, corporateEventTypeDictOID[1], asset, paymentDate, grossAmount, netAmount, comment)
             newID = DaoCorporateEvent.insert(ce)
             tax = Tax(None)
             tax.setAttr(None, 'CORPORATE_EVENT', newID, isrAmount)
             DaoTax.insert(tax)
-            print(newID)
-            print(isrAmount)
-            print(grossAmount)
-            print(paymentDate)
+            #print(newID)
+            print("ASSET " + assetName)
+            print("ISR " + str(isrAmount))
+            print("GROSS AMOUNT " + str(grossAmount))
+            print("NET AMOUNT " + str(netAmount))
+            print("PAYMENTDATE " + str(paymentDate))
             isrAmount = 0
             amount = 0
 
