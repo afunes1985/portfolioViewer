@@ -113,7 +113,7 @@ class DaoCorporateEvent():
    
     @staticmethod
     def insert(corporateEvent):
-        insertSentence = """insert corporate_event(corporate_event_type, asset_oid, payment_date, gross_amount, custody_oid, net_amount, comment) 
+        insertSentence = """insert corporate_event(corporate_event_type_oid, asset_oid, payment_date, gross_amount, custody_oid, net_amount, comment) 
                        values (%s,%s,%s,%s,%s,%s,%s)"""
         return DbConnector().doInsert(insertSentence, (corporateEvent.corporateEventType.OID,  corporateEvent.asset.OID, corporateEvent.paymentDate, corporateEvent.grossAmount, corporateEvent.custody.OID, corporateEvent.netAmount, corporateEvent.comment))
 
@@ -123,5 +123,16 @@ class DaoTax():
         insertSentence = """insert tax(origin_type, origin_oid, tax_amount) 
                        values (%s,%s,%s)"""
         return DbConnector().doInsert(insertSentence, (tax.originType,  tax.originOID, tax.taxAmount))
+
+class DaoPrice():
+    @staticmethod
+    def getLastPrice(assetName):
+        query = """SELECT p.last_price, p.date_
+                    FROM PRICE p
+                    INNER JOIN ASSET A ON P.ASSET_OID = A.ID
+                WHERE A.NAME = %s                  
+                order by p.DATE_ desc"""
+        resultSet = DbConnector().doQuery(query, (assetName,))
+        return resultSet 
 
     

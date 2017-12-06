@@ -9,6 +9,7 @@ import string
 import httplib
 import json
 import requests
+from dao.dao import DaoPrice
 
 
 class PricingInterface:
@@ -18,7 +19,8 @@ class PricingInterface:
         return dict({"EXCEL":PricingInterfaceExcel, 
                     "YAHOO":PricingInterfaceYahoo,
                     "TRADIER":PricingInterfaceTradier,
-                    "ALPHAVANTAGE":PricingInterfaceAlphaVantage}) 
+                    "ALPHAVANTAGE":PricingInterfaceAlphaVantage,
+                    "DB":PricingInterfaceDB}) 
         
     @staticmethod
     def getExchangeRateByCurrency(fromCurrency, toCurrency):
@@ -138,4 +140,22 @@ class PricingInterfaceExcel:
                 change = changeValues[index]
                 returnRow.append(round((((currentPrice)/(currentPrice-change)-1)*100), 2))
                 returnList.append(returnRow)
+        return returnList
+
+class PricingInterfaceDB:
+    @staticmethod
+    def getMarketPriceByAssetName(assetName):
+        return 0
+    
+    @staticmethod
+    def getReferenceDataByAssetNames(assetNames):
+        lastPriceList = DaoPrice.getLastPrice(assetNames)
+        returnList = []
+        returnRow = []
+        returnRow.append(assetNames)
+        currentPrice = lastPriceList[0][0]
+        returnRow.append(round(currentPrice,2))
+        change = 0
+        returnRow.append(round((((currentPrice)/(currentPrice-change)-1)*100), 2))
+        returnList.append(returnRow)
         return returnList

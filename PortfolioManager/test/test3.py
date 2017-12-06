@@ -4,8 +4,9 @@ from dao.dao import DaoCorporateEvent, DaoTax
 from engine.engine import Engine
 from modelClass.corporateEvent import CorporateEvent
 from modelClass.tax import Tax
-
-
+from core.cache import Singleton, MainCache
+mainCache = Singleton(MainCache)
+mainCache.refreshReferenceData()
 #df = pandas.read_excel('C://Users//afunes//iCloudDrive//PortfolioViewer//import//quotes.csv')
 df = pandas.read_excel('C://Users//afunes//iCloudDrive//PortfolioViewer//import//Import_Corporate_Event.xlsx');
 #get the values for a given column
@@ -18,7 +19,6 @@ returnList = []
 grossAmount = 0
 isrAmount = 0
 assetDict = Engine.getAssetDict()
-corporateEventTypeDictOID = Engine.getCorporateEventDictOID()
 for index, rfRow in enumerate(assetNameValues):
         paymentDate = None
         assetName = assetNameValues[index]
@@ -31,7 +31,7 @@ for index, rfRow in enumerate(assetNameValues):
             paymentDate =  pandas.to_datetime(str(paymentDateValues[index])).to_pydatetime()  
             asset = assetDict[assetName]
             ce = CorporateEvent(None)
-            ce.setAttr(None, asset.defaultCustody, corporateEventTypeDictOID[1], asset, paymentDate, grossAmount, netAmount, comment)
+            ce.setAttr(None, asset.defaultCustody, mainCache.corporateEventTypeOID[1], asset, paymentDate, grossAmount, netAmount, comment)
             newID = DaoCorporateEvent.insert(ce)
             tax = Tax(None)
             tax.setAttr(None, 'CORPORATE_EVENT', newID, isrAmount)
