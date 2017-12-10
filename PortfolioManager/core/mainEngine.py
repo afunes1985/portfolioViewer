@@ -41,8 +41,8 @@ class MainEngine(object):
         progressBar.setLabelText("CORPORATE EVENT")
         progressBar.setValue(10)
         Engine.buildCorporateEventPosition()
-        #mainWindow.renderCorpEvent(corpEventList)
+        mainWindow.renderCorpEvent(mainCache.corporateEventPositionDictAsset)
         #======================================================================
-        mainCache.summaryDict = Engine.buildSummaryByCustody(mainCache.positionDict, mainCache.oldPositionDict, mainCache.corporateEventPositionDict)
+        mainCache.summaryDict = Engine.buildSummaryByCustody(mainCache.positionDict, mainCache.oldPositionDict, mainCache.corporateEventPositionDictAsset)
         mainWindow.renderSummary(mainCache.summaryDict)
         

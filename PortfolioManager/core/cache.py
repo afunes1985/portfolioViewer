@@ -20,8 +20,7 @@ class MainCache:
     positionDict = None
     oldPositionDict = None
     summaryDict = None
-    corpEventDict = None
-    corporateEventPositionDict = None
+    corporateEventPositionDictAsset = None
     #REFERENCE DATA
     custodyDictOID = None
     corporateEventTypeOID = None
@@ -45,5 +44,5 @@ class MainCache:
     
     def refreshReferenceData(self):
         self.custodyDictOID = Engine.getCustodyDictOID()
-        self.corporateEventTypeOID = Engine.getCustodyDictOID()
+        self.corporateEventTypeOID = Engine.getCorporateEventTypeDictOID()
         self.assetDictOID = Engine.getAssetDictOID()

@@ -25,7 +25,7 @@ class CEExcelImport:
         grossAmount = 0
         isrAmount = 0
         assetDict = Engine.getAssetDict()
-        corporateEventTypeDictOID = Engine.getCorporateEventDictOID()
+        corporateEventTypeDictOID = Engine.getCorporateEventTypeDictOID()
         for index, rfRow in enumerate(assetNameValues):
                 paymentDate = None
                 assetName = assetNameValues[index]

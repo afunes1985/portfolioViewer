@@ -1,41 +1,35 @@
-from PySide import QtCore, QtGui
 import sys
 
-app = QtGui.QApplication(sys.argv)
-QtGui.qApp = app
-
-folderTree = QtGui.QTreeWidget()
-
-header = QtGui.QTreeWidgetItem(["Asset","Gross Amount"])
-folderTree.setHeaderItem(header)   #Another alternative is setHeaderLabels(["Tree","First",...])
-positionDict = {"ALFA":10, "GRUMA":10}
+from PySide.QtGui import QApplication, QTreeWidgetItem, QWidget, QTreeWidget
 
 
-root = QtGui.QTreeWidgetItem(folderTree, positionDict)
+if __name__ == '__main__':
+    app = 0
+    if QApplication.instance():
+        app = QApplication.instance()
+    else:
+        app = QApplication(sys.argv)
 
-folder1 = QtGui.QTreeWidgetItem(root, ["Interiors"])
-folder1.setData(2, QtCore.Qt.EditRole, 'Some hidden data here')    # Data set to column 2, which is not visible
+    l1 = QTreeWidgetItem(["ALFA", "100"])
+    l2 = QTreeWidgetItem(["GRUMA", "200"])
 
-folder2 = QtGui.QTreeWidgetItem(root, ["Exteriors"])
-folder2.setData(2, QtCore.Qt.EditRole, 'Some hidden data here')    # Data set to column 2, which is not visible
+    for i in range(3):
+        l1_child = QTreeWidgetItem([None, str(i*10), "Child C" + str(i)])
+        l1.addChild(l1_child)
 
-folder1_1 = QtGui.QTreeWidgetItem(folder1, ["Bathroom", "Seg was here"])
-folder1_1.setData(2, QtCore.Qt.EditRole, 'Some hidden data here')    # Data set to column 2, which is not visible
+    for j in range(2):
+        l2_child = QTreeWidgetItem([None, str(j*20), "Child CC" + str(j)])
+        l2.addChild(l2_child)
 
-folder1_2 = QtGui.QTreeWidgetItem(folder1, ["Living room", "Approved by client"])
-folder1_2.setData(2, QtCore.Qt.EditRole, 'Some hidden data here')    # Data set to column 2, which is not visible
+    w = QWidget()
+    w.resize(510, 210)
 
+    tw = QTreeWidget(w)
+    tw.resize(500, 200)
+    tw.setColumnCount(3)
+    tw.setHeaderLabels(["Asset", "Gross Amount", "Payment Date"])
+    tw.addTopLevelItem(l1)
+    tw.addTopLevelItem(l2)
 
-
-def printer( treeItem ):
-    foldername = treeItem.text(0)
-    comment = treeItem.text(1)
-    data = treeItem.text(2)
-    print foldername + ': ' + comment + ' (' + data + ')'
-
-
-folderTree.itemClicked.connect( lambda : printer( folderTree.currentItem() ) )
-
-
-folderTree.show()
-sys.exit(app.exec_())
+    w.show()
+    sys.exit(app.exec_())

@@ -10,9 +10,10 @@ class CorporateEventPosition():
     custody = None
     corporateEventType = None
     accNetAmount = 0
-    corporateEventList = []
+    corporateEventList = None
     
     def __init__(self, corporateEvent):
+        self.corporateEventList = []
         self.addCorporateEvent(corporateEvent)
         
         

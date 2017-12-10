@@ -258,16 +258,16 @@ class Engine:
         resultSet = DaoCorporateEvent.getCorporateEventList()
         for (row) in resultSet:
             o = CorporateEvent(row)
-            corporateEventPosition = resultDict.get(o.asset.name)
+            corporateEventPosition = resultDict.get(o.asset.name, None)
             if corporateEventPosition == None:
                 resultDict[o.asset.name] = CorporateEventPosition(o)
             else:
                 corporateEventPosition.addCorporateEvent(o)
-        mainCache.corporateEventPositionDict = resultDict
+        mainCache.corporateEventPositionDictAsset = resultDict
     
     @staticmethod
-    def getCorporateEventDictOID():
-        rs = DaoCorporateEvent().getCorporateEventList()
+    def getCorporateEventTypeDictOID():
+        rs = DaoCorporateEvent().getCorporateEventTypeList()
         returnDict = {}
         for (row) in rs:
             obj = CorporateEventType(row)

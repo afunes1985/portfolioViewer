@@ -80,5 +80,5 @@ class MainWindow(QtGui.QMainWindow):
     def renderSummary(self, summaryDict):  
         self.mainPanel.renderSummary(summaryDict)   
     
-    def renderCorpEvent(self, corpEventList):  
-        self.corpEventPanel.renderCorpEvent(corpEventList) 
+    def renderCorpEvent(self, corporateEventPositionDictAsset):  
+        self.corpEventPanel.renderCorpEvent(corporateEventPositionDictAsset) 
