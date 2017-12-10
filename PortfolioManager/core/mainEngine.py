@@ -45,4 +45,5 @@ class MainEngine(object):
         #======================================================================
         mainCache.summaryDict = Engine.buildSummaryByCustody(mainCache.positionDict, mainCache.oldPositionDict, mainCache.corporateEventPositionDictAsset)
         mainWindow.renderSummary(mainCache.summaryDict)
+        mainWindow.renderGeneralInfoPanel(mainCache.usdMXN)
         

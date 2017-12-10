@@ -82,3 +82,6 @@ class MainWindow(QtGui.QMainWindow):
     
     def renderCorpEvent(self, corporateEventPositionDictAsset):  
         self.corpEventPanel.renderCorpEvent(corporateEventPositionDictAsset) 
+        
+    def renderGeneralInfoPanel(self, usdMXNvalue):  
+        self.mainPanel.renderGeneralInfoPanel(usdMXNvalue) 

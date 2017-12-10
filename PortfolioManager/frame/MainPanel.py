@@ -5,7 +5,7 @@ Created on Feb 19, 2017
 '''
 
 from PySide import QtGui
-from PySide.QtGui import QTableWidget
+from PySide.QtGui import QTableWidget, QWidget, QLabel
 
 from engine.engine import Engine
 from frame.MovementFilterWidget import MovementFilterWidget
@@ -36,6 +36,7 @@ class MainPanel(QtGui.QWidget):
         self.summaryRow = 0
         self.createTable()
         self.createSummaryTable()
+        self.createGeneralInfoPanel()
     
     def createSummaryTable(self):
         self.summaryTableWidget = QTableWidget()
@@ -50,6 +51,19 @@ class MainPanel(QtGui.QWidget):
         self.summaryTableWidget.setFixedSize(700, 150) 
         self.layout.addWidget(self.summaryTableWidget, 1, 1)
         
+    def createGeneralInfoPanel(self):
+        self.generalInfoPanel = QWidget()
+        self.generalInfoLayout = QtGui.QGridLayout(self.generalInfoPanel)
+        self.lblUSDMXN = QLabel("USD/MXN")
+        self.lblUSDMXN.font()
+        self.lblUSDMXN.setFont(QtGui.QFont("MS Shell Dlg", 12, QtGui.QFont.Normal) )
+        self.generalInfoLayout.addWidget(self.lblUSDMXN, 1, 1)
+        self.lblUSDMXNValue = QLabel("0")
+        self.lblUSDMXNValue.setFont(QtGui.QFont("MS Shell Dlg", 12, QtGui.QFont.Bold) )
+        self.generalInfoLayout.addWidget(self.lblUSDMXNValue, 1, 2)
+        self.generalInfoPanel.setFixedSize(200, 50) 
+        self.layout.addWidget(self.generalInfoPanel, 1, 2)
+        
     def createTable(self):
         self.positionTableWidget = QTableWidget()
         self.positionTableWidget.setRowCount(27)
@@ -63,7 +77,11 @@ class MainPanel(QtGui.QWidget):
         self.positionTableWidget.resizeColumnsToContents()
         self.positionTableWidget.resizeRowsToContents()
         self.layout.addWidget(self.positionTableWidget, 2, 0, 3, 3)   
-        
+    
+    def renderGeneralInfoPanel(self, usdMXNvalue):
+        self.lblUSDMXNValue.setText(str(round(usdMXNvalue, 4)))
+        #self.generalInfoLayout.addWidget(self.lblUSDMXNValue, 1, 2)
+    
     def renderSummary(self, summaryDict):
         for (key, summaryItem) in sorted(summaryDict.iteritems()):
             #custodyName
