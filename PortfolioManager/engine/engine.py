@@ -206,28 +206,26 @@ class Engine:
         positionDict = {}
         oldPositionDict = {}
         threads = []
-        previousAssetName  = None
         position = None
         for (movement) in movementRS:
             asset = assetDict.get(movement[Constant.CONST_ASSET_NAME])
             assetName = asset.name
-            if previousAssetName is None:
-                previousAssetName = asset.name
             if(asset.assetType == 'BOND'):
                 assetName = assetName + str(movement[Constant.CONST_MOVEMENT_OID])
-              
+            
+            position =  oldPositionDict.get(assetName, None)
+            if position == None:
+                position = positionDict.get(assetName, None)
+            
             if position == None:
                 position = Position(asset, movement)
-                        
-            if previousAssetName == assetName:
-                position.addMovement(movement)
-            else:
                 if (position.isMatured or position.totalQuantity == 0):
                     oldPositionDict[assetName] = position
+                    positionDict.pop(assetName, None)
                 else:
                     positionDict[assetName] = position
-                position = Position(asset, movement)
-                previousAssetName = asset.name
+            else:           
+                position.addMovement(movement)
                     
         #print(datetime.datetime.now())
         for key, position2 in positionDict.items():
