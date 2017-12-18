@@ -22,7 +22,7 @@ class Position():
     realizedPnlPercentage = 0
     marketPrice = 0
     marketPriceOrig = 0
-    movementList = []
+    movementList = None
     acquisitionDate = 0
     asset = None
     tenor = 0
@@ -37,6 +37,7 @@ class Position():
         print('New position ' + self.getAssetName())
         self.acquisitionDate = movement[Constant.CONST_MOVEMENT_ACQUISITION_DATE]
         self.custodyName = movement[Constant.CONST_MOVEMENT_CUSTODY] 
+        self.movementList = []
         if (self.asset.assetType == 'BOND'):
             self.addBondMovement(movement)
         else:    
@@ -63,7 +64,14 @@ class Position():
             self.setMarketPriceOrig(Decimal(price)) 
             self.setMarketPrice(Decimal(price) * Singleton(MainCache).usdMXN)#Tal vez hay que quitar esta linea
             self.changePercentage = str(changePercentage) + '%'
-        
+    
+    def addPositionToOldPosition(self, position):
+        self.realizedPnl += position.realizedPnl
+        self.accumulatedSellCommission += position.accumulatedSellCommission
+        self.accumulatedSellVATCommission += position.accumulatedSellVATCommission
+        self.accumulatedBuyCommission += position.accumulatedBuyCommission
+        self.accumulatedBuyVATCommission += position.accumulatedBuyVATCommission
+    
     def addMovement(self, movement):   
         self.movementList.append(movement)
         quantity = movement[Constant.CONST_MOVEMENT_QUANTITY]
@@ -86,10 +94,6 @@ class Position():
         if self.totalQuantity == 0:        
             self.unitCost = 0
             self.accumulatedAmount = 0
-            self.accumulatedSellCommission = 0
-            self.accumulatedSellVATCommission = 0
-            self.accumulatedBuyCommission = 0
-            self.accumulatedBuyVATCommission = 0
         else:
             self.unitCost = self.accumulatedAmount / self.totalQuantity
         
@@ -183,7 +187,10 @@ class Position():
         return self.getGrossPnL() - self.accumulatedBuyCommission - self.accumulatedBuyVATCommission
         
     def getGrossPnLPercentage(self):
-        return (self.getValuatedAmount() / self.getInvestedAmount() -1 ) * 100
+        try:
+            return (self.getValuatedAmount() / self.getInvestedAmount() -1 ) * 100
+        except Exception as err:
+            return 0
     
     def getNetPnLPercentage(self):
         return (self.getValuatedAmount() / (self.getInvestedAmount() + self.accumulatedBuyCommission + self.accumulatedBuyVATCommission) -1 ) * 100
