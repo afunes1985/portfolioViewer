@@ -30,12 +30,6 @@ class MainCache:
     totalValuatedAmount = None
     
     
-    def __init__(self):
-        USDMXN = PricingInterface.getExchangeRateByCurrency('USD','MXN')
-        if USDMXN == 0:
-            USDMXN = 1
-        self.setUSDMXN(USDMXN)
-    
     def setUSDMXN(self, usdMXN):
         self.usdMXN = Decimal(usdMXN)
     
@@ -46,3 +40,7 @@ class MainCache:
         self.custodyDictOID = Engine.getCustodyDictOID()
         self.corporateEventTypeOID = Engine.getCorporateEventTypeDictOID()
         self.assetDictOID = Engine.getAssetDictOID()
+        USDMXN = PricingInterface.getExchangeRateByCurrency('USD','MXN')
+        if USDMXN == 0:
+            USDMXN = 1
+        self.setUSDMXN(USDMXN)
