@@ -135,4 +135,18 @@ class DaoPrice():
         resultSet = DbConnector().doQuery(query, (assetName,))
         return resultSet 
 
+class DaoCashMovement():
+    @staticmethod
+    def getCashMovement():
+        query = """SELECT ID, amount, in_out, custody_oid, date_movement 
+                        FROM cash_movement                 
+                order by date_movement desc"""
+        resultSet = DbConnector().doQuery(query, "")
+        return resultSet   
+    
+    @staticmethod
+    def insert(cashMovement):
+        insertSentence = """insert cash_movement(amount, in_out, custody_oid, movement_date, comment) 
+                       values (%s,%s,%s,%s,%s)"""
+        return DbConnector().doInsert(insertSentence, (cashMovement.amount, cashMovement.inOut, cashMovement.custody.OID, cashMovement.movementDate, cashMovement.comment))      
     

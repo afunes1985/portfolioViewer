@@ -5,7 +5,9 @@ Created on Mar 9, 2017
 '''
 import threading
 
-from dao.dao import DaoMovement, DaoAsset, DaoCorporateEvent, DaoCustody
+from dao.dao import DaoMovement, DaoAsset, DaoCorporateEvent, DaoCustody, \
+    DaoCashMovement
+from modelClass.cashMovement import CashMovement
 from modelClass.constant import Constant
 from modelClass.corporateEvent import CorporateEvent, Custody, \
     CorporateEventType
@@ -269,6 +271,15 @@ class Engine:
         returnDict = {}
         for (row) in rs:
             obj = CorporateEventType(row)
+            returnDict[obj.OID] = obj
+        return returnDict
+    
+    @staticmethod
+    def getCashMovementList():
+        rs = DaoCashMovement().getCashMovement()
+        returnDict = {}
+        for (row) in rs:
+            obj = CashMovement(row)
             returnDict[obj.OID] = obj
         return returnDict
             
