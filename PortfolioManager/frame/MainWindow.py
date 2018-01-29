@@ -51,13 +51,6 @@ class MainWindow(QtGui.QMainWindow):
             triggered=self.openCorporateEventEditor)
         self.fileMenu.addAction(self.actionOpenCorporateEventEditor)
 
-    
-    def paintEntireRow(self, row):
-        for r in range(self.mainPanel.positionTableWidget.columnCount()+1):
-            emptyCell = QTableWidgetItem()
-            emptyCell.setBackground(QtGui.QColor(204,204,204))
-            self.mainPanel.positionTableWidget.setItem(row, r, emptyCell)
-            
     def openMovementEditor(self):
         self.movementEditor = MovementEditor()
         self.movementEditor.show()
