@@ -8,7 +8,7 @@ from PySide.QtGui import QTableWidgetItem, QTabWidget
 
 from frame.CorporateEventEditor import CorporateEventEditor
 from frame.CorporateEventPanel import CorporateEventPanel
-from frame.MainPanel import MainPanel
+from frame.PositionPanel import PositionPanel
 from frame.MovementEditor import MovementEditor
 
 
@@ -37,7 +37,7 @@ class MainWindow(QtGui.QMainWindow):
         return self.corpEventPanel
         
     def createMainWidget(self):
-        self.mainPanel = MainPanel()
+        self.mainPanel = PositionPanel()
         return self.mainPanel
         
     def createMenu(self):
