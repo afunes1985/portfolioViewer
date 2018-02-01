@@ -8,11 +8,10 @@ from datetime import date
 from PySide import QtGui
 from PySide.QtGui import QLabel, QSizePolicy, QDateEdit, QPushButton
 
-from core.cache import Singleton
-
-class MovementFilterWidget(QtGui.QWidget):
-    def __init__(self):      
-        super(MovementFilterWidget, self).__init__()
+class PnLFilter(QtGui.QWidget):
+    def __init__(self, parent):      
+        super(PnLFilter, self).__init__()
+        self.parent = parent
         self.layout = QtGui.QGridLayout(self)
         #lblFromDate
         self.lblFromDate = QLabel("From Date")
@@ -45,7 +44,5 @@ class MovementFilterWidget(QtGui.QWidget):
         self.btnSubmit.clicked.connect(self.doSubmit)
     
     def doSubmit(self):
-        from core.mainEngine import MainEngine
-        mainEngine = Singleton(MainEngine)
-        mainEngine.refreshAll((self.dateFromDate.date()).toString("yyyy-M-dd"),(self.dateToDate.date()).toString("yyyy-M-dd"))
+        self.parent.doSubmit((self.dateFromDate.date()).toString("yyyy-M-dd"),(self.dateToDate.date()).toString("yyyy-M-dd"))
         

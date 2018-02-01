@@ -7,6 +7,7 @@ import threading
 
 from dao.dao import DaoMovement, DaoAsset, DaoCorporateEvent, DaoCustody, \
     DaoCashMovement
+from logicObject.PnLLO import PnLLO
 from modelClass.cashMovement import CashMovement
 from modelClass.constant import Constant
 from modelClass.corporateEvent import CorporateEvent, Custody, \
@@ -277,9 +278,16 @@ class Engine:
     @staticmethod
     def getCashMovementList():
         rs = DaoCashMovement().getCashMovement()
-        returnDict = {}
+        returnList = []
         for (row) in rs:
             obj = CashMovement(row)
-            returnDict[obj.OID] = obj
-        return returnDict
-            
+            returnList.append(obj)
+        return returnList
+       
+    @staticmethod
+    def buildPnlLogicObject(): 
+        pnlLO = PnLLO()
+        pnlLO.setCashMovement(Engine.getCashMovementList())
+        pnlLO.calculatePnl()
+        return pnlLO
+        

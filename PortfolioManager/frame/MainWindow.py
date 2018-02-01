@@ -4,18 +4,17 @@ Created on May 3, 2017
 @author: afunes
 '''
 from PySide import QtGui
-from PySide.QtGui import QTableWidgetItem, QTabWidget
+from PySide.QtGui import QTabWidget
 
 from frame.CorporateEventEditor import CorporateEventEditor
 from frame.CorporateEventPanel import CorporateEventPanel
 from frame.PositionPanel import PositionPanel
 from frame.MovementEditor import MovementEditor
+from frame.PnLPanel import PnLPanel
 
 
 class MainWindow(QtGui.QMainWindow):
     _instance = None
-    mainPanel = None
-    corpEventPanel = None
     tabPanel = None
     
     def __init__(self):
@@ -28,18 +27,23 @@ class MainWindow(QtGui.QMainWindow):
          
     def createTabWidget(self):
         self.tabPanel = QTabWidget()
-        self.tabPanel.addTab(self.createMainWidget(), "Main")
+        self.tabPanel.addTab(self.createPositionPanel(), "Position")
         self.tabPanel.addTab(self.createCorporateEventPanel(), "Corporate Event")
+        self.tabPanel.addTab(self.createPnLPanel(), "PnL")
         return self.tabPanel
     
     def createCorporateEventPanel(self):
         self.corpEventPanel = CorporateEventPanel()
         return self.corpEventPanel
         
-    def createMainWidget(self):
-        self.mainPanel = PositionPanel()
-        return self.mainPanel
+    def createPositionPanel(self):
+        self.positionPanel = PositionPanel()
+        return self.positionPanel
         
+    def createPnLPanel(self):
+        self.pnLPanel = PnLPanel()
+        return self.pnLPanel
+    
     def createMenu(self):
         self.fileMenu = self.menuBar().addMenu("&Add")
         self.actionOpenMovementEditor = QtGui.QAction("&Add movement", self, checkable=True,
@@ -60,21 +64,21 @@ class MainWindow(QtGui.QMainWindow):
         self.corporateEditor.show()
     
     def clearTable(self):
-        self.mainPanel.clearTables()
+        self.positionPanel.clearTables()
 
     ################################### RENDERS #########################################
 
     def renderSubtotal(self, positionDict, assetType ,isSIC):
-        self.mainPanel.renderSubtotal(positionDict, assetType, isSIC)
+        self.positionPanel.renderSubtotal(positionDict, assetType, isSIC)
     
     def renderPositions(self, positionDict, assetType ,isSIC):  
-        self.mainPanel.renderPositions(positionDict, assetType, isSIC) 
+        self.positionPanel.renderPositions(positionDict, assetType, isSIC) 
         
     def renderSummary(self, summaryDict):  
-        self.mainPanel.renderSummary(summaryDict)   
+        self.positionPanel.renderSummary(summaryDict)   
     
     def renderCorpEvent(self, corporateEventPositionDictAsset):  
         self.corpEventPanel.renderCorpEvent(corporateEventPositionDictAsset) 
         
     def renderGeneralInfoPanel(self, usdMXNvalue):  
-        self.mainPanel.renderGeneralInfoPanel(usdMXNvalue) 
+        self.positionPanel.renderGeneralInfoPanel(usdMXNvalue) 

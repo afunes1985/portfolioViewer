@@ -138,9 +138,9 @@ class DaoPrice():
 class DaoCashMovement():
     @staticmethod
     def getCashMovement():
-        query = """SELECT ID, amount, in_out, custody_oid, date_movement 
+        query = """SELECT ID, amount, in_out, custody_oid, movement_date, comment
                         FROM cash_movement                 
-                order by date_movement desc"""
+                order by movement_date desc"""
         resultSet = DbConnector().doQuery(query, "")
         return resultSet   
     
