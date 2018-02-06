@@ -20,7 +20,7 @@ class MovementView(QWidget):
         self.layout = QtGui.QGridLayout(self)
         self.positionTableWidget = QTableWidget()
         self.resize(800, 400)
-        self.positionTableWidget.setRowCount(15)
+        self.positionTableWidget.setRowCount(10000)
         self.positionTableWidget.setColumnCount(len(self.columnList))
         self.positionTableWidget.setHorizontalHeaderLabels(self.columnList)
         self.positionTableWidget.resizeColumnsToContents()
@@ -28,6 +28,7 @@ class MovementView(QWidget):
         self.layout.addWidget(self.positionTableWidget, 1, 0)   
         for (movement) in movementList:
             self.renderMovements(movement)
+        self.positionTableWidget.setRowCount(self.row)
         
     def renderMovements(self, movement):
         #assetName
@@ -60,4 +61,5 @@ class MovementView(QWidget):
         #commissionVATAmount
         commissionVATAmountItem = QTableWidgetItem6Decimal(movement.commissionVATAmount, False)
         self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_COMMISSION_VAT_AMOUNT,commissionVATAmountItem)
-        self.row +=1 
+        self.row +=1
+        
