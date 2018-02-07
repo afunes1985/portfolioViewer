@@ -41,6 +41,18 @@ class Engine:
             summaryItem = summaryDict.get(summaryKey)
             if (summaryItem is not None):
                 summaryItem.addRealizedPnl(corporateEventPosition.accNetAmount)
+        
+        summaryItem = SummaryItem(None)
+        for (summaryKey, summary) in summaryDict.iteritems():
+            summaryItem.valuatedAmount += summary.valuatedAmount
+            summaryItem.investedAmount += summary.investedAmount 
+            summaryItem.accumulatedBuyCommissionAmount += summary.accumulatedBuyCommissionAmount
+            summaryItem.accumulatedBuyVATCommissionAmount += summary.accumulatedBuyVATCommissionAmount
+            summaryItem.realizedPnl += summary.realizedPnl
+            summaryItem.positionPercentage += summary.positionPercentage
+            summaryItem.weightedPnL += summary.weightedPnL
+            summaryItem.subTotalNetPNL += summary.subTotalNetPNL
+        summaryDict["SUMMARY"] = summaryItem  
         return summaryDict         
     
     @staticmethod

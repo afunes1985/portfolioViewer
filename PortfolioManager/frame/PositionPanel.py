@@ -24,7 +24,7 @@ class PositionPanel(QtGui.QWidget):
     row = 0
     summaryRow = 0
     positionColumnList = "Asset Name;Position;Unit Cost;Market Price;Change%;Invested amount;Valuated amount;Tenor;Maturity Date;Gross PNL;Net PNL;Gross%PNL;Net%PNL;Realized Pnl;%Portfolio;WeightedPNL%".split(";");
-    summaryColumnList = "Custody;Asset type;Invested Amount;Valuated Amount;Net%PNL;Realized Pnl;%Portfolio;WeightedPNL%".split(";");
+    summaryColumnList = "Custody;Asset type;Invested Amount;Valuated Amount;Net PnL;Net%PNL;Realized Pnl;%Portfolio;WeightedPNL%".split(";");
     def __init__(self): 
         super(self.__class__, self).__init__()
         self.layout = QtGui.QGridLayout(self)
@@ -48,7 +48,7 @@ class PositionPanel(QtGui.QWidget):
         #self.summaryTableWidget.sortItems(0)  
         self.summaryTableWidget.resizeColumnsToContents()
         self.summaryTableWidget.resizeRowsToContents()
-        self.summaryTableWidget.setFixedSize(700, 150) 
+        self.summaryTableWidget.setFixedSize(750, 170) 
         self.layout.addWidget(self.summaryTableWidget, 1, 1)
         
     def createGeneralInfoPanel(self):
@@ -96,6 +96,9 @@ class PositionPanel(QtGui.QWidget):
             #valuatedAmount
             valuatedAmountItem = QTableWidgetItemDecimal(summaryItem.valuatedAmount, False)
             self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_VALUATED_AMOUNT,valuatedAmountItem)
+            #subTotalNetPnL
+            subTotalNetPnLItem = QTableWidgetItemDecimal(summaryItem.subTotalNetPNL, False)
+            self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_SUBTOTAL_NET_PNL,subTotalNetPnLItem)
             #netPNLPercentage
             netPNLPercentageItem = QTableWidgetItemDecimal(summaryItem.getNetPnLPercentage(), False)
             self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_NET_PNL_PERCENTAGE,netPNLPercentageItem)
