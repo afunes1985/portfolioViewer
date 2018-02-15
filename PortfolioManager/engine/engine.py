@@ -24,7 +24,7 @@ class Engine:
     def buildSummaryByCustody(positionDict, oldPositionDict, corporateEventPositionDict):
         summaryDict = {}
         for (positionKey, position) in positionDict.iteritems():
-            summaryKey = position.custodyName + position.asset.assetType
+            summaryKey = position.custody.name + position.asset.assetType
             summaryItem = summaryDict.get(summaryKey)
             if (summaryItem == None):
                 summaryItem = SummaryItem(position)
@@ -32,7 +32,7 @@ class Engine:
             else:
                 summaryItem.sumPosition(position) 
         for (positionKey, position) in oldPositionDict.iteritems():
-            summaryKey = position.custodyName + position.asset.assetType
+            summaryKey = position.custody.name + position.asset.assetType
             summaryItem = summaryDict.get(summaryKey)
             if (summaryItem is not None):
                 summaryItem.addRealizedPnl(position.realizedPnl)
@@ -120,6 +120,14 @@ class Engine:
         return subTotalValuatedAmount
     
     @staticmethod
+    def getSubTotalValuatedAmountByCustodyOID(positionDict, custodyOID):
+        subTotalValuatedAmount = 0
+        positionList = Engine.getPositionByCustodyOID(positionDict, custodyOID)
+        for position in positionList:
+            subTotalValuatedAmount += position.getValuatedAmount()
+        return subTotalValuatedAmount
+    
+    @staticmethod
     def getAccBuyCommissionAmount(positionDict, assetType ,isSIC):
         accBuyCommissionAmount = 0
         positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
@@ -150,6 +158,14 @@ class Engine:
         positionList = []
         for key, position in positionDict.items():
             if assetType == 'ALL' or (position.asset.assetType == assetType and position.asset.isSIC == isSIC):
+                positionList.append(position)
+        return positionList
+    
+    @staticmethod
+    def getPositionByCustodyOID(positionDict, custodyOID):
+        positionList = []
+        for key, position in positionDict.items():
+            if position.custody.OID == custodyOID or custodyOID is None:
                 positionList.append(position)
         return positionList
     
@@ -300,6 +316,6 @@ class Engine:
     def buildPnlLogicObject(): 
         pnlLO = PnLLO()
         pnlLO.setCashMovement(Engine.getCashMovementList())
-        pnlLO.calculatePnl()
-        return pnlLO
+        pnlCalculationList = pnlLO.calculatePnL()
+        return pnlCalculationList
         

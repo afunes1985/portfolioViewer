@@ -39,37 +39,40 @@ class PnLPanel(QtGui.QWidget):
         return self.pnLTableWidget 
         
     def doSubmit(self, fromDate, toDate):
-        pnlLO = Engine.buildPnlLogicObject()
-        self.renderPnlTable(pnlLO)
+        pnlCalculationList = Engine.buildPnlLogicObject()
+        self.renderPnlTable(pnlCalculationList)
     
-    def renderPnlTable(self, pnlLO):
-        #initialPositionItem
-        initialPositionItem = QTableWidgetItemDecimal(pnlLO.initialPosition, False)
-        self.pnLTableWidget.setItem(0,Constant.CONST_COLUMN_PNL_INITIAL_POSITION,initialPositionItem)
-        #finalPositionItem
-        finalPositionItem = QTableWidgetItemDecimal(pnlLO.finalPosition, False)
-        self.pnLTableWidget.setItem(0,Constant.CONST_COLUMN_PNL_FINAL_POSITION,finalPositionItem)
-        #totalCashIn
-        totalCashInItem = QTableWidgetItemDecimal(pnlLO.totalCashIn, False)
-        self.pnLTableWidget.setItem(0,Constant.CONST_COLUMN_PNL_CASH_IN,totalCashInItem)
-        #totalWeightedCashIn
-        totalWeightedCashInItem = QTableWidgetItemDecimal(pnlLO.totalWeightedCashIn, False)
-        self.pnLTableWidget.setItem(0,Constant.CONST_COLUMN_PNL_WEIGHTED_CASH_IN,totalWeightedCashInItem)
-        #totalCashOut
-        totalCashOutItem = QTableWidgetItemDecimal(pnlLO.totalCashOut, False)
-        self.pnLTableWidget.setItem(0,Constant.CONST_COLUMN_PNL_CASH_OUT,totalCashOutItem)
-        #totalWeightedCashOut
-        totalWeightedCashOutItem = QTableWidgetItemDecimal(pnlLO.totalWeightedCashOut, False)
-        self.pnLTableWidget.setItem(0,Constant.CONST_COLUMN_PNL_WEIGHTED_CASH_OUT,totalWeightedCashOutItem)
-        #pnlAmount
-        pnlAmountItem = QTableWidgetItemDecimal(pnlLO.pnlAmount, False)
-        self.pnLTableWidget.setItem(0,Constant.CONST_COLUMN_PNL_PNL_AMOUNT,pnlAmountItem)
-        #pnlWeightedAmount
-        pnlWeightedAmountItem = QTableWidgetItemDecimal(pnlLO.pnlWeightedAmount, False)
-        self.pnLTableWidget.setItem(0,Constant.CONST_COLUMN_PNL_WEIGHTED_PNL_AMOUNT,pnlWeightedAmountItem)
-        #tir
-        tirItem = QTableWidgetItemDecimal(pnlLO.tir, False)
-        self.pnLTableWidget.setItem(0,Constant.CONST_COLUMN_PNL_TIR,tirItem)
-        #weightedtir
-        weightedTirItem = QTableWidgetItemDecimal(pnlLO.weightedTir, False)
-        self.pnLTableWidget.setItem(0,Constant.CONST_COLUMN_PNL_WEIGHTED_TIR,weightedTirItem)
+    def renderPnlTable(self, pnlCalculationList):
+        row = 0
+        for pnlVO in pnlCalculationList:
+            #initialPositionItem
+            initialPositionItem = QTableWidgetItemDecimal(pnlVO.initialPosition, False)
+            self.pnLTableWidget.setItem(row,Constant.CONST_COLUMN_PNL_INITIAL_POSITION,initialPositionItem)
+            #finalPositionItem
+            finalPositionItem = QTableWidgetItemDecimal(pnlVO.finalPosition, False)
+            self.pnLTableWidget.setItem(row,Constant.CONST_COLUMN_PNL_FINAL_POSITION,finalPositionItem)
+            #totalCashIn
+            totalCashInItem = QTableWidgetItemDecimal(pnlVO.totalCashIn, False)
+            self.pnLTableWidget.setItem(row,Constant.CONST_COLUMN_PNL_CASH_IN,totalCashInItem)
+            #totalWeightedCashIn
+            totalWeightedCashInItem = QTableWidgetItemDecimal(pnlVO.totalWeightedCashIn, False)
+            self.pnLTableWidget.setItem(row,Constant.CONST_COLUMN_PNL_WEIGHTED_CASH_IN,totalWeightedCashInItem)
+            #totalCashOut
+            totalCashOutItem = QTableWidgetItemDecimal(pnlVO.totalCashOut, False)
+            self.pnLTableWidget.setItem(row,Constant.CONST_COLUMN_PNL_CASH_OUT,totalCashOutItem)
+            #totalWeightedCashOut
+            totalWeightedCashOutItem = QTableWidgetItemDecimal(pnlVO.totalWeightedCashOut, False)
+            self.pnLTableWidget.setItem(row,Constant.CONST_COLUMN_PNL_WEIGHTED_CASH_OUT,totalWeightedCashOutItem)
+            #pnlAmount
+            pnlAmountItem = QTableWidgetItemDecimal(pnlVO.pnlAmount, False)
+            self.pnLTableWidget.setItem(row,Constant.CONST_COLUMN_PNL_PNL_AMOUNT,pnlAmountItem)
+            #pnlWeightedAmount
+            pnlWeightedAmountItem = QTableWidgetItemDecimal(pnlVO.pnlWeightedAmount, False)
+            self.pnLTableWidget.setItem(row,Constant.CONST_COLUMN_PNL_WEIGHTED_PNL_AMOUNT,pnlWeightedAmountItem)
+            #tir
+            tirItem = QTableWidgetItemDecimal(pnlVO.tir, False)
+            self.pnLTableWidget.setItem(row,Constant.CONST_COLUMN_PNL_TIR,tirItem)
+            #weightedtir
+            weightedTirItem = QTableWidgetItemDecimal(pnlVO.weightedTir, False)
+            self.pnLTableWidget.setItem(row,Constant.CONST_COLUMN_PNL_WEIGHTED_TIR,weightedTirItem)
+            row += 1

@@ -20,7 +20,7 @@ class SummaryItem:
             self.sumPosition(position)
         
     def sumPosition(self, position):    
-        self.custodyName = position.custodyName
+        self.custodyName = position.custody.name
         self.assetType = position.asset.assetType
         self.valuatedAmount += position.getValuatedAmount()
         self.investedAmount += position.getInvestedAmount()  

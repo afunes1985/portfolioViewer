@@ -27,16 +27,16 @@ class Position():
     asset = None
     tenor = 0
     row = 0
-    custodyName = None
     isMatured = 0
     maturityDate = None
     changePercentage = None
     
     def __init__(self, asset, movement):
+        from core.cache import MainCache, Singleton
         self.asset = asset
         print('New position ' + self.getAssetName())
+        self.custody = Singleton(MainCache).custodyDictOID[movement[Constant.CONST_MOVEMENT_CUSTODY_OID]]
         self.acquisitionDate = movement[Constant.CONST_MOVEMENT_ACQUISITION_DATE]
-        self.custodyName = movement[Constant.CONST_MOVEMENT_CUSTODY] 
         self.movementList = []
         if (self.asset.assetType == 'BOND'):
             self.addBondMovement(movement)

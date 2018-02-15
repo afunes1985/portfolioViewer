@@ -23,7 +23,7 @@ class DaoMovement():
                     m.COMMISSION_AMOUNT, 
                     m.COMMISSION_IVA_AMOUNT, 
                     m.TENOR,
-                    c.NAME  
+                    c.ID  
                     FROM movement as m 
                         inner join asset as a on m.asset_oid = a.id 
                         inner join custody as c on c.ID = m.CUSTODY_OID
