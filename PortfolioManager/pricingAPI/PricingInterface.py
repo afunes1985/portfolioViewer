@@ -25,7 +25,7 @@ class PricingInterface:
     @staticmethod
     def getExchangeRateByCurrency(fromCurrency, toCurrency):
         try:
-            return PricingInterface.getPriceInterfacesDict()["ALPHAVANTAGE"].getExchangeRateByCurrency(fromCurrency, toCurrency)
+            return PricingInterface.getPriceInterfacesDict()["EXCEL"].getExchangeRateByCurrency(fromCurrency, toCurrency)
         except Exception as e:
             logging.warning(e)
             return 0
@@ -69,7 +69,8 @@ class PricingInterfaceAlphaVantage:
     def getExchangeRateByCurrency(fromCurrency, toCurrency):
         result = requests.get('https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency='+fromCurrency+'&to_currency='+toCurrency+'&apikey=Z09WI322376KBA3P')
         json_data = json.loads(result.text)
-        return Decimal(json_data['Realtime Currency Exchange Rate']['5. Exchange Rate'])
+        return Decimal(18.60)
+        #return Decimal(json_data['Realtime Currency Exchange Rate']['5. Exchange Rate'])
     
     
     
@@ -117,6 +118,23 @@ class PricingInterfaceTradier:
         return returnList
     
 class PricingInterfaceExcel:
+    
+    @staticmethod
+    def getExchangeRateByCurrency(fromCurrency, toCurrency):
+        import pandas
+        #df = pandas.read_excel('C://Users//afunes//iCloudDrive//PortfolioViewer//import//quotes.csv')
+        df = pandas.read_csv('C://Users//afunes//iCloudDrive//PortfolioViewer//import//quotes.csv');
+        #get the values for a given column
+        symbolValues = df['Symbol'].values
+        curPriceValues = df['Current Price'].values
+        #changeValues = df['Change'].values
+        for index, rfRow in enumerate(symbolValues):
+            if 'MXN=X' == rfRow:
+                currentPrice = curPriceValues[index]
+                #change = changeValues[index]
+                #returnRow.append(round((((currentPrice)/(currentPrice-change)-1)*100), 2))
+                return round(currentPrice,2)
+    
     @staticmethod
     def getMarketPriceByAssetName(assetName):
         return 0
