@@ -6,7 +6,9 @@ Created on 5 jun. 2017
 from datetime import date
 
 from PySide import QtGui
+from PySide.QtCore import QDate
 from PySide.QtGui import QLabel, QSizePolicy, QDateEdit, QPushButton
+
 
 class PnLFilter(QtGui.QWidget):
     def __init__(self, parent):      
@@ -20,7 +22,7 @@ class PnLFilter(QtGui.QWidget):
         #dateFromDate
         self.dateFromDate = QDateEdit(self)
         self.dateFromDate.setDisplayFormat("dd-MM-yyyy")
-        self.dateFromDate.setDate(date(2001, 7, 14))
+        self.dateFromDate.setDate(date(2017, 1, 1))
         self.dateFromDate.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
         self.layout.addWidget(self.dateFromDate, 1, 1)
         #lblToDate
@@ -30,7 +32,7 @@ class PnLFilter(QtGui.QWidget):
         #dateToDate
         self.dateToDate = QDateEdit(self)
         self.dateToDate.setDisplayFormat("dd-MM-yyyy")
-        self.dateToDate.setDate(date(2020, 7, 14))
+        self.dateToDate.setDate(QDate.currentDate())
         self.dateToDate.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
         self.layout.addWidget(self.dateToDate, 2, 1)
         #btnSubmit
@@ -44,5 +46,5 @@ class PnLFilter(QtGui.QWidget):
         self.btnSubmit.clicked.connect(self.doSubmit)
     
     def doSubmit(self):
-        self.parent.doSubmit((self.dateFromDate.date()).toString("yyyy-M-dd"),(self.dateToDate.date()).toString("yyyy-M-dd"))
+        self.parent.doSubmit(self.dateFromDate.date(),self.dateToDate.date())
         

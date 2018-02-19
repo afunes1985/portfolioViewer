@@ -17,3 +17,4 @@ class PnLVO():
         self.pnlWeightedAmount =  None
         self.tir = None
         self.weightedTir = None
+        self.itemName = None

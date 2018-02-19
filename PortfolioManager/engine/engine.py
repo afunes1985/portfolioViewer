@@ -313,9 +313,9 @@ class Engine:
         return returnList
        
     @staticmethod
-    def buildPnlLogicObject(): 
+    def buildPnlLogicObject(fromDate, toDate): 
         pnlLO = PnLLO()
         pnlLO.setCashMovement(Engine.getCashMovementList())
-        pnlCalculationList = pnlLO.calculatePnL()
-        return pnlCalculationList
+        pnlLO.setPnlVOlist(pnlLO.calculatePnL(fromDate, toDate))
+        return pnlLO
         

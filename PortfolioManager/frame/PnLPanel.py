@@ -8,13 +8,13 @@ from PySide.QtGui import QTableWidget
 
 from engine.engine import Engine
 from frame.PnLFilter import PnLFilter
-from frame.framework import QTableWidgetItemDecimal
+from frame.framework import QTableWidgetItemDecimal, QTableWidgetItemString
 from modelClass.constant import Constant
 
 
 class PnLPanel(QtGui.QWidget):
     
-    pnLColumnList = "Initial Position;Final Position;Cash In;Weighted Cash In; Cash Out;Weighted Cash Out;PnL;Weighted PnL;TIR;Weighted TIR".split(";");
+    pnLColumnList = "Custody Name;Initial Position;Final Position;Cash In;Weighted Cash In; Cash Out;Weighted Cash Out;PnL;Weighted PnL;TIR;Weighted TIR".split(";");
     
     def __init__(self): 
         super(self.__class__, self).__init__()
@@ -39,12 +39,15 @@ class PnLPanel(QtGui.QWidget):
         return self.pnLTableWidget 
         
     def doSubmit(self, fromDate, toDate):
-        pnlCalculationList = Engine.buildPnlLogicObject()
-        self.renderPnlTable(pnlCalculationList)
+        pnlLO = Engine.buildPnlLogicObject(fromDate, toDate)
+        self.renderPnlTable(pnlLO.pnlVOList)
     
     def renderPnlTable(self, pnlCalculationList):
         row = 0
         for pnlVO in pnlCalculationList:
+            #ItemNameItem
+            ItemNameItem = QTableWidgetItemString(pnlVO.itemName, False)
+            self.pnLTableWidget.setItem(row,Constant.CONST_COLUMN_PNL_ITEM_NAME,ItemNameItem)
             #initialPositionItem
             initialPositionItem = QTableWidgetItemDecimal(pnlVO.initialPosition, False)
             self.pnLTableWidget.setItem(row,Constant.CONST_COLUMN_PNL_INITIAL_POSITION,initialPositionItem)
