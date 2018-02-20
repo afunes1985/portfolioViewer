@@ -3,22 +3,35 @@ Created on Jun 4, 2017
 
 @author: afunes
 '''
+from modelClass.position import Position
 class SummaryItem:
-    custodyName = None
-    assetType = None
-    valuatedAmount = 0
-    investedAmount = 0
-    accumulatedBuyCommissionAmount = 0
-    accumulatedBuyVATCommissionAmount = 0
-    realizedPnl = 0
-    positionPercentage = 0
-    weightedPnL = 0
-    subTotalNetPNL = 0
+
+    def __init__(self, obj):
+        self.custodyName = None
+        self.assetType = None
+        self.valuatedAmount = 0
+        self.investedAmount = 0
+        self.accumulatedBuyCommissionAmount = 0
+        self.accumulatedBuyVATCommissionAmount = 0
+        self.realizedPnl = 0
+        self.positionPercentage = 0
+        self.weightedPnL = 0
+        self.netPnL = 0
+        if isinstance(obj, Position):
+            self.sumPosition(obj)
+        elif isinstance(obj, SummaryItem):
+            self.sumSubTotal(obj)
     
-    def __init__(self, position):
-        if position is not None:
-            self.sumPosition(position)
-        
+    def sumSubTotal(self, summaryItem):
+        self.valuatedAmount += summaryItem.valuatedAmount
+        self.investedAmount += summaryItem.investedAmount 
+        self.accumulatedBuyCommissionAmount += summaryItem.accumulatedBuyCommissionAmount
+        self.accumulatedBuyVATCommissionAmount += summaryItem.accumulatedBuyVATCommissionAmount
+        self.realizedPnl += summaryItem.realizedPnl
+        self.positionPercentage += summaryItem.positionPercentage
+        self.weightedPnL += summaryItem.weightedPnL
+        self.netPnL += summaryItem.netPnL
+    
     def sumPosition(self, position):    
         self.custodyName = position.custody.name
         self.assetType = position.asset.assetType
@@ -29,7 +42,7 @@ class SummaryItem:
         self.realizedPnl += position.realizedPnl
         self.positionPercentage += position.getPositionPercentage()
         self.weightedPnL += position.getWeightedPnl()
-        self.subTotalNetPNL += position.getNetPnL()
+        self.netPnL += position.getNetPnL()
         
     def addRealizedPnl(self, realizedPnl):
             self.realizedPnl += realizedPnl

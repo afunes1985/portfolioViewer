@@ -40,7 +40,7 @@ class PositionPanel(QtGui.QWidget):
     
     def createSummaryTable(self):
         self.summaryTableWidget = QTableWidget()
-        self.summaryTableWidget.setRowCount(6)
+        self.summaryTableWidget.setRowCount(7)
         self.summaryTableWidget.setColumnCount(len(self.summaryColumnList))
         self.summaryTableWidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.summaryTableWidget.setHorizontalHeaderLabels(self.summaryColumnList)
@@ -48,7 +48,7 @@ class PositionPanel(QtGui.QWidget):
         #self.summaryTableWidget.sortItems(0)  
         self.summaryTableWidget.resizeColumnsToContents()
         self.summaryTableWidget.resizeRowsToContents()
-        self.summaryTableWidget.setFixedSize(750, 170) 
+        self.summaryTableWidget.setFixedSize(750, 200) 
         self.layout.addWidget(self.summaryTableWidget, 1, 1)
         
     def createGeneralInfoPanel(self):
@@ -84,32 +84,36 @@ class PositionPanel(QtGui.QWidget):
     
     def renderSummary(self, summaryDict):
         for (key, summaryItem) in sorted(summaryDict.iteritems()):
+            if summaryItem.custodyName is None:
+                isBold = True
+            else:
+                isBold = False
             #custodyName
-            custodyNameItem = QTableWidgetItemString(summaryItem.custodyName, False)
+            custodyNameItem = QTableWidgetItemString(summaryItem.custodyName, isBold)
             self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_CUSTODY_NAME,custodyNameItem)
             #assetTypeName
-            assetTypeNameItem = QTableWidgetItemString(summaryItem.assetType, False)
+            assetTypeNameItem = QTableWidgetItemString(summaryItem.assetType, isBold)
             self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_ASSET_TYPE_NAME,assetTypeNameItem)
             #InvestedAmount
-            investedAmountItem = QTableWidgetItemDecimal(summaryItem.investedAmount, False)
+            investedAmountItem = QTableWidgetItemDecimal(summaryItem.investedAmount, isBold)
             self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_INVESTED_AMOUNT,investedAmountItem)
             #valuatedAmount
-            valuatedAmountItem = QTableWidgetItemDecimal(summaryItem.valuatedAmount, False)
+            valuatedAmountItem = QTableWidgetItemDecimal(summaryItem.valuatedAmount, isBold)
             self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_VALUATED_AMOUNT,valuatedAmountItem)
             #subTotalNetPnL
-            subTotalNetPnLItem = QTableWidgetItemDecimal(summaryItem.subTotalNetPNL, False)
-            self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_SUBTOTAL_NET_PNL,subTotalNetPnLItem)
+            netPnLItem = QTableWidgetItemDecimal(summaryItem.netPnL, isBold)
+            self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_NET_PNL,netPnLItem)
             #netPNLPercentage
-            netPNLPercentageItem = QTableWidgetItemDecimal(summaryItem.getNetPnLPercentage(), False)
+            netPNLPercentageItem = QTableWidgetItemDecimal(summaryItem.getNetPnLPercentage(), isBold)
             self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_NET_PNL_PERCENTAGE,netPNLPercentageItem)
             #realizedPnl
-            realizedPnlItem = QTableWidgetItemDecimal(summaryItem.realizedPnl, False)
+            realizedPnlItem = QTableWidgetItemDecimal(summaryItem.realizedPnl, isBold)
             self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_REALIZED_PNL,realizedPnlItem)
             #positionPercentage
-            positionPercentageItem = QTableWidgetItemDecimal(summaryItem.positionPercentage, False)
+            positionPercentageItem = QTableWidgetItemDecimal(summaryItem.positionPercentage, isBold)
             self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_POSITION_PERCENTAGE,positionPercentageItem)
             #weightedPnL
-            weightedPnLItem = QTableWidgetItemDecimal(summaryItem.weightedPnL, False)
+            weightedPnLItem = QTableWidgetItemDecimal(summaryItem.weightedPnL, isBold)
             self.summaryTableWidget.setItem(self.summaryRow,Constant.CONST_COLUMN_SUMMARY_CUST_WEIGHTED_PNL,weightedPnLItem)
             self.summaryRow += 1
             

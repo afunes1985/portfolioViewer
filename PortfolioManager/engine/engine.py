@@ -23,6 +23,7 @@ class Engine:
     @staticmethod
     def buildSummaryByCustody(positionDict, oldPositionDict, corporateEventPositionDict):
         summaryDict = {}
+        #Positions
         for (positionKey, position) in positionDict.iteritems():
             summaryKey = position.custody.name + position.asset.assetType
             summaryItem = summaryDict.get(summaryKey)
@@ -30,29 +31,36 @@ class Engine:
                 summaryItem = SummaryItem(position)
                 summaryDict[summaryKey] = summaryItem
             else:
-                summaryItem.sumPosition(position) 
+                summaryItem.sumPosition(position)
+        #Old positions 
         for (positionKey, position) in oldPositionDict.iteritems():
             summaryKey = position.custody.name + position.asset.assetType
             summaryItem = summaryDict.get(summaryKey)
-            if (summaryItem is not None):
-                summaryItem.addRealizedPnl(position.realizedPnl)
+            summaryItem.addRealizedPnl(position.realizedPnl)
+        #Corporate event        
         for (positionKey, corporateEventPosition) in corporateEventPositionDict.iteritems():
             summaryKey = corporateEventPosition.custody.name + corporateEventPosition.asset.assetType
             summaryItem = summaryDict.get(summaryKey)
-            if (summaryItem is not None):
-                summaryItem.addRealizedPnl(corporateEventPosition.accNetAmount)
+            summaryItem.addRealizedPnl(corporateEventPosition.accNetAmount)
+        #Sub Total
+        subTotalSummary = {}
+        for (sumKey, summaryItem) in summaryDict.iteritems():
+            summaryKey = summaryItem.custodyName+"Z"
+            subTotalSummaryItem = subTotalSummary.get(summaryKey)
+            if (subTotalSummaryItem is None):
+                subTotalSummaryItem = SummaryItem(summaryItem)
+                subTotalSummary[summaryKey] = subTotalSummaryItem
+            else:
+                subTotalSummaryItem.sumSubTotal(summaryItem)
+        #Grand total
+        grandTotalSummaryItem = SummaryItem(None)
+        for (summaryKey, summaryItem) in summaryDict.iteritems():
+            grandTotalSummaryItem.sumSubTotal(summaryItem)
+        summaryDict["TOTAL"] = grandTotalSummaryItem  
+        #Merge
+        summaryDict.update(subTotalSummary)
+        sorted(summaryDict)
         
-        summaryItem = SummaryItem(None)
-        for (summaryKey, summary) in summaryDict.iteritems():
-            summaryItem.valuatedAmount += summary.valuatedAmount
-            summaryItem.investedAmount += summary.investedAmount 
-            summaryItem.accumulatedBuyCommissionAmount += summary.accumulatedBuyCommissionAmount
-            summaryItem.accumulatedBuyVATCommissionAmount += summary.accumulatedBuyVATCommissionAmount
-            summaryItem.realizedPnl += summary.realizedPnl
-            summaryItem.positionPercentage += summary.positionPercentage
-            summaryItem.weightedPnL += summary.weightedPnL
-            summaryItem.subTotalNetPNL += summary.subTotalNetPNL
-        summaryDict["SUMMARY"] = summaryItem  
         return summaryDict         
     
     @staticmethod
