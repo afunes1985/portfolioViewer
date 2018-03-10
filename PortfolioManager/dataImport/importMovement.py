@@ -27,7 +27,7 @@ for index, rfRow in enumerate(movementDateValues):
         amount = float(amountValues[index])
         comment = commentValues[index]
         
-        m = Movement(None)vas
+        m = Movement(None)vasasd
         m.setAttr(None, amount, inOut, custody.OID, movementDate, comment)
         newID = DaoCashMovement.insert(cm)
         #print(newID)
