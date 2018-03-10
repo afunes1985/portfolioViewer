@@ -32,7 +32,7 @@ class MovementView(QWidget):
         
     def renderMovements(self, movement):
         #assetName
-        assetNameItem = QTableWidgetItemString(movement.assetName, False)
+        assetNameItem = QTableWidgetItemString(movement.asset.name, False)
         self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_MOVEMENT_ASSET_NAME,assetNameItem)
         #buysell
         buySellItem = QTableWidgetItemString(movement.buySell, False)

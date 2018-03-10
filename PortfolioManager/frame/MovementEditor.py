@@ -159,7 +159,7 @@ class MovementEditor(QWidget):
         movement = Movement.constructMovementByType(self.cmdAssetType.currentText())
         movement.buySell = self.cmdBuySell.currentText()
         movement.assetOID = self.cmdAssetName.itemData(self.cmdAssetName.currentIndex())
-        movement.custody = self.cmbCustody.itemData(self.cmbCustody.currentIndex())
+        movement.custodyOID = self.cmbCustody.itemData(self.cmbCustody.currentIndex())
         movement.acquisitionDate = (self.dateAcquisitionDate.date()).toString("yyyy-M-dd")
         movement.quantity = self.txtQuantity.text()
         if self.cmdAssetType.currentText() == 'BOND':

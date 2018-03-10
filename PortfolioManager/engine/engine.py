@@ -240,14 +240,13 @@ class Engine:
     def buildPositions(fromDate, toDate):
         from core.cache import Singleton, MainCache
         mainCache = Singleton(MainCache)
-        assetDict = Engine.getAssetDict()
-        movementRS = DaoMovement.getMovementsByDate(fromDate, toDate)
+        movementRS = DaoMovement.getMovementsByDate(None, fromDate, toDate)
         positionDict = {}
         oldPositionDict = {}
         threads = []
         for (movement) in movementRS:
             position = None
-            asset = assetDict.get(movement[Constant.CONST_ASSET_NAME])
+            asset = mainCache.assetDictOID.get(movement[Constant.CONST_ASSET_OID])
             assetName = asset.name
             if(asset.assetType == 'BOND'):
                 assetName = assetName + str(movement[Constant.CONST_MOVEMENT_OID])
@@ -280,7 +279,7 @@ class Engine:
     
     @staticmethod
     def getMovementListByAsset(assetName, fromDate, toDate):
-        movementRS = DaoMovement.getMovementsByAsset(assetName, fromDate, toDate)
+        movementRS = DaoMovement.getMovementsByDate(assetName, fromDate, toDate)
         movementList = []
         for (movementRow) in movementRS:
             movement = Movement(movementRow)

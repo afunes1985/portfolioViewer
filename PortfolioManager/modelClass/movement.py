@@ -5,36 +5,26 @@ Created on Mar 18, 2017
 '''
 
 class Movement():
-    OID = None
-    assetName = None
-    buySell = ''
-    assetOID = None
-    asset = None
-    acquisitionDate = None
-    quantity = 0
-    grossAmount = 0
-    netAmount = 0
-    commissionPercentage = 0
-    commissionAmount = 0
-    commissionVATAmount = 0
-    rate = 0
-    price = 0
-    tenor = 0
-    custody = None
         
     def __init__(self, movementRow):
         if(movementRow is not None):
-            self.OID = movementRow[0]
-            self.assetName = movementRow[1]
-            self.buySell = movementRow[2]
-            self.acquisitionDate = movementRow[3]
-            self.quantity = movementRow[4]
-            self.price = movementRow[5]
-            self.grossAmount = movementRow[6]
-            self.netAmount = movementRow[7]
-            self.commissionPercentage = movementRow[8]
-            self.commissionAmount = movementRow[9]
-            self.commissionVATAmount = movementRow[10]
+            self.setAttr(movementRow[0], movementRow[1], movementRow[2], movementRow[3], movementRow[4], movementRow[5], movementRow[6], movementRow[7], movementRow[8], movementRow[9], movementRow[10], movementRow[11])
+    
+    def setAttr(self, OID, assetOID, buySell, acquisitionDate, quantity, price, rate, grossAmount, netAmount, commissionPercentage, commissionAmount, commissionVATAmount):
+        from core.cache import Singleton, MainCache
+        mainCache = Singleton(MainCache)
+        self.OID = OID
+        self.asset = mainCache.assetDictOID[assetOID]
+        self.buySell = buySell
+        self.acquisitionDate = acquisitionDate
+        self.quantity = quantity
+        self.price = price
+        self.rate = rate
+        self.grossAmount = grossAmount
+        self.netAmount = netAmount
+        self.commissionPercentage = commissionPercentage
+        self.commissionAmount = commissionAmount
+        self.commissionVATAmount = commissionVATAmount
     
     @staticmethod 
     def constructMovementByType(assetType):

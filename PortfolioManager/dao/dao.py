@@ -8,10 +8,9 @@ from dbConnector.dbConnector import DbConnector
 class DaoMovement():
 
     @staticmethod
-    def getMovementsByDate(fromDate, toDate):
+    def getMovementsByDate(assetName, fromDate, toDate):
         query = '''SELECT m.ID, 
-                    a.asset_type, 
-                    a.name, 
+                    m.asset_oid, 
                     m.buy_sell, 
                     m.ACQUISITION_DATE, 
                     m.quantity, 
@@ -28,31 +27,10 @@ class DaoMovement():
                         inner join asset as a on m.asset_oid = a.id 
                         inner join custody as c on c.ID = m.CUSTODY_OID
                     WHERE ACQUISITION_DATE BETWEEN %s AND %s 
+                        AND (a.NAME = %s or %s is null)
                     ORDER BY m.asset_oid,ACQUISITION_DATE'''
-        resultSet = DbConnector().doQuery(query, (fromDate, toDate))
+        resultSet = DbConnector().doQuery(query, (fromDate, toDate, assetName, assetName))
         return resultSet    
-    
-    @staticmethod
-    def getMovementsByAsset(assetName, fromDate, toDate):
-        query = '''SELECT m.ID, 
-                    a.name, 
-                    m.buy_sell, 
-                    m.ACQUISITION_DATE, 
-                    m.quantity, 
-                    m.price,
-                    m.GROSS_AMOUNT, 
-                    m.NET_AMOUNT, 
-                    m.COMMISSION_PERCENTAGE, 
-                    m.COMMISSION_AMOUNT, 
-                    m.COMMISSION_IVA_AMOUNT, 
-                    m.TENOR  
-                    FROM movement as m 
-                        inner join asset as a on m.asset_oid = a.id  
-                    WHERE ACQUISITION_DATE BETWEEN %s AND %s 
-                        AND a.NAME = %s
-                    ORDER BY ACQUISITION_DATE desc'''
-        resultSet = DbConnector().doQuery(query, (fromDate, toDate, assetName))
-        return resultSet  
     
     def insertMovement(self, movement):
         insertSentence = """insert movement(asset_oid, buy_sell,acquisition_date, quantity, 
@@ -63,7 +41,7 @@ class DaoMovement():
                                %s,%s,%s,%s,%s)"""
         DbConnector().doInsert(insertSentence, (movement.assetOID, movement.buySell, movement.acquisitionDate, movement.quantity,
                                                 movement.price, movement.rate, movement.grossAmount, movement.netAmount,
-                                                movement.commissionPercentage, movement.commissionAmount, movement.commissionVATAmount, movement.tenor, movement.custody))
+                                                movement.commissionPercentage, movement.commissionAmount, movement.commissionVATAmount, movement.tenor, movement.custodyOID))
 
 class DaoAsset():
     def getAssetTypes(self):
