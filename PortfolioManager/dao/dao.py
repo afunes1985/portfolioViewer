@@ -138,5 +138,80 @@ class DaoCashMovement():
     def insert(cashMovement):
         insertSentence = """insert cash_movement(amount, in_out, custody_oid, movement_date, comment) 
                        values (%s,%s,%s,%s,%s)"""
-        return DbConnector().doInsert(insertSentence, (cashMovement.amount, cashMovement.inOut, cashMovement.custody.OID, cashMovement.movementDate, cashMovement.comment))      
+        return DbConnector().doInsert(insertSentence, (cashMovement.amount, cashMovement.inOut, cashMovement.custody.OID, cashMovement.movementDate, cashMovement.comment))    
     
+class DaoReportMovement():  
+    @staticmethod
+    def getMovements(assetName, fromDate, toDate):
+        paramns = {'fromdate' : fromDate,
+                   'toDate': toDate}
+        query = '''SELECT 
+                    'MOVEMENT' as EVENT_TYPE,
+                    'TRX' AS EVENT_SUB_TYPE,
+                    BUY_SELL as EVENT_DIRECTION,
+                    a.name as ASSET_NAME,
+                    ACQUISITION_DATE AS EVENT_DATE,
+                    QUANTITY AS QUANTITY,
+                    PRICE AS PRICE,
+                    RATE AS RATE,
+                    GROSS_AMOUNT AS GROSS_AMOUNT,
+                    NET_AMOUNT AS NET_AMOUNT,
+                    COMMISSION_PERCENTAGE AS COMMISSION_PERCENTAGE,
+                    COMMISSION_AMOUNT AS COMMISSION_AMOUNT,
+                    COMMISSION_IVA_AMOUNT AS COMMISSION_IVA_AMOUNT,
+                    TENOR AS TENOR,
+                    c.name AS CUSTODY_NAME,
+                    COMMENT AS COMMENT,
+                    EXTERNAL_ID AS EXTERNAL_ID
+                FROM movement m
+                    inner join asset as a on m.asset_oid = a.id 
+                    inner join custody as c on c.id = m.custody_oid 
+                WHERE ACQUISITION_DATE BETWEEN %(fromdate)s AND %(toDate)s 
+                UNION ALL
+                SELECT 
+                    'CORP EVENT' as EVENT_TYPE,
+                    cet.name AS EVENT_SUB_TYPE,
+                    null as EVENT_DIRECTION,
+                    a.name as ASSET_NAME,
+                    payment_date AS EVENT_DATE,
+                    NULL AS QUANTITY,
+                    NULL AS PRICE,
+                    NULL AS RATE,
+                    gross_amount AS GROSS_AMOUNT,
+                    NET_AMOUNT AS NET_AMOUNT,
+                    0 AS COMMISSION_PERCENTAGE,
+                    0 AS COMMISSION_AMOUNT,
+                    0 AS COMMISSION_IVA_AMOUNT,
+                    NULL AS TENOR,
+                    c.name AS CUSTODY_NAME,
+                    COMMENT AS COMMENT,
+                    EXTERNAL_ID AS EXTERNAL_ID
+                FROM corporate_event ce
+                    left join asset as a on ce.asset_oid = a.id
+                    left join custody as c on c.id = ce.custody_oid 
+                    left join corporate_event_type as cet on cet.id = ce.corporate_event_type_oid
+                WHERE payment_date BETWEEN %(fromdate)s AND %(toDate)s  
+                UNION ALL
+                SELECT 
+                    'MOVEMENT' as EVENT_TYPE,
+                    'CASH' AS EVENT_SUB_TYPE,
+                    in_out as EVENT_DIRECTION,
+                    'MXN' as ASSET_NAME,
+                    movement_date AS EVENT_DATE,
+                    NULL AS QUANTITY,
+                    NULL AS PRICE,
+                    NULL AS RATE,
+                    amount AS GROSS_AMOUNT,
+                    amount AS NET_AMOUNT,
+                    0 AS COMMISSION_PERCENTAGE,
+                    0 AS COMMISSION_AMOUNT,
+                    0 AS COMMISSION_IVA_AMOUNT,
+                    NULL AS TENOR,
+                    c.name AS CUSTODY_NAME,
+                    COMMENT AS COMMENT,
+                    EXTERNAL_ID AS EXTERNAL_ID
+                FROM cash_movement CM
+                    inner join custody as c on c.id = CM.custody_oid 
+                WHERE movement_date BETWEEN %(fromdate)s AND %(toDate)s  '''
+        resultSet = DbConnector().doQuery(query, paramns)
+        return resultSet    

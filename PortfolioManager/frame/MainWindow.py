@@ -11,6 +11,7 @@ from frame.CorporateEventPanel import CorporateEventPanel
 from frame.PositionPanel import PositionPanel
 from frame.MovementEditor import MovementEditor
 from frame.PnLPanel import PnLPanel
+from frame.ReportMovementPanel import ReportMovementPanel
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -30,6 +31,7 @@ class MainWindow(QtGui.QMainWindow):
         self.tabPanel.addTab(self.createPositionPanel(), "Position")
         self.tabPanel.addTab(self.createCorporateEventPanel(), "Corporate Event")
         self.tabPanel.addTab(self.createPnLPanel(), "PnL")
+        self.tabPanel.addTab(self.createReportMovementPanel(), "Report Movement")
         return self.tabPanel
     
     def createCorporateEventPanel(self):
@@ -43,6 +45,10 @@ class MainWindow(QtGui.QMainWindow):
     def createPnLPanel(self):
         self.pnLPanel = PnLPanel()
         return self.pnLPanel
+    
+    def createReportMovementPanel(self):
+        self.reportMovementPanel = ReportMovementPanel()
+        return self.reportMovementPanel
     
     def createMenu(self):
         self.fileMenu = self.menuBar().addMenu("&Add")

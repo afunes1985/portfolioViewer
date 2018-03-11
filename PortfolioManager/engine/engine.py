@@ -6,7 +6,7 @@ Created on Mar 9, 2017
 import threading
 
 from dao.dao import DaoMovement, DaoAsset, DaoCorporateEvent, DaoCustody, \
-    DaoCashMovement
+    DaoCashMovement, DaoReportMovement
 from logicObject.PnLLO import PnLLO
 from modelClass.cashMovement import CashMovement
 from modelClass.constant import Constant
@@ -16,6 +16,7 @@ from modelClass.corporateEventPosition import CorporateEventPosition
 from modelClass.movement import Asset, Movement
 from modelClass.position import Position    
 from modelClass.summaryItem import SummaryItem
+from logicObject.ReportMovementLO import ReportMovementLO
 
 
 class Engine:
@@ -325,4 +326,14 @@ class Engine:
         pnlLO.setCashMovement(Engine.getCashMovementList())
         pnlLO.setPnlVOlist(pnlLO.calculatePnL(fromDate, toDate))
         return pnlLO
+        
+    @staticmethod
+    def getReportMovementList(fromDate, toDate): 
+        reportMovementLO = ReportMovementLO()
+        reportMovementLO.setMovementList(DaoReportMovement.getMovements(None, fromDate, toDate))
+        return reportMovementLO
+        
+        
+        
+        
         
