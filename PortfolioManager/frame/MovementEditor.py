@@ -156,27 +156,28 @@ class MovementEditor(QWidget):
         self.btnClear.clicked.connect(self.clearEditor)
          
     def addMovement(self):
-        movement = Movement.constructMovementByType(self.cmdAssetType.currentText())
-        movement.buySell = self.cmdBuySell.currentText()
-        movement.assetOID = self.cmdAssetName.itemData(self.cmdAssetName.currentIndex())
-        movement.custodyOID = self.cmbCustody.itemData(self.cmbCustody.currentIndex())
-        movement.acquisitionDate = (self.dateAcquisitionDate.date()).toString("yyyy-M-dd")
-        movement.quantity = self.txtQuantity.text()
+        buySell = self.cmdBuySell.currentText()
+        assetOID = self.cmdAssetName.itemData(self.cmdAssetName.currentIndex())
+        custodyOID = self.cmbCustody.itemData(self.cmbCustody.currentIndex())
+        acquisitionDate = (self.dateAcquisitionDate.date()).toString("yyyy-M-dd")
+        quantity = self.txtQuantity.text()
         if self.cmdAssetType.currentText() == 'BOND':
-            movement.rate = self.txtRate.text();
+            rate = self.txtRate.text();
         else:
-            movement.rate = None;
-        movement.price = self.txtPrice.text()
-        movement.grossAmount = self.txtGrossAmount.text()
-        movement.netAmount = self.txtNetAmount.text()
-        movement.commissionPercentage = self.txtCommissionPercentage.text()
-        movement.commissionAmount = self.txtCommissionAmount.text()
-        movement.commissionVATAmount = self.txtCommissionVATAmount.text()
+            rate = None;
+        price = self.txtPrice.text()
+        grossAmount = self.txtGrossAmount.text()
+        netAmount = self.txtNetAmount.text()
+        commissionPercentage = self.txtCommissionPercentage.text()
+        commissionAmount = self.txtCommissionAmount.text()
+        commissionVATAmount = self.txtCommissionVATAmount.text()
         if self.txtTenor.text() == '': 
-            movement.tenor = None 
+            tenor = None 
         else: 
-            movement.tenor = self.txtTenor.text()
-        DaoMovement().insertMovement(movement)
+            tenor = self.txtTenor.text()
+        movement = Movement(None)
+        movement.setAttr(None, assetOID, buySell, acquisitionDate, quantity, price, rate, grossAmount, netAmount, commissionPercentage, commissionAmount, commissionVATAmount, None, custodyOID, None, tenor)
+        DaoMovement.insertMovement(movement)
         self.clearEditor()
      
     def clearEditor(self):

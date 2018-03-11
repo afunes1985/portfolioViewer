@@ -6,6 +6,14 @@ Created on Feb 13, 2017
 from dbConnector.dbConnector import DbConnector
 
 class DaoMovement():
+    
+    @staticmethod
+    def getMovementsByExternalID(externalID):
+        query = '''SELECT m.external_id  
+                    FROM movement as m 
+                    WHERE m.external_id = %s'''
+        resultSet = DbConnector().doQuery(query, (externalID,))
+        return resultSet
 
     @staticmethod
     def getMovementsByDate(assetName, fromDate, toDate):
@@ -32,16 +40,20 @@ class DaoMovement():
         resultSet = DbConnector().doQuery(query, (fromDate, toDate, assetName, assetName))
         return resultSet    
     
-    def insertMovement(self, movement):
+    @staticmethod
+    def insertMovement(movement):
         insertSentence = """insert movement(asset_oid, buy_sell,acquisition_date, quantity, 
                                     price, rate, gross_amount, net_amount, 
-                                    commission_percentage, commission_amount, commission_iva_amount, tenor, custody_oid) 
+                                    commission_percentage, commission_amount, commission_iva_amount, tenor, 
+                                    custody_oid, external_id, comment) 
                        values (%s,%s,%s,%s,
                                %s,%s,%s,%s,
-                               %s,%s,%s,%s,%s)"""
-        DbConnector().doInsert(insertSentence, (movement.assetOID, movement.buySell, movement.acquisitionDate, movement.quantity,
+                               %s,%s,%s,%s,
+                               %s,%s,%s)"""
+        DbConnector().doInsert(insertSentence, (movement.asset.OID, movement.buySell, movement.acquisitionDate, movement.quantity,
                                                 movement.price, movement.rate, movement.grossAmount, movement.netAmount,
-                                                movement.commissionPercentage, movement.commissionAmount, movement.commissionVATAmount, movement.tenor, movement.custodyOID))
+                                                movement.commissionPercentage, movement.commissionAmount, movement.commissionVATAmount, movement.tenor, 
+                                                movement.custodyOID, movement.externalID, movement.comment))
 
 class DaoAsset():
     def getAssetTypes(self):
@@ -93,7 +105,7 @@ class DaoCorporateEvent():
     def insert(corporateEvent):
         insertSentence = """insert corporate_event(corporate_event_type_oid, asset_oid, payment_date, gross_amount, custody_oid, net_amount, comment) 
                        values (%s,%s,%s,%s,%s,%s,%s)"""
-        return DbConnector().doInsert(insertSentence, (corporateEvent.corporateEventType.OID,  corporateEvent.asset.OID, corporateEvent.paymentDate, corporateEvent.grossAmount, corporateEvent.custody.OID, corporateEvent.netAmount, corporateEvent.comment))
+        return DbConnector().doInsert(insertSentence, (corporateEvent.corporateEventType.OID,  corporateEvent.assetOID, corporateEvent.paymentDate, corporateEvent.grossAmount, corporateEvent.custody.OID, corporateEvent.netAmount, corporateEvent.comment))
 
 class DaoTax():
     @staticmethod
