@@ -328,9 +328,9 @@ class Engine:
         return pnlLO
         
     @staticmethod
-    def getReportMovementList(fromDate, toDate): 
+    def getReportMovementList(fromDate, toDate, movementType, assetName): 
         reportMovementLO = ReportMovementLO()
-        reportMovementLO.setMovementList(DaoReportMovement.getMovements(None, fromDate, toDate))
+        reportMovementLO.setMovementList(DaoReportMovement.getMovements(fromDate, toDate, movementType, assetName))
         return reportMovementLO
         
         

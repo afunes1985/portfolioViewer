@@ -7,7 +7,9 @@ from datetime import date
 
 from PySide import QtGui
 from PySide.QtCore import QDate
-from PySide.QtGui import QLabel, QSizePolicy, QDateEdit, QPushButton
+from PySide.QtGui import QLabel, QSizePolicy, QDateEdit, QPushButton, QComboBox
+
+from dao.dao import DaoReportMovement
 
 
 class ReportMovementFilter(QtGui.QWidget):
@@ -35,16 +37,34 @@ class ReportMovementFilter(QtGui.QWidget):
         self.dateToDate.setDate(QDate.currentDate())
         self.dateToDate.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
         self.layout.addWidget(self.dateToDate, 2, 1)
+        #lblMovementType
+        self.lblMovementType = QLabel("Movement Type")
+        self.layout.addWidget(self.lblMovementType, 3, 0)
+        #cmdMovementType
+        self.cmdMovementType = QComboBox(self)
+        self.cmdMovementType.addItems(DaoReportMovement.getMovementType())
+        self.layout.addWidget(self.cmdMovementType, 3, 1)
+        #lblAssetName
+        self.lblAssetName = QLabel("Asset Name")
+        self.layout.addWidget(self.lblAssetName, 4, 0)
+        #cmdAssetName
+        self.cmdAssetName = QComboBox(self)
+        self.cmdAssetName.addItems(DaoReportMovement.getAssetNames())
+        self.layout.addWidget(self.cmdAssetName, 4, 1)
         #btnSubmit
         self.btnSubmit = QPushButton("Submit", self)
         self.btnSubmit.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
         self.layout.addWidget(self.btnSubmit)
-        self.setFixedSize(190, 100) 
+        self.setFixedSize(190, 150) 
         self.initListener() 
     
     def initListener(self):
         self.btnSubmit.clicked.connect(self.doSubmit)
     
     def doSubmit(self):
-        self.parent.doSubmit((self.dateFromDate.date()).toString("yyyy-M-dd"),(self.dateToDate.date()).toString("yyyy-M-dd"))
+        fromDate = (self.dateFromDate.date()).toString("yyyy-M-dd")
+        toDate = (self.dateToDate.date()).toString("yyyy-M-dd")
+        movementType = self.cmdMovementType.currentText()
+        assetName = self.cmdAssetName.currentText()
+        self.parent.doSubmit(fromDate, toDate, movementType, assetName)
         

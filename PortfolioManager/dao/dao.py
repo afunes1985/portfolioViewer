@@ -55,6 +55,7 @@ class DaoMovement():
                                                 movement.commissionPercentage, movement.commissionAmount, movement.commissionVATAmount, movement.tenor, 
                                                 movement.custodyOID, movement.externalID, movement.comment))
 
+    
 class DaoAsset():
     def getAssetTypes(self):
         query = '''SELECT DISTINCT ASSET_TYPE
@@ -142,10 +143,13 @@ class DaoCashMovement():
     
 class DaoReportMovement():  
     @staticmethod
-    def getMovements(assetName, fromDate, toDate):
+    def getMovements(fromDate, toDate, movementType, assetName):
         paramns = {'fromdate' : fromDate,
-                   'toDate': toDate}
+                   'toDate': toDate,
+                   'movementType': movementType,
+                   'assetName' : assetName}
         query = '''SELECT 
+                    m.ID as EVENT_ID,
                     'MOVEMENT' as EVENT_TYPE,
                     'TRX' AS EVENT_SUB_TYPE,
                     BUY_SELL as EVENT_DIRECTION,
@@ -164,11 +168,14 @@ class DaoReportMovement():
                     COMMENT AS COMMENT,
                     EXTERNAL_ID AS EXTERNAL_ID
                 FROM movement m
-                    inner join asset as a on m.asset_oid = a.id 
-                    inner join custody as c on c.id = m.custody_oid 
+                    left join asset as a on m.asset_oid = a.id 
+                    left join custody as c on c.id = m.custody_oid 
                 WHERE ACQUISITION_DATE BETWEEN %(fromdate)s AND %(toDate)s 
+                    AND (a.asset_type = %(movementType)s or %(movementType)s = 'ALL') 
+                    AND (a.name = %(assetName)s or %(assetName)s = 'ALL')
                 UNION ALL
                 SELECT 
+                    ce.ID as EVENT_ID,
                     'CORP EVENT' as EVENT_TYPE,
                     cet.name AS EVENT_SUB_TYPE,
                     null as EVENT_DIRECTION,
@@ -191,8 +198,11 @@ class DaoReportMovement():
                     left join custody as c on c.id = ce.custody_oid 
                     left join corporate_event_type as cet on cet.id = ce.corporate_event_type_oid
                 WHERE payment_date BETWEEN %(fromdate)s AND %(toDate)s  
+                    AND (a.asset_type = %(movementType)s or %(movementType)s = 'ALL') 
+                    AND (a.name = %(assetName)s or %(assetName)s = 'ALL')
                 UNION ALL
                 SELECT 
+                    cm.ID as EVENT_ID,
                     'MOVEMENT' as EVENT_TYPE,
                     'CASH' AS EVENT_SUB_TYPE,
                     in_out as EVENT_DIRECTION,
@@ -211,7 +221,32 @@ class DaoReportMovement():
                     COMMENT AS COMMENT,
                     EXTERNAL_ID AS EXTERNAL_ID
                 FROM cash_movement CM
-                    inner join custody as c on c.id = CM.custody_oid 
-                WHERE movement_date BETWEEN %(fromdate)s AND %(toDate)s  '''
+                    left join custody as c on c.id = CM.custody_oid 
+                WHERE movement_date BETWEEN %(fromdate)s AND %(toDate)s  
+                    AND ('CASH' = %(movementType)s or %(movementType)s = 'ALL')
+                    AND ('CASH' = %(assetName)s or %(assetName)s = 'ALL') '''
         resultSet = DbConnector().doQuery(query, paramns)
-        return resultSet    
+        return resultSet  
+        
+    @staticmethod
+    def getMovementType():
+        query = '''SELECT DISTINCT ASSET_TYPE
+                FROM ASSET'''
+        resultSet = DbConnector().doQuery(query, "")
+        returnList = []
+        for (row) in resultSet:
+            returnList.append(row[0])
+        returnList.append('CASH')
+        returnList.append('ALL')
+        return returnList   
+    
+    @staticmethod
+    def getAssetNames():
+        query = """SELECT DISTINCT NAME FROM ASSET"""
+        resultSet = DbConnector().doQuery(query, "")
+        returnList = []
+        for (row) in resultSet:
+            returnList.append(row[0])
+        returnList.append('MXN')
+        returnList.append('ALL')
+        return returnList
