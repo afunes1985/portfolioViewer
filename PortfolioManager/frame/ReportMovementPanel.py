@@ -39,8 +39,8 @@ class ReportMovementPanel(QtGui.QWidget):
         self.table.setFixedSize(1100, 900) 
         return self.table 
         
-    def doSubmit(self, fromDate, toDate, movementType, assetName):
-        reportMovementLO = Engine.getReportMovementList(fromDate, toDate, movementType, assetName)
+    def doSubmit(self, fromDate, toDate, movementType, assetName, custodyName):
+        reportMovementLO = Engine.getReportMovementList(fromDate, toDate, movementType, assetName, custodyName)
         self.table.setSortingEnabled(False) 
         self.table.clearContents()
         self.table.setRowCount(len(reportMovementLO.movementList))

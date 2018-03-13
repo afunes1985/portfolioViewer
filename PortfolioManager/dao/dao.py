@@ -77,10 +77,20 @@ class DaoAsset():
         return resultSet  
         
 class DaoCustody():
+    
     def getCustodyList(self):
         query = "SELECT ID, NAME FROM CUSTODY"
         resultSet = DbConnector().doQuery(query, "")
         return resultSet  
+    
+    def getCustodyNameList(self):
+        query = "SELECT NAME FROM CUSTODY"
+        resultSet = DbConnector().doQuery(query, "")
+        returnList = []
+        for (row) in resultSet:
+            returnList.append(row[0])
+        returnList.append('ALL')
+        return returnList  
     
     def getDefaultCustody(self, name):
         query = "SELECT C.ID FROM CUSTODY AS C INNER JOIN ASSET AS A ON A.DEFAULT_CUSTODY_OID = C.ID WHERE A.NAME = %s"
@@ -151,11 +161,12 @@ class DaoCashMovement():
     
 class DaoReportMovement():  
     @staticmethod
-    def getMovements(fromDate, toDate, movementType, assetName):
+    def getMovements(fromDate, toDate, movementType, assetName, custodyName):
         paramns = {'fromdate' : fromDate,
                    'toDate': toDate,
                    'movementType': movementType,
-                   'assetName' : assetName}
+                   'assetName' : assetName,
+                   'custodyName': custodyName}
         query = '''SELECT 
                     m.ID as EVENT_ID,
                     'MOVEMENT' as EVENT_TYPE,
@@ -181,6 +192,7 @@ class DaoReportMovement():
                 WHERE ACQUISITION_DATE BETWEEN %(fromdate)s AND %(toDate)s 
                     AND (a.asset_type = %(movementType)s or %(movementType)s = 'ALL') 
                     AND (a.name = %(assetName)s or %(assetName)s = 'ALL')
+                    AND (c.name = %(custodyName)s or %(custodyName)s = 'ALL')
                 UNION ALL
                 SELECT 
                     ce.ID as EVENT_ID,
@@ -208,6 +220,7 @@ class DaoReportMovement():
                 WHERE payment_date BETWEEN %(fromdate)s AND %(toDate)s  
                     AND (a.asset_type = %(movementType)s or %(movementType)s = 'ALL') 
                     AND (a.name = %(assetName)s or %(assetName)s = 'ALL')
+                    AND (c.name = %(custodyName)s or %(custodyName)s = 'ALL')
                 UNION ALL
                 SELECT 
                     cm.ID as EVENT_ID,
@@ -232,7 +245,8 @@ class DaoReportMovement():
                     left join custody as c on c.id = CM.custody_oid 
                 WHERE movement_date BETWEEN %(fromdate)s AND %(toDate)s  
                     AND ('CASH' = %(movementType)s or %(movementType)s = 'ALL')
-                    AND ('CASH' = %(assetName)s or %(assetName)s = 'ALL') '''
+                    AND ('CASH' = %(assetName)s or %(assetName)s = 'ALL')
+                    AND (c.name = %(custodyName)s or %(custodyName)s = 'ALL') '''
         resultSet = DbConnector().doQuery(query, paramns)
         return resultSet  
         

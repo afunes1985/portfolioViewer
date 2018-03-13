@@ -9,7 +9,7 @@ from PySide import QtGui
 from PySide.QtCore import QDate
 from PySide.QtGui import QLabel, QSizePolicy, QDateEdit, QPushButton, QComboBox
 
-from dao.dao import DaoReportMovement
+from dao.dao import DaoReportMovement, DaoCustody
 
 
 class ReportMovementFilter(QtGui.QWidget):
@@ -51,6 +51,13 @@ class ReportMovementFilter(QtGui.QWidget):
         self.cmdAssetName = QComboBox(self)
         self.cmdAssetName.addItems(DaoReportMovement.getAssetNames())
         self.layout.addWidget(self.cmdAssetName, 4, 1)
+        #lblCustodyName
+        self.lblCustodyName = QLabel("Custody Name")
+        self.layout.addWidget(self.lblCustodyName, 5, 0)
+        #cmdCustodyName
+        self.cmdCustodyName = QComboBox(self)
+        self.cmdCustodyName.addItems(DaoCustody().getCustodyNameList())
+        self.layout.addWidget(self.cmdCustodyName, 5, 1)
         #btnSubmit
         self.btnSubmit = QPushButton("Submit", self)
         self.btnSubmit.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
@@ -66,5 +73,6 @@ class ReportMovementFilter(QtGui.QWidget):
         toDate = (self.dateToDate.date()).toString("yyyy-M-dd")
         movementType = self.cmdMovementType.currentText()
         assetName = self.cmdAssetName.currentText()
-        self.parent.doSubmit(fromDate, toDate, movementType, assetName)
+        custodyName = self.cmdCustodyName.currentText()
+        self.parent.doSubmit(fromDate, toDate, movementType, assetName, custodyName)
         
