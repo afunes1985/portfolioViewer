@@ -137,9 +137,17 @@ class DaoCashMovement():
     
     @staticmethod
     def insert(cashMovement):
-        insertSentence = """insert cash_movement(amount, in_out, custody_oid, movement_date, comment) 
-                       values (%s,%s,%s,%s,%s)"""
-        return DbConnector().doInsert(insertSentence, (cashMovement.amount, cashMovement.inOut, cashMovement.custody.OID, cashMovement.movementDate, cashMovement.comment))    
+        insertSentence = """insert cash_movement(amount, in_out, custody_oid, movement_date, comment, external_id) 
+                       values (%s,%s,%s,%s,%s,%s)"""
+        return DbConnector().doInsert(insertSentence, (cashMovement.amount, cashMovement.inOut, cashMovement.custody.OID, cashMovement.movementDate, cashMovement.comment, cashMovement.externalID))    
+    
+    @staticmethod
+    def getCashMovementsByExternalID(externalID):
+        query = '''SELECT cm.external_id  
+                    FROM cash_movement as cm 
+                    WHERE cm.external_id = %s'''
+        resultSet = DbConnector().doQuery(query, (externalID,))
+        return resultSet
     
 class DaoReportMovement():  
     @staticmethod
