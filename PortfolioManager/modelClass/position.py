@@ -106,6 +106,7 @@ class Position():
         self.rate = movement[Constant.CONST_MOVEMENT_RATE]
         self.tenor = movement[Constant.CONST_MOVEMENT_TENOR]
         self.maturityDate = self.acquisitionDate + datetime.timedelta(days = int(self.tenor))
+        self.maturityDate = movement[Constant.CONST_MOVEMENT_MATURITY_DATE]
         today = datetime.datetime.now()
         if((self.maturityDate)<today):
             self.isMatured = 1
