@@ -203,11 +203,14 @@ class DaoReportMovement():
                     COMMISSION_IVA_AMOUNT AS COMMISSION_IVA_AMOUNT,
                     TENOR AS TENOR,
                     c.name AS CUSTODY_NAME,
+                    t.ID AS TAX_ID,
+                    t.TAX_AMOUNT as TAX_AMOUNT,
                     COMMENT AS COMMENT,
-                    EXTERNAL_ID AS EXTERNAL_ID
+                    m.EXTERNAL_ID AS EXTERNAL_ID
                 FROM movement m
                     left join asset as a on m.asset_oid = a.id 
                     left join custody as c on c.id = m.custody_oid 
+                    left join tax as t on t.origin_oid = m.id and t.origin_type = 'MOVEMENT'
                 WHERE ACQUISITION_DATE BETWEEN %(fromdate)s AND %(toDate)s 
                     AND (a.asset_type = %(movementType)s or %(movementType)s = 'ALL') 
                     AND (a.name = %(assetName)s or %(assetName)s = 'ALL')
@@ -230,12 +233,15 @@ class DaoReportMovement():
                     0 AS COMMISSION_IVA_AMOUNT,
                     NULL AS TENOR,
                     c.name AS CUSTODY_NAME,
+                    t.ID AS TAX_ID,
+                    t.TAX_AMOUNT as TAX_AMOUNT,
                     COMMENT AS COMMENT,
-                    EXTERNAL_ID AS EXTERNAL_ID
+                    ce.EXTERNAL_ID AS EXTERNAL_ID
                 FROM corporate_event ce
                     left join asset as a on ce.asset_oid = a.id
                     left join custody as c on c.id = ce.custody_oid 
                     left join corporate_event_type as cet on cet.id = ce.corporate_event_type_oid
+                    left join tax as t on t.origin_oid = ce.id and t.origin_type = 'CORPORATE_EVENT'
                 WHERE payment_date BETWEEN %(fromdate)s AND %(toDate)s  
                     AND (a.asset_type = %(movementType)s or %(movementType)s = 'ALL') 
                     AND (a.name = %(assetName)s or %(assetName)s = 'ALL')
@@ -258,10 +264,12 @@ class DaoReportMovement():
                     0 AS COMMISSION_IVA_AMOUNT,
                     NULL AS TENOR,
                     c.name AS CUSTODY_NAME,
+                    null AS TAX_ID,
+                    null as TAX_AMOUNT,
                     COMMENT AS COMMENT,
                     EXTERNAL_ID AS EXTERNAL_ID
                 FROM cash_movement CM
-                    left join custody as c on c.id = CM.custody_oid 
+                    left join custody as c on c.id = CM.custody_oid
                 WHERE movement_date BETWEEN %(fromdate)s AND %(toDate)s  
                     AND ('CASH' = %(movementType)s or %(movementType)s = 'ALL')
                     AND ('CASH' = %(assetName)s or %(assetName)s = 'ALL')

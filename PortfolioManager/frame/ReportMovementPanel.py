@@ -18,7 +18,7 @@ from modelClass.constant import Constant
 
 class ReportMovementPanel(QtGui.QWidget):
     
-    columnList = "EVENT_ID;EVENT_TYPE; EVENT_SUB_TYPE; EVENT_DIRECTION; ASSET_NAME; EVENT_DATE; QUANTITY; PRICE; RATE; GROSS_AMOUNT; NET_AMOUNT; COMMISSION_PERCENTAGE; COMMISSION_AMOUNT; COMMISSION_IVA_AMOUNT; TENOR; CUSTODY_NAME; COMMENT; EXTERNAL_ID".split(";");
+    columnList = "EVENT_ID;EVENT_TYPE; EVENT_SUB_TYPE; EVENT_DIRECTION; ASSET_NAME; EVENT_DATE; QUANTITY; PRICE; RATE; GROSS_AMOUNT; NET_AMOUNT; COMMISSION_PERCENTAGE; COMMISSION_AMOUNT; COMMISSION_IVA_AMOUNT; TENOR; CUSTODY_NAME; TAX_ID; TAX_AMOUNT; COMMENT; EXTERNAL_ID".split(";");
     
     def __init__(self): 
         super(self.__class__, self).__init__()
@@ -67,6 +67,8 @@ class ReportMovementPanel(QtGui.QWidget):
             self.addItemtoTable(listItem,row,Constant.CONST_COLUMN_REPORT_MOVEMENT_COMMISSION_IVA_AMOUNT)
             self.addItemtoTable(listItem,row,Constant.CONST_COLUMN_REPORT_MOVEMENT_TENOR)
             self.addItemtoTable(listItem,row,Constant.CONST_COLUMN_REPORT_MOVEMENT_CUSTODY_NAME)
+            self.addItemtoTable(listItem,row,Constant.CONST_COLUMN_REPORT_MOVEMENT_TAX_ID)
+            self.addItemtoTable(listItem,row,Constant.CONST_COLUMN_REPORT_MOVEMENT_TAX_AMOUNT)
             self.addItemtoTable(listItem,row,Constant.CONST_COLUMN_REPORT_MOVEMENT_COMMENT)
             self.addItemtoTable(listItem,row,Constant.CONST_COLUMN_REPORT_MOVEMENT_EXTERNAL_ID)
             row += 1
