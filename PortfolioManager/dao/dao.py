@@ -9,10 +9,21 @@ class DaoMovement():
     
     @staticmethod
     def getMovementsByExternalID(externalID):
-        query = '''SELECT m.external_id  
+        query = '''SELECT m.external_id
                     FROM movement as m 
                     WHERE m.external_id = %s'''
         resultSet = DbConnector().doQuery(query, (externalID,))
+        return resultSet
+
+    @staticmethod
+    def getMovementsByMaturityDate(maturityDate):
+        query = '''SELECT m.id, m.gross_amount
+                    FROM movement as m 
+                        left join tax as t on t.origin_oid = m.id and t.origin_type = 'MOVEMENT'
+                    WHERE m.maturity_date = %s
+                        and t.id is null
+                    order by gross_amount desc'''
+        resultSet = DbConnector().doQuery(query, (maturityDate,))
         return resultSet
 
     @staticmethod
@@ -121,9 +132,17 @@ class DaoCorporateEvent():
 class DaoTax():
     @staticmethod
     def insert(tax):
-        insertSentence = """insert tax(origin_type, origin_oid, tax_amount) 
-                       values (%s,%s,%s)"""
-        return DbConnector().doInsert(insertSentence, (tax.originType,  tax.originOID, tax.taxAmount))
+        insertSentence = """insert tax(origin_type, origin_oid, tax_amount, external_id) 
+                       values (%s,%s,%s,%s)"""
+        return DbConnector().doInsert(insertSentence, (tax.originType,  tax.originOID, tax.taxAmount, tax.externalID))
+    
+    @staticmethod
+    def getTaxByExternalID(externalID):
+        query = '''SELECT t.external_id  
+                    FROM tax as t 
+                    WHERE t.external_id = %s'''
+        resultSet = DbConnector().doQuery(query, (externalID,))
+        return resultSet
 
 class DaoPrice():
     @staticmethod
