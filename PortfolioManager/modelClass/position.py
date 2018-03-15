@@ -89,8 +89,6 @@ class Position():
             self.accumulatedSellCommission += sellCommissionAmount
             self.accumulatedSellVATCommission += sellVATCommissionAmount
             self.realizedPnl += (grossAmount - (quantity * self.unitCost) - sellCommissionAmount - sellVATCommissionAmount)
-            #self.realizedPnlPercentage = ((grossAmount / ((quantity * self.unitCost) - sellCommissionAmount - sellVATCommissionAmount)) -1) * 100
-                
         if self.totalQuantity == 0:        
             self.unitCost = 0
             self.accumulatedAmount = 0
@@ -105,8 +103,8 @@ class Position():
         self.unitCost = movement[Constant.CONST_MOVEMENT_PRICE]
         self.rate = movement[Constant.CONST_MOVEMENT_RATE]
         self.tenor = movement[Constant.CONST_MOVEMENT_TENOR]
-        self.maturityDate = self.acquisitionDate + datetime.timedelta(days = int(self.tenor))
         self.maturityDate = movement[Constant.CONST_MOVEMENT_MATURITY_DATE]
+        self.taxAmount = movement[Constant.CONST_MOVEMENT_TAX_AMOUNT]
         today = datetime.datetime.now()
         if((self.maturityDate)<today):
             self.isMatured = 1
@@ -134,7 +132,7 @@ class Position():
     
     def getValuatedAmount(self):
         if (self.asset.assetType == 'BOND'):
-            return self.accumulatedAmount * (1 + (self.getElapsedDays() * (self.rate / 360)))
+            return self.accumulatedAmount * (1 + (self.getElapsedDays() * (self.rate / 360))) - self.taxAmount
         else:  
             if (self.marketPrice == 0):
                 return Decimal(self.totalQuantity) * self.unitCost

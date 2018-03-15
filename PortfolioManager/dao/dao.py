@@ -42,10 +42,12 @@ class DaoMovement():
                     m.COMMISSION_IVA_AMOUNT, 
                     m.TENOR,
                     c.ID,
-                    m.MATURITY_DATE
+                    m.MATURITY_DATE,
+                    IFNULL(t.tax_amount, 0)
                     FROM movement as m 
                         inner join asset as a on m.asset_oid = a.id 
                         inner join custody as c on c.ID = m.CUSTODY_OID
+                        left join tax as t on t.origin_oid = m.id and t.origin_type = 'MOVEMENT'
                     WHERE ACQUISITION_DATE BETWEEN %s AND %s 
                         AND (a.NAME = %s or %s is null)
                     ORDER BY m.asset_oid,ACQUISITION_DATE'''
