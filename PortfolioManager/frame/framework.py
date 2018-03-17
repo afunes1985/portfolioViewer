@@ -3,8 +3,12 @@ Created on 15 may. 2017
 
 @author: afunes
 '''
+from datetime import datetime
+from decimal import Decimal
+
 from PySide import QtGui
 from PySide.QtGui import QTableWidgetItem
+
 
 class QTableWidgetItemStringPlusMinus(QTableWidgetItem):
     def __init__(self, value, bold):
@@ -83,3 +87,20 @@ class QTableWidgetItemInt(QTableWidgetItem):
         font = self.font()
         font.setBold(bold)
         self.setFont(font)
+        
+class PanelWithTable(QtGui.QWidget):
+    def addItemtoTable(self, table, listItem, row, column, isBold):
+        if isinstance(listItem[column], basestring):
+            Item = QTableWidgetItemString(listItem[column], isBold)
+        elif isinstance(listItem[column], datetime):
+            Item = QTableWidgetItemString(listItem[column].strftime("%Y-%m-%d"), isBold)
+        elif isinstance(listItem[column], (int, long)):
+            Item = QTableWidgetItemInt(listItem[column], isBold)
+        elif isinstance(listItem[column], (float, Decimal)):
+            if float(listItem[column]).is_integer():
+                Item = QTableWidgetItemInt(listItem[column], isBold)
+            else:
+                Item = QTableWidgetItem6Decimal(listItem[column], isBold)
+        elif listItem[column] is None:
+            Item = QTableWidgetItemString(listItem[column], isBold)
+        table.setItem(row,column,Item)
