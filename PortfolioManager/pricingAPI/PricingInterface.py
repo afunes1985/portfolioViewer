@@ -87,7 +87,7 @@ class PricingInterfaceTradier:
         response = connection.getresponse()
         content = response.read()
         json_data = json.loads(content)
-        return Decimal(json_data['quotes']['quote']['last']) 
+        return Decimal(json_data['quotes']['quote']['last'])
     
     @staticmethod
     def getReferenceDataByAssetNames(assetNames):

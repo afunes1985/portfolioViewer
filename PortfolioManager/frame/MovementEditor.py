@@ -159,24 +159,27 @@ class MovementEditor(QWidget):
         buySell = self.cmdBuySell.currentText()
         assetOID = self.cmdAssetName.itemData(self.cmdAssetName.currentIndex())
         custodyOID = self.cmbCustody.itemData(self.cmbCustody.currentIndex())
-        acquisitionDate = (self.dateAcquisitionDate.date()).toString("yyyy-M-dd")
+        acquisitionDate = self.dateAcquisitionDate.date()
         quantity = self.txtQuantity.text()
         if self.cmdAssetType.currentText() == 'BOND':
             rate = self.txtRate.text();
+            if self.txtTenor.text() == '': 
+                tenor = None 
+            else: 
+                tenor = self.txtTenor.text()
+            maturityDate = acquisitionDate.toPython() + datetime.timedelta(days = int(tenor))
         else:
             rate = None;
+            maturityDate = None
         price = self.txtPrice.text()
         grossAmount = self.txtGrossAmount.text()
         netAmount = self.txtNetAmount.text()
         commissionPercentage = self.txtCommissionPercentage.text()
         commissionAmount = self.txtCommissionAmount.text()
         commissionVATAmount = self.txtCommissionVATAmount.text()
-        if self.txtTenor.text() == '': 
-            tenor = None 
-        else: 
-            tenor = self.txtTenor.text()
+        
         movement = Movement(None)
-        movement.setAttr(None, assetOID, buySell, acquisitionDate, quantity, price, rate, grossAmount, netAmount, commissionPercentage, commissionAmount, commissionVATAmount, None, custodyOID, None, tenor)
+        movement.setAttr(None, assetOID, buySell, (acquisitionDate).toString("yyyy-M-dd"), quantity, price, rate, grossAmount, netAmount, commissionPercentage, commissionAmount, commissionVATAmount, None, custodyOID, None, tenor, maturityDate)
         DaoMovement.insertMovement(movement)
         self.clearEditor()
      
