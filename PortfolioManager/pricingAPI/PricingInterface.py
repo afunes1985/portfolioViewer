@@ -117,6 +117,10 @@ class PricingInterfaceTradier:
             returnList.append(returnRow)
         return returnList
     
+    @staticmethod
+    def getHistoricalPrice(assetName, fromDate, ToDate):
+        return None
+    
 class PricingInterfaceExcel:
     
     @staticmethod

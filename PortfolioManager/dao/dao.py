@@ -89,6 +89,11 @@ class DaoAsset():
         query = '''SELECT ID, ASSET_TYPE, NAME, ORIGIN_NAME, IS_SIC, IS_ONLINE_PRICE, PRICE_SOURCE, DEFAULT_CUSTODY_OID FROM ASSET'''
         resultSet = DbConnector().doQuery(query, "")
         return resultSet  
+    
+    def getAssetByName(self, assetName):
+        query = """SELECT ID, NAME FROM ASSET WHERE NAME = %s"""
+        resultSet = DbConnector().doQuery(query, (assetName,))
+        return resultSet 
         
 class DaoCustody():
     
@@ -157,6 +162,22 @@ class DaoPrice():
                 order by p.DATE_ desc"""
         resultSet = DbConnector().doQuery(query, (assetName,))
         return resultSet 
+    @staticmethod
+    def insert(price):
+        insertSentence = """insert price(asset_oid, last_price, date_) 
+                       values (%s,%s,%s)"""
+        return DbConnector().doInsert(insertSentence, (price.assetOID, price.lastPrice, price.date))
+    @staticmethod
+    def getPriceByDate(assetName, date):
+        query = """SELECT p.last_price, p.date_
+                    FROM PRICE p
+                    INNER JOIN ASSET A ON P.ASSET_OID = A.ID
+                WHERE ((A.NAME = %s and a.ORIGIN_NAME IS NULL) 
+                        OR (A.ORIGIN_NAME = %s))
+                    AND p.DATE_ = %s"""
+        resultSet = DbConnector().doQuery(query, (assetName,assetName, date))
+        return resultSet 
+    
 
 class DaoCashMovement():
     @staticmethod
