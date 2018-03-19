@@ -31,7 +31,7 @@ for index, assetNameValue in enumerate(assetNameValues):
                 currencyValue = CurrencyValue(None)
                 currencyValue.setAttr(None, currencyRs[0][0], dateToImport, round(closePriceValues[index], 4))
                 DaoCurrency.insertCurrencyValue(currencyValue)
-                logging.info("ADD PRICE ASSET NAME :" + assetNameValue + " " + str(dateToImport))
+                print("ADD PRICE ASSET NAME :" + assetNameValue + " " + str(dateToImport))
             else:
                 logging.warning("CANNOT ADD PRICE ASSET NAME :" + assetNameValue + " " + str(dateToImport))
         else:
@@ -44,6 +44,6 @@ for index, assetNameValue in enumerate(assetNameValues):
                 price.setAttr(None, assetOID, round(lastPrice, 4), dateToImport) 
                 print(assetNameValue + " " + str(lastPrice) + " " + str(dateToImport))
                 DaoPrice.insert(price)
-                logging.info("ADD PRICE ASSET NAME :" + assetNameValue + " " + str(dateToImport))
+                print("ADD PRICE ASSET NAME :" + assetNameValue + " " + str(dateToImport))
             else:
                 logging.warning("CANNOT ADD PRICE ASSET NAME :" + assetNameValue + " " + str(dateToImport))

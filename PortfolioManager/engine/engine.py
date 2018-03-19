@@ -3,11 +3,14 @@ Created on Mar 9, 2017
 
 @author: afunes
 '''
+from datetime import datetime
 import threading
 
 from dao.dao import DaoMovement, DaoAsset, DaoCorporateEvent, DaoCustody, \
     DaoCashMovement, DaoReportMovement
 from logicObject.PnLLO import PnLLO
+from logicObject.ReportMovementLO import ReportMovementLO
+from modelClass import constant
 from modelClass.cashMovement import CashMovement
 from modelClass.constant import Constant
 from modelClass.corporateEvent import CorporateEvent, Custody, \
@@ -16,7 +19,6 @@ from modelClass.corporateEventPosition import CorporateEventPosition
 from modelClass.movement import Asset, Movement
 from modelClass.position import Position    
 from modelClass.summaryItem import SummaryItem
-from logicObject.ReportMovementLO import ReportMovementLO
 
 
 class Engine:
@@ -238,13 +240,15 @@ class Engine:
         return returnDict      
     
     @staticmethod
-    def buildPositions(fromDate, toDate):
+    def buildPositions(fromDate, toDate, setLastMarketData):
         from core.cache import Singleton, MainCache
         mainCache = Singleton(MainCache)
         movementRS = DaoMovement.getMovementsByDate(None, fromDate, toDate)
         positionDict = {}
         oldPositionDict = {}
         threads = []
+        today = datetime.now().date()
+        #toDate = toDate.replace(hour=12, minute=0, second=0, microsecond=0)
         for (movement) in movementRS:
             position = None
             asset = mainCache.assetDictOID.get(movement[Constant.CONST_ASSET_OID])
@@ -257,26 +261,30 @@ class Engine:
                 positionDict[assetName] = position
             else:           
                 position.addMovement(movement)
-                
-            if (position.isMatured or position.totalQuantity == 0):
+            
+            if (position.asset.assetType == 'BOND'
+                 and ((position.isMatured and today == toDate)
+                    or (position.maturityDate.date() < toDate and today != toDate) 
+                    or position.totalQuantity == 0)):
                 oldPosition =  oldPositionDict.get(assetName, None)
                 if oldPosition == None:
                     oldPositionDict[assetName] = position
                 else:
                     oldPosition.addPositionToOldPosition(position)#TODO TESTEAR
                 positionDict.pop(assetName, None)
-                    
-        #print(datetime.datetime.now())
-        for key, position2 in positionDict.items():
-            t = threading.Thread(target=position2.refreshMarketData)
-            t.start()
-            threads.append(t)
-        for thread in threads:
-            thread.join()
-        #print(datetime.datetime.now())
-        mainCache.positionDict = positionDict
-        mainCache.oldPositionDict = oldPositionDict
-        mainCache.setGlobalAttribute(positionDict)
+        if setLastMarketData:         
+            for key, position2 in positionDict.items():
+                t = threading.Thread(target=position2.refreshMarketData)
+                t.start()
+                threads.append(t)
+            for thread in threads:
+                thread.join()
+        
+        returnDict = {}
+        returnDict[Constant.CONST_POSITION_DICT] = positionDict
+        returnDict[Constant.CONST_OLD_POSITION_DICT] = oldPositionDict
+        return returnDict
+
     
     @staticmethod
     def getMovementListByAsset(assetName, fromDate, toDate):
@@ -312,8 +320,8 @@ class Engine:
         return returnDict
     
     @staticmethod
-    def getCashMovementList():
-        rs = DaoCashMovement().getCashMovement()
+    def getCashMovementList(fromDate, toDate):
+        rs = DaoCashMovement().getCashMovement(fromDate, toDate)
         returnList = []
         for (row) in rs:
             obj = CashMovement(row)
@@ -323,7 +331,7 @@ class Engine:
     @staticmethod
     def buildPnlLogicObject(fromDate, toDate): 
         pnlLO = PnLLO()
-        pnlLO.setCashMovement(Engine.getCashMovementList())
+        pnlLO.setCashMovement(Engine.getCashMovementList(fromDate, toDate))
         pnlLO.setPnlVOlist(pnlLO.calculatePnL(fromDate, toDate))
         return pnlLO
         

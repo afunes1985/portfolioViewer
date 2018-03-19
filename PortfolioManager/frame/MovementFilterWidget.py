@@ -3,12 +3,13 @@ Created on 5 jun. 2017
 
 @author: afunes
 '''
-from datetime import date
+from datetime import date, datetime
 
 from PySide import QtGui
 from PySide.QtGui import QLabel, QSizePolicy, QDateEdit, QPushButton
 
 from core.cache import Singleton
+
 
 class MovementFilterWidget(QtGui.QWidget):
     def __init__(self):      
@@ -31,7 +32,7 @@ class MovementFilterWidget(QtGui.QWidget):
         #dateToDate
         self.dateToDate = QDateEdit(self)
         self.dateToDate.setDisplayFormat("dd-MM-yyyy")
-        self.dateToDate.setDate(date(2020, 7, 14))
+        self.dateToDate.setDate(datetime.now())
         self.dateToDate.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
         self.layout.addWidget(self.dateToDate, 2, 1)
         #btnSubmit
@@ -47,5 +48,5 @@ class MovementFilterWidget(QtGui.QWidget):
     def doSubmit(self):
         from core.mainEngine import MainEngine
         mainEngine = Singleton(MainEngine)
-        mainEngine.refreshAll((self.dateFromDate.date()).toString("yyyy-M-dd"),(self.dateToDate.date()).toString("yyyy-M-dd"))
+        mainEngine.refreshAll((self.dateFromDate.date()).toPython(),(self.dateToDate.date()).toPython())
         

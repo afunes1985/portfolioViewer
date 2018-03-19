@@ -46,5 +46,5 @@ class PnLFilter(QtGui.QWidget):
         self.btnSubmit.clicked.connect(self.doSubmit)
     
     def doSubmit(self):
-        self.parent.doSubmit(self.dateFromDate.date(),self.dateToDate.date())
+        self.parent.doSubmit((self.dateFromDate.date()).toPython(),(self.dateToDate.date()).toPython())
         

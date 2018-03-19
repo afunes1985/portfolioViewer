@@ -8,6 +8,7 @@ from PySide import QtGui, QtCore
 from core.cache import Singleton, MainCache
 from engine.engine import Engine
 from frame.MainWindow import MainWindow
+from modelClass.constant import Constant
 
 
 class MainEngine(object):
@@ -23,7 +24,10 @@ class MainEngine(object):
         mainCache.refreshReferenceData()
         self.mainWindow = MainWindow()
         self.mainWindow.clearTable()
-        Engine.buildPositions(fromDate, toDate)
+        resultPositionDict = Engine.buildPositions(fromDate, toDate, True)
+        mainCache.positionDict = resultPositionDict[Constant.CONST_POSITION_DICT]
+        mainCache.oldPositionDict = resultPositionDict[Constant.CONST_OLD_POSITION_DICT]
+        mainCache.setGlobalAttribute(resultPositionDict[Constant.CONST_POSITION_DICT])
         progressBar.setLabelText("EQUITY")
         progressBar.setValue(3)
         self.mainWindow.renderPositions(mainCache.positionDict, 'EQUITY', 0)

@@ -181,11 +181,12 @@ class DaoPrice():
 
 class DaoCashMovement():
     @staticmethod
-    def getCashMovement():
+    def getCashMovement(fromDate, toDate):
         query = """SELECT ID, amount, in_out, custody_oid, movement_date, comment
-                        FROM cash_movement                 
-                order by movement_date desc"""
-        resultSet = DbConnector().doQuery(query, "")
+                        FROM cash_movement 
+                    WHERE movement_date BETWEEN %s AND %s  
+                    order by movement_date desc"""
+        resultSet = DbConnector().doQuery(query, (fromDate, toDate))
         return resultSet   
     
     @staticmethod
@@ -323,3 +324,27 @@ class DaoReportMovement():
         returnList.append('MXN')
         returnList.append('ALL')
         return returnList
+    
+class DaoCurrency():
+    @staticmethod
+    def insertCurrencyValue(currencyValue):
+        insertSentence = """insert currency_value(currency_id, date_, value) 
+                       values (%s,%s,%s)"""
+        return DbConnector().doInsert(insertSentence, (currencyValue.currencyOID,currencyValue.date,currencyValue.value))
+    @staticmethod
+    def getCurrencyValueByDate(currencyName, date):
+        query = """SELECT cv.value, cv.date_
+                    FROM CURRENCY_VALUE cv
+                    INNER JOIN CURRENCY C ON C.ID = CV.CURRENCY_ID
+                WHERE C.NAME = %s
+                    AND cv.DATE_ = %s"""
+        resultSet = DbConnector().doQuery(query, (currencyName, date))
+        return resultSet 
+    
+    @staticmethod
+    def getCurrencyByName(currencyName):
+        query = """SELECT c.id
+                    FROM CURRENCY C
+                    WHERE C.NAME = %s"""
+        resultSet = DbConnector().doQuery(query, (currencyName,))
+        return resultSet 

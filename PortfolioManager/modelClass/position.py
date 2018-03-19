@@ -65,6 +65,13 @@ class Position():
             self.setMarketPrice(Decimal(price) * Singleton(MainCache).usdMXN)#Tal vez hay que quitar esta linea
             self.changePercentage = str(changePercentage) + '%'
     
+    def setSpecificMarketData(self, price, usdMXN):
+        if self.asset.isSIC:
+            self.setMarketPriceOrig(Decimal(price))
+            self.setMarketPrice(Decimal(price) * usdMXN)#Tal vez hay que quitar esta linea
+        else:
+            self.setMarketPrice(price)
+    
     def addPositionToOldPosition(self, position):
         self.realizedPnl += position.realizedPnl
         self.accumulatedSellCommission += position.accumulatedSellCommission
@@ -207,4 +214,10 @@ class Position():
             return self.rate * 100 
         else:
             return self.unitCost 
+        
+    def getMainName(self):
+        if self.asset.isSIC:
+            return self.asset.originName
+        else:
+            return self.asset.name
     
