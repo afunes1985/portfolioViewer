@@ -109,7 +109,7 @@ class DaoCustody():
         for (row) in resultSet:
             returnList.append(row[0])
         returnList.append('ALL')
-        return returnList  
+        return sorted(returnList)  
     
     def getDefaultCustody(self, name):
         query = "SELECT C.ID FROM CUSTODY AS C INNER JOIN ASSET AS A ON A.DEFAULT_CUSTODY_OID = C.ID WHERE A.NAME = %s"
@@ -312,7 +312,7 @@ class DaoReportMovement():
             returnList.append(row[0])
         returnList.append('CASH')
         returnList.append('ALL')
-        return returnList   
+        return sorted(returnList)   
     
     @staticmethod
     def getAssetNames():
@@ -323,7 +323,7 @@ class DaoReportMovement():
             returnList.append(row[0])
         returnList.append('MXN')
         returnList.append('ALL')
-        return returnList
+        return sorted(returnList)
     
 class DaoCurrency():
     @staticmethod

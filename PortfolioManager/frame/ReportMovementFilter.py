@@ -24,7 +24,7 @@ class ReportMovementFilter(QtGui.QWidget):
         #dateFromDate
         self.dateFromDate = QDateEdit(self)
         self.dateFromDate.setDisplayFormat("dd-MM-yyyy")
-        self.dateFromDate.setDate(date(2017, 1, 1))
+        self.dateFromDate.setDate(date(2018, 1, 1))
         self.dateFromDate.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
         self.layout.addWidget(self.dateFromDate, 1, 1)
         #lblToDate
@@ -43,6 +43,7 @@ class ReportMovementFilter(QtGui.QWidget):
         #cmdMovementType
         self.cmdMovementType = QComboBox(self)
         self.cmdMovementType.addItems(DaoReportMovement.getMovementType())
+        self.cmdMovementType.setCurrentIndex(self.cmdMovementType.findText("ALL"))
         self.layout.addWidget(self.cmdMovementType, 3, 1)
         #lblAssetName
         self.lblAssetName = QLabel("Asset Name")
@@ -50,6 +51,7 @@ class ReportMovementFilter(QtGui.QWidget):
         #cmdAssetName
         self.cmdAssetName = QComboBox(self)
         self.cmdAssetName.addItems(DaoReportMovement.getAssetNames())
+        self.cmdAssetName.setCurrentIndex(self.cmdAssetName.findText("ALL"))
         self.layout.addWidget(self.cmdAssetName, 4, 1)
         #lblCustodyName
         self.lblCustodyName = QLabel("Custody Name")
@@ -57,6 +59,7 @@ class ReportMovementFilter(QtGui.QWidget):
         #cmdCustodyName
         self.cmdCustodyName = QComboBox(self)
         self.cmdCustodyName.addItems(DaoCustody().getCustodyNameList())
+        self.cmdCustodyName.setCurrentIndex(self.cmdCustodyName.findText("ALL"))
         self.layout.addWidget(self.cmdCustodyName, 5, 1)
         #btnSubmit
         self.btnSubmit = QPushButton("Submit", self)

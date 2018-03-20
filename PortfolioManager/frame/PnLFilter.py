@@ -22,7 +22,7 @@ class PnLFilter(QtGui.QWidget):
         #dateFromDate
         self.dateFromDate = QDateEdit(self)
         self.dateFromDate.setDisplayFormat("dd-MM-yyyy")
-        self.dateFromDate.setDate(date(2017, 1, 1))
+        self.dateFromDate.setDate(date(2018, 1, 1))
         self.dateFromDate.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
         self.layout.addWidget(self.dateFromDate, 1, 1)
         #lblToDate
