@@ -81,7 +81,7 @@ class CorporateEventEditor(QWidget):
         corporateEvent.assetOID = self.cmdAssetName.itemData(self.cmdAssetName.currentIndex())
         corporateEvent.corporateEventTypeOID = self.cmbCorporateEventType.itemData(self.cmbCorporateEventType.currentIndex())
         corporateEvent.custodyOID = self.cmbCustody.itemData(self.cmbCustody.currentIndex())
-        corporateEvent.paymentDate = (self.cmbPaymentDate.date()).toString("yyyy-M-dd")
+        corporateEvent.paymentDate = (self.cmbPaymentDate.date()).toPython()
         corporateEvent.grossAmount = self.txtGrossAmount.text()
         DaoCorporateEvent().insert(corporateEvent)
         self.clearEditor()

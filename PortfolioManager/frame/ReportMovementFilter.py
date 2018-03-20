@@ -69,8 +69,8 @@ class ReportMovementFilter(QtGui.QWidget):
         self.btnSubmit.clicked.connect(self.doSubmit)
     
     def doSubmit(self):
-        fromDate = (self.dateFromDate.date()).toString("yyyy-M-dd")
-        toDate = (self.dateToDate.date()).toString("yyyy-M-dd")
+        fromDate = (self.dateFromDate.date()).toPython()
+        toDate = (self.dateToDate.date()).toPython()
         movementType = self.cmdMovementType.currentText()
         assetName = self.cmdAssetName.currentText()
         custodyName = self.cmdCustodyName.currentText()

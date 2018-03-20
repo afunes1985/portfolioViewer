@@ -179,7 +179,7 @@ class MovementEditor(QWidget):
         commissionVATAmount = self.txtCommissionVATAmount.text()
         
         movement = Movement(None)
-        movement.setAttr(None, assetOID, buySell, (acquisitionDate).toString("yyyy-M-dd"), quantity, price, rate, grossAmount, netAmount, commissionPercentage, commissionAmount, commissionVATAmount, None, custodyOID, None, tenor, maturityDate)
+        movement.setAttr(None, assetOID, buySell, (acquisitionDate).toPython(), quantity, price, rate, grossAmount, netAmount, commissionPercentage, commissionAmount, commissionVATAmount, None, custodyOID, None, tenor, maturityDate)
         DaoMovement.insertMovement(movement)
         self.clearEditor()
      

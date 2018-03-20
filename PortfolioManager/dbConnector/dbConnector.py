@@ -3,8 +3,11 @@ Created on Feb 12, 2017
 
 @author: afunes
 '''
-import mysql.connector
+import PySide
 from mysql.connector import errorcode
+import mysql.connector
+from datetime import date
+
 
 class DbConnector():
 
@@ -39,10 +42,21 @@ class DbConnector():
         cnx.commit()
         self.closeConnection(cnx)
         return lastRowID
+    
+    def convertParams(self, params):
+        paramToReturn = []
+        for index, param in enumerate(params):
+            if isinstance(param, date):
+                paramToReturn.append(param.toString("yyyy-M-dd"))
+            else:
+                paramToReturn.append(param)
+        return paramToReturn
+
  
     def doQuery(self, query, params):
         cnx = self.initConnection()
         cursor = cnx.cursor()
+        #convertedParams = self.convertParams(params)
         cursor.execute(query,params)
         resultList = list(cursor)
         self.closeConnection(cnx);
