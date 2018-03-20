@@ -30,11 +30,11 @@ class PnLLO():
     
     def getTotalWeightedCash(self, inOut, custodyOID, fromDate, toDate):
         totalWeightedCash = 0
-        fromDate = datetime.combine(fromDate, datetime.min.time())
-        difFromTo = fromDate.daysTo(toDate)
+        #fromDate = datetime.combine(fromDate, datetime.min.time())
+        difFromTo = abs(toDate-fromDate).days
         for cashMovement in self.cashMovementList:
             if cashMovement.inOut == inOut and (cashMovement.custody.OID == custodyOID or custodyOID is None):
-                totalWeightedCash += cashMovement.amount * Decimal(((float(difFromTo) - fromDate.daysTo(cashMovement.movementDate))) /difFromTo)  
+                totalWeightedCash += cashMovement.amount * Decimal(((float(difFromTo) - abs(cashMovement.movementDate-fromDate).days)) /difFromTo)  
         return totalWeightedCash
        
     def getTotalCashIn(self, custodyOID):
@@ -72,14 +72,14 @@ class PnLLO():
             
         pnlVO.totalCashIn = self.getTotalCashIn(custodyOID)
         pnlVO.totalCashOut = self.getTotalCashOut(custodyOID)
-        pnlVO.totalWeightedCashIn = self.getTotalWeightedCashIn(custodyOID, fromDate, toDate)
-        pnlVO.totalWeightedCashOut = self.getTotalWeightedCashOut(custodyOID, fromDate, toDate)
+        pnlVO.totalWeightedCashIn =  0 #self.getTotalWeightedCashIn(custodyOID, fromDate, toDate)
+        pnlVO.totalWeightedCashOut = 0  #self.getTotalWeightedCashOut(custodyOID, fromDate, toDate)
         pnlVO.finalPosition = Engine.getSubTotalValuatedAmountByCustodyOID(self.finalPositionDict[Constant.CONST_POSITION_DICT], custodyOID)
         pnlVO.initialPosition = Engine.getSubTotalValuatedAmountByCustodyOID(self.startPositionDict[Constant.CONST_POSITION_DICT], custodyOID)
         pnlVO.pnlAmount =  pnlVO.finalPosition - pnlVO.initialPosition - (pnlVO.totalCashIn - pnlVO.totalCashOut)
-        pnlVO.pnlWeightedAmount =  pnlVO.finalPosition - pnlVO.initialPosition - (pnlVO.totalWeightedCashIn - pnlVO.totalWeightedCashOut)
+        pnlVO.pnlWeightedAmount =  0 #pnlVO.finalPosition - pnlVO.initialPosition - (pnlVO.totalWeightedCashIn - pnlVO.totalWeightedCashOut)
         pnlVO.tir = (pnlVO.pnlAmount / (pnlVO.initialPosition + (pnlVO.totalCashIn - pnlVO.totalCashOut)))*100
-        pnlVO.weightedTir = (pnlVO.pnlAmount / (pnlVO.initialPosition + (pnlVO.totalWeightedCashIn - pnlVO.totalWeightedCashOut)))*100
+        pnlVO.weightedTir = 0 #(pnlVO.pnlAmount / (pnlVO.initialPosition + (pnlVO.totalWeightedCashIn - pnlVO.totalWeightedCashOut)))*100
         return pnlVO
         
     def calculateCustodyPnL(self, pnlCalculationList, fromDate, toDate):
@@ -87,34 +87,50 @@ class PnLLO():
         custodyDictOID = Engine.getCustodyDictOID()
         for custodyOID in custodyDictOID.iterkeys():
             pnlCalculationList.append(self.calculatePnl(custodyOID, fromDate, toDate))
-            
-    def setReferenceData(self, fromDate, toDate):
+    
+    def setPositionDict(self, fromDate, toDate, setLastMarketData):
         from engine.engine import Engine
-        #build positions
+        today = datetime.now().date()
         self.startPositionDict = Engine.buildPositions(date(1900, 1, 1), fromDate, False)
         if len(self.startPositionDict) == 0:
             logging.warning("Empty start position dict")
-        self.finalPositionDict = Engine.buildPositions(date(1900, 1, 1), toDate, True)
+        self.finalPositionDict = Engine.buildPositions(date(1900, 1, 1), toDate, setLastMarketData)
         if len(self.finalPositionDict) == 0:
             logging.warning("Empty final position dict")
+    
+    def setReferenceData(self, fromDate, toDate):
+        from core.cache import Singleton, MainCache
+        mainCache = Singleton(MainCache)
+        #build positions
+        today = datetime.now().date()
+        if today == toDate:
+            setLastMarketData = True
+        else:
+            setLastMarketData = False    
+        self.setPositionDict(fromDate, toDate, setLastMarketData)
         self.startWorkingDay = Function.getLastWorkingDay(fromDate)
-        self.finalWorkingDay = Function.getLastWorkingDay(toDate)
         startUsdMxn = DaoCurrency.getCurrencyValueByDate("USD/MXN", self.startWorkingDay)
         if len(startUsdMxn) == 0:
-            logging.warning("start USDMXN not found: " + str(self.startWorkingDay))
-        finalUsdMxn = DaoCurrency.getCurrencyValueByDate("USD/MXN", self.finalWorkingDay)
-        if len(finalUsdMxn) == 0:
-            logging.warning("final USDMXN not found: " + str(self.finalWorkingDay))    
+                logging.warning("start USDMXN not found: " + str(self.startWorkingDay))
+        if setLastMarketData:
+            finalUsdMxn = mainCache.usdMXN
+        else:
+            self.finalWorkingDay = Function.getLastWorkingDay(toDate)
+            currencyRS = DaoCurrency.getCurrencyValueByDate("USD/MXN", self.finalWorkingDay)
+            if len(currencyRS) == 0:
+                logging.warning("final USDMXN not found: " + str(self.finalWorkingDay))
+            finalUsdMxn =  currencyRS[0][0]
         for position in (self.startPositionDict[Constant.CONST_POSITION_DICT]).itervalues():
             if position.asset.assetType != 'BOND':
                 price = DaoPrice.getPriceByDate(position.getMainName(), self.startWorkingDay)
                 if len(price) == 0:
-                    logging.warning("price not found: " + position.getMainName())    
+                    logging.warning("price not found: " + position.getMainName() + " " + str(self.startWorkingDay))    
                 position.setSpecificMarketData(price[0][0], startUsdMxn[0][0])
-        for position in (self.finalPositionDict[Constant.CONST_POSITION_DICT]).itervalues():
-            if position.asset.assetType != 'BOND':
-                price = DaoPrice.getPriceByDate(position.getMainName(), self.finalWorkingDay)
-                if len(price) == 0:
-                    logging.warning("price not found: " + position.getMainName())  
-                position.setSpecificMarketData(price[0][0], finalUsdMxn[0][0])
+        if not setLastMarketData: 
+            for position in (self.finalPositionDict[Constant.CONST_POSITION_DICT]).itervalues():
+                if position.asset.assetType != 'BOND':
+                    price = DaoPrice.getPriceByDate(position.getMainName(), self.finalWorkingDay)
+                    if len(price) == 0:
+                        logging.warning("price not found: " + position.getMainName() + " " + str(self.finalWorkingDay)) 
+                    position.setSpecificMarketData(price[0][0], finalUsdMxn)
         
