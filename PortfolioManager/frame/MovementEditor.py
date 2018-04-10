@@ -171,6 +171,7 @@ class MovementEditor(QWidget):
         else:
             rate = None;
             maturityDate = None
+            tenor = None
         price = self.txtPrice.text()
         grossAmount = self.txtGrossAmount.text()
         netAmount = self.txtNetAmount.text()

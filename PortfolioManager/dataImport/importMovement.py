@@ -1,4 +1,5 @@
 from datetime import date
+import datetime
 import logging
 
 import pandas
@@ -43,7 +44,7 @@ for index, rfRow in enumerate(movementDateValues):
     serie = str(serieValues[index])
     assetName  = assetNameValues[index]
     quantity = int(quantityValues[index])
-    if movementType == 'BOND' and direction == 'ISR' and assetName == 'CETES':
+    if movementType == 'BOND' and direction == 'ISR' and assetName == 'CETES' and 1==2:
         try:
             totalAmount = 0
             rs = DaoTax.getTaxByExternalID(externalID + "-" + str(0))
@@ -71,33 +72,45 @@ for index, rfRow in enumerate(movementDateValues):
         except Exception as e:
             print(e)
             print (externalID)
-    #===========================================================================
-    # elif movementType == 'CASH' and direction == 'IN':
-    #     try:
-    #         rs = DaoCashMovement.getCashMovementsByExternalID(externalID)
-    #         if len(rs) == 0:
-    #             m = CashMovement(None)
-    #             m.setAttr(None, amount, direction, custodyOID, acquisitionDate, comment, externalID)
-    #             newID = DaoCashMovement.insert(m)
-    #             print("ADD externalID " + str(externalID) + " ID: " + str(newID))
-    #         else:
-    #             print("CANNOT ADD externalID " + str(externalID))
-    #     except Exception as e:
-    #         print(e)
-    #         print (externalID)
-    # elif movementType == 'CETES': 
-    #     assetOID = assetDictByName[assetNameValues[index]].OID
-    #     price = float(priceValues[index])
-    #     grossAmount = float(amount)
-    #     netAmount = float(amount)
-    #     tenor = int(tenorValues[index])
-    #     rate = round(float(rateValues[index])/100, 5)
-    #     rs = DaoMovement.getMovementsByExternalID(externalID)
-    #     if len(rs) == 0:
-    #         m = Movement(None)
-    #         m.setAttr( None, assetOID, direction, acquisitionDate, quantity, price, rate, grossAmount, netAmount, 0, 0, 0, externalID, custodyOID, comment, tenor)
-    #         newID = DaoMovement.insertMovement(m)
-    #         print("ADD externalID " + str(externalID))
-    #     else:
-    #         print("CANNOT ADD externalID " + str(externalID))
-    #===========================================================================
+    elif movementType == 'CASH' and direction == 'IN' and 1==2:
+        try:
+            rs = DaoCashMovement.getCashMovementsByExternalID(externalID)
+            if len(rs) == 0:
+                m = CashMovement(None)
+                m.setAttr(None, amount, direction, custodyOID, acquisitionDate, comment, externalID)
+                newID = DaoCashMovement.insert(m)
+                print("ADD externalID " + str(externalID) + " ID: " + str(newID))
+            else:
+                print("CANNOT ADD externalID " + str(externalID))
+        except Exception as e:
+            print(e)
+            print (externalID)
+    elif movementType == 'BOND' and assetName == 'CETES' and direction == 'BUY' and 1==2: 
+        assetOID = assetDictByName[assetNameValues[index]].OID
+        price = float(priceValues[index])
+        grossAmount = float(amount)
+        netAmount = float(amount)
+        tenor = int(tenorValues[index])
+        rate = round(float(rateValues[index])/100, 5)
+        maturityDate = acquisitionDate + datetime.timedelta(days = int(tenor))
+        rs = DaoMovement.getMovementsByExternalID(externalID)
+        if len(rs) == 0:
+            m = Movement(None)
+            m.setAttr( None, assetOID, direction, acquisitionDate, quantity, price, rate, grossAmount, netAmount, 0, 0, 0, externalID, custodyOID, comment, tenor, maturityDate)
+            newID = DaoMovement.insertMovement(m)
+            print("ADD externalID " + str(externalID))
+        else:
+            print("CANNOT ADD externalID " + str(externalID))
+    elif movementType == 'FUND': 
+        assetOID = assetDictByName[assetNameValues[index]].OID
+        price = float(priceValues[index])
+        grossAmount = float(amount)
+        netAmount = float(amount)
+        rs = DaoMovement.getMovementsByExternalID(externalID)
+        if len(rs) == 0:
+            m = Movement(None)
+            m.setAttr( None, assetOID, direction, acquisitionDate, quantity, price, None, grossAmount, netAmount, 0, 0, 0, externalID, custodyOID, comment, None, None)
+            newID = DaoMovement.insertMovement(m)
+            print("ADD externalID " + str(externalID))
+        else:
+            print("CANNOT ADD externalID " + str(externalID))
