@@ -213,6 +213,15 @@ class Engine:
         return assetDict 
      
     @staticmethod
+    def getAssetDictByOriginName():
+        assetRS = DaoAsset().getAssetList()
+        assetDict = {}
+        for (assetRow) in assetRS:
+            asset = Asset(assetRow)
+            assetDict[asset.originName] = asset
+        return assetDict 
+
+    @staticmethod
     def getAssetDictOID():
         assetRS = DaoAsset().getAssetList()
         assetDict = {}

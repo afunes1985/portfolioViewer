@@ -67,9 +67,13 @@ class DaoMovement():
         DbConnector().doInsert(insertSentence, (movement.asset.OID, movement.buySell, movement.acquisitionDate, movement.quantity,
                                                 movement.price, movement.rate, movement.grossAmount, movement.netAmount,
                                                 movement.commissionPercentage, movement.commissionAmount, movement.commissionVATAmount, movement.tenor, 
-                                                movement.maturityDate, movement.custodyOID, movement.externalID, movement.comment))
+                                                movement.maturityDate, movement.custody.OID, movement.externalID, movement.comment))
 
-    
+    @staticmethod
+    def deleteMovement(movementOID):
+        deleteSentence = """delete from movement where id =%s"""
+        DbConnector().doDelete(deleteSentence, (movementOID,))
+        
 class DaoAsset():
     def getAssetTypes(self):
         query = '''SELECT DISTINCT ASSET_TYPE
@@ -125,7 +129,7 @@ class DaoCorporateEvent():
 
     @staticmethod
     def getCorporateEventList():
-        query = """SELECT ce.id, CE.CUSTODY_OID, CE.CORPORATE_EVENT_TYPE_OID, CE.ASSET_OID,  CE.PAYMENT_DATE, CE.GROSS_AMOUNT, CE.NET_AMOUNT, COMMENT
+        query = """SELECT ce.id, CE.CUSTODY_OID, CE.CORPORATE_EVENT_TYPE_OID, CE.ASSET_OID,  CE.PAYMENT_DATE, CE.GROSS_AMOUNT, CE.NET_AMOUNT, COMMENT, CE.EXTERNAL_ID
                     FROM CORPORATE_EVENT CE                    
                 order by CE.PAYMENT_DATE desc"""
         resultSet = DbConnector().doQuery(query, "")
@@ -133,10 +137,34 @@ class DaoCorporateEvent():
    
     @staticmethod
     def insert(corporateEvent):
-        insertSentence = """insert corporate_event(corporate_event_type_oid, asset_oid, payment_date, gross_amount, custody_oid, net_amount, comment) 
-                       values (%s,%s,%s,%s,%s,%s,%s)"""
-        return DbConnector().doInsert(insertSentence, (corporateEvent.corporateEventType.OID,  corporateEvent.assetOID, corporateEvent.paymentDate, corporateEvent.grossAmount, corporateEvent.custody.OID, corporateEvent.netAmount, corporateEvent.comment))
+        insertSentence = """insert corporate_event(corporate_event_type_oid, asset_oid, payment_date, gross_amount, custody_oid, net_amount, comment, external_id) 
+                       values (%s,%s,%s,%s,%s,%s,%s,%s)"""
+        return DbConnector().doInsert(insertSentence, (corporateEvent.corporateEventType.OID,  corporateEvent.asset.OID, corporateEvent.paymentDate, corporateEvent.grossAmount, corporateEvent.custody.OID, corporateEvent.netAmount, corporateEvent.comment, corporateEvent.externalID))
 
+    @staticmethod
+    def getCorporateEventByExternalID(externalID):
+        query = '''SELECT ce.external_id  
+                    FROM corporate_event as ce 
+                    WHERE ce.external_id = %s'''
+        resultSet = DbConnector().doQuery(query, (externalID,))
+        return resultSet
+    
+    @staticmethod
+    def getCorporateEventByDateAndAsset(date, assetOID):
+        query = '''SELECT ce.ID, ce.gross_amount  
+                    FROM corporate_event as ce 
+                    WHERE ce.payment_date = %s
+                        and ce.asset_oid = %s'''
+        resultSet = DbConnector().doQuery(query, (date,assetOID,))
+        return resultSet
+    
+    @staticmethod
+    def updateNetAmount(OID, netAmount):
+        insertSentence = """update corporate_event set net_amount = %s where ID = %s"""
+        return DbConnector().doInsert(insertSentence, (netAmount, OID))
+
+    
+    
 class DaoTax():
     @staticmethod
     def insert(tax):
@@ -203,6 +231,11 @@ class DaoCashMovement():
         resultSet = DbConnector().doQuery(query, (externalID,))
         return resultSet
     
+    @staticmethod
+    def deleteCashMovement(cashMovementOID):
+        deleteSentence = """delete from cash_movement where id =%s"""
+        DbConnector().doDelete(deleteSentence, (cashMovementOID,))
+    
 class DaoReportMovement():  
     @staticmethod
     def getMovements(fromDate, toDate, movementType, assetName, custodyName):
@@ -253,9 +286,9 @@ class DaoReportMovement():
                     NULL AS RATE,
                     gross_amount AS GROSS_AMOUNT,
                     NET_AMOUNT AS NET_AMOUNT,
-                    0 AS COMMISSION_PERCENTAGE,
-                    0 AS COMMISSION_AMOUNT,
-                    0 AS COMMISSION_IVA_AMOUNT,
+                    NULL AS COMMISSION_PERCENTAGE,
+                    NULL AS COMMISSION_AMOUNT,
+                    NULL AS COMMISSION_IVA_AMOUNT,
                     NULL AS TENOR,
                     c.name AS CUSTODY_NAME,
                     t.ID AS TAX_ID,
@@ -284,9 +317,9 @@ class DaoReportMovement():
                     NULL AS RATE,
                     amount AS GROSS_AMOUNT,
                     amount AS NET_AMOUNT,
-                    0 AS COMMISSION_PERCENTAGE,
-                    0 AS COMMISSION_AMOUNT,
-                    0 AS COMMISSION_IVA_AMOUNT,
+                    NULL AS COMMISSION_PERCENTAGE,
+                    NULL AS COMMISSION_AMOUNT,
+                    NULL AS COMMISSION_IVA_AMOUNT,
                     NULL AS TENOR,
                     c.name AS CUSTODY_NAME,
                     null AS TAX_ID,

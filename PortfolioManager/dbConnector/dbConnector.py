@@ -3,7 +3,6 @@ Created on Feb 12, 2017
 
 @author: afunes
 '''
-import PySide
 from mysql.connector import errorcode
 import mysql.connector
 from datetime import date
@@ -34,6 +33,16 @@ class DbConnector():
         cnx.close()
     
     def doInsert(self, sentence, params):
+        cnx = self.initConnection()
+        cursor = cnx.cursor()
+        cursor.execute(sentence,params)
+        cursor.fetchone()
+        lastRowID = cursor.lastrowid
+        cnx.commit()
+        self.closeConnection(cnx)
+        return lastRowID
+       
+    def doDelete(self, sentence, params):
         cnx = self.initConnection()
         cursor = cnx.cursor()
         cursor.execute(sentence,params)

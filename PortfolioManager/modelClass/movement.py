@@ -34,7 +34,7 @@ class Movement():
         self.commissionAmount = commissionAmount
         self.commissionVATAmount = commissionVATAmount
         self.externalID = externalID
-        self.custodyOID = custodyOID
+        self.custody = mainCache.custodyDictOID[custodyOID]
         self.comment = comment
         self.tenor = tenor
         self.maturityDate = maturityDate

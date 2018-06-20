@@ -8,9 +8,10 @@ from PySide.QtGui import QTabWidget
 
 from frame.CorporateEventEditor import CorporateEventEditor
 from frame.CorporateEventPanel import CorporateEventPanel
-from frame.PositionPanel import PositionPanel
+from frame.ImportMovementPanel import ImportMovementPanel
 from frame.MovementEditor import MovementEditor
 from frame.PnLPanel import PnLPanel
+from frame.PositionPanel import PositionPanel
 from frame.ReportMovementPanel import ReportMovementPanel
 
 
@@ -32,6 +33,7 @@ class MainWindow(QtGui.QMainWindow):
         self.tabPanel.addTab(self.createCorporateEventPanel(), "Corporate Event")
         self.tabPanel.addTab(self.createPnLPanel(), "PnL")
         self.tabPanel.addTab(self.createReportMovementPanel(), "Report Movement")
+        self.tabPanel.addTab(self.createImporterMovementPanel(), "Import Movement")
         return self.tabPanel
     
     def createCorporateEventPanel(self):
@@ -49,6 +51,10 @@ class MainWindow(QtGui.QMainWindow):
     def createReportMovementPanel(self):
         self.reportMovementPanel = ReportMovementPanel()
         return self.reportMovementPanel
+    
+    def createImporterMovementPanel(self):
+        self.importerMovement = ImportMovementPanel()
+        return self.importerMovement
     
     def createMenu(self):
         self.fileMenu = self.menuBar().addMenu("&Add")

@@ -89,18 +89,24 @@ class QTableWidgetItemInt(QTableWidgetItem):
         self.setFont(font)
         
 class PanelWithTable(QtGui.QWidget):
+    
     def addItemtoTable(self, table, listItem, row, column, isBold):
-        if isinstance(listItem[column], basestring):
-            Item = QTableWidgetItemString(listItem[column], isBold)
-        elif isinstance(listItem[column], datetime):
-            Item = QTableWidgetItemString(listItem[column].strftime("%Y-%m-%d"), isBold)
-        elif isinstance(listItem[column], (int, long)):
-            Item = QTableWidgetItemInt(listItem[column], isBold)
-        elif isinstance(listItem[column], (float, Decimal)):
-            if float(listItem[column]).is_integer():
-                Item = QTableWidgetItemInt(listItem[column], isBold)
+        self.addItemtoTable2(table, listItem[column], row, column, isBold)
+        
+    def addItemtoTable2(self, table, cellValue, row, column, isBold, backgroundColor=None):
+        if isinstance(cellValue, basestring):
+            Item = QTableWidgetItemString(cellValue, isBold)
+        elif isinstance(cellValue, datetime):
+            Item = QTableWidgetItemString(cellValue.strftime("%Y-%m-%d"), isBold)
+        elif isinstance(cellValue, (int, long)):
+            Item = QTableWidgetItemInt(cellValue, isBold)
+        elif isinstance(cellValue, (float, Decimal)):
+            if float(cellValue).is_integer():
+                Item = QTableWidgetItemInt(cellValue, isBold)
             else:
-                Item = QTableWidgetItem6Decimal(listItem[column], isBold)
-        elif listItem[column] is None:
-            Item = QTableWidgetItemString(listItem[column], isBold)
+                Item = QTableWidgetItem6Decimal(cellValue, isBold)
+        elif cellValue is None:
+            Item = QTableWidgetItemString(cellValue, isBold)
+        if (backgroundColor is not None):
+            Item.setBackground(backgroundColor)
         table.setItem(row,column,Item)
