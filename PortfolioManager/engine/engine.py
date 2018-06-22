@@ -349,6 +349,14 @@ class Engine:
         reportMovementLO = ReportMovementLO()
         reportMovementLO.setMovementList(DaoReportMovement.getMovements(fromDate, toDate, movementType, assetName, custodyName))
         return reportMovementLO
+    
+    @staticmethod
+    def getAssetTranslatorDict():
+        rs = DaoAsset().getAssetTranslatorList()
+        returnDict = {}
+        for (row) in rs:
+            returnDict[row[0]] = row[1]
+        return returnDict
         
         
         

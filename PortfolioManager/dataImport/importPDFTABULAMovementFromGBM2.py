@@ -35,11 +35,6 @@ class MovementImporter():
                  'Compra de Acciones.' : 'EQUITY_BUY', 
                  'Venta Soc. de Inv. - Cliente' : 'FUND_SELL',
                  'DEPOSITO DE EFECTIVO' : 'CASH'}
-    assetTranslator = {'GBMF2 BF' : 'GBMF2BF.MX',
-                   'GRUMA B' : 'GRUMAB.MX',
-                   'INTC *' : 'INTC.MX',
-                   'AMZN *' : 'AMZN.MX',
-                   'MSFT *' : 'MSFT.MX'}
     
     def last_day_of_month(self, any_day):
         next_month = any_day.replace(day=28) + datetime.timedelta(days=4)  # this will never fail
@@ -49,6 +44,7 @@ class MovementImporter():
         imLO = ImportMovementLO()
         fileName = filePath[filePath.rfind("/", 0, len(filePath))+1: len(filePath)]
         custodyName = fileName[0:fileName.find("_")]
+        self.assetTranslator = Engine.getAssetTranslatorDict()
         if (custodyName == 'GBM'):
             imLO.setMovementList(self.getMovementListFromGBM(filePath, fileName, imLO))
         imLO.setCustodyName(custodyName)
@@ -92,7 +88,8 @@ class MovementImporter():
                     movementList.append(ce)
                 elif(movementType == 'Compra Soc. de Inv. - Cliente'
                         or movementType == "Compra de Acciones."
-                        or movementType == "Venta Soc. de Inv. - Cliente"):
+                        or movementType == "Venta Soc. de Inv. - Cliente"
+                        or movementType ==  "Venta de Acciones."):
                     assetName = key[3]['text']
                     asset = assetDict[self.assetTranslator.get(assetName, assetName)]
                     print (assetName)
@@ -104,8 +101,9 @@ class MovementImporter():
                     print (commission)
                     commissionVAT = self.replaceComma(key[9]['text'])
                     print (commissionVAT)
+                    grossAmount = float(str('{0:.6f}'.format(float(price*quantity))))
                     m = Movement(None)
-                    m.setAttr( None, asset.OID, self.getBuyOrSell(movementType), paymentDate, float(quantity), float(price), None, float(price*quantity), float(netAmount), self.getCommissionPercentage(movementType), float(commission), float(commissionVAT), externalID, custodyOID, comment, None, None)
+                    m.setAttr( None, asset.OID, self.getBuyOrSell(movementType), paymentDate, float(quantity), float(price), None, grossAmount , float(netAmount), self.getCommissionPercentage(movementType), float(commission), float(commissionVAT), externalID, custodyOID, comment, None, None)
                     movementList.append(m)
                 else:
                     assetName = key[3]['text']
@@ -119,13 +117,15 @@ class MovementImporter():
                     print (commission)
                     commissionVAT = self.replaceComma(key[9]['text'])
                     print (commissionVAT)
+                    grossAmount = float(str('{0:.6f}'.format(float(price*quantity))))
                     m = Movement(None)
-                    m.setAttr( None, asset.OID, 'NOT CATEGORY', paymentDate, float(quantity), float(price), None, float(price*quantity), float(netAmount), self.getCommissionPercentage(movementType), float(commission), float(commissionVAT), externalID, custodyOID, "NOT CATEGORY", None, None)
+                    m.setAttr( None, asset.OID, 'NOT CATEGORY', paymentDate, float(quantity), float(price), None, grossAmount, float(netAmount), self.getCommissionPercentage(movementType), float(commission), float(commissionVAT), externalID, custodyOID, "NOT CATEGORY", None, None)
                     movementList.append(m)
         return movementList 
     
     def getCommissionPercentage(self, movementType):
-        if(movementType == "Compra de Acciones."):
+        if(movementType == "Compra de Acciones."
+            or movementType ==  "Venta de Acciones."):
             return Constant.CONST_DEF_EQUITY_COMMISSION_PERCENTAGE
         else:
             return 0
@@ -134,10 +134,11 @@ class MovementImporter():
         if(movementType == 'Compra Soc. de Inv. - Cliente'
            or movementType == "Compra de Acciones."):
             return Constant.CONST_BUY
-        elif(movementType == 'Venta Soc. de Inv. - Cliente'):
+        elif(movementType == 'Venta Soc. de Inv. - Cliente'
+             or movementType ==  "Venta de Acciones."):
             return Constant.CONST_SELL
         else:
             return 'NOT CATEGORY'
 
     def replaceComma(self, value):
-        return float(value.replace(',',''))
+        return float(float(value.replace(',','')))

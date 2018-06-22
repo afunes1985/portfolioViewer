@@ -99,6 +99,13 @@ class DaoAsset():
         resultSet = DbConnector().doQuery(query, (assetName,))
         return resultSet 
         
+    def getAssetTranslatorList(self):
+        query = '''SELECT CODE, a.name 
+                        FROM ASSET_TRANSLATOR at
+                            inner join asset a on a.ID = at.asset_id'''
+        resultSet = DbConnector().doQuery(query, "")
+        return resultSet 
+        
 class DaoCustody():
     
     def getCustodyList(self):
@@ -163,7 +170,10 @@ class DaoCorporateEvent():
         insertSentence = """update corporate_event set net_amount = %s where ID = %s"""
         return DbConnector().doInsert(insertSentence, (netAmount, OID))
 
-    
+    @staticmethod
+    def deleteCorporateEvent(movementOID):
+        deleteSentence = """delete from corporate_event where id =%s"""
+        DbConnector().doDelete(deleteSentence, (movementOID,))
     
 class DaoTax():
     @staticmethod
