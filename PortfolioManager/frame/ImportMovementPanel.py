@@ -4,9 +4,10 @@ Created on 15 jun. 2018
 @author: afunes
 '''
 from PySide import QtGui, QtCore
-from PySide.QtGui import QTableWidget, QPushButton, QSizePolicy
+from PySide.QtGui import QTableWidget, QPushButton, QSizePolicy, QInputDialog, \
+    QMessageBox
 
-from dao.dao import DaoMovement, DaoCorporateEvent, DaoCashMovement
+from dao.dao import DaoMovement, DaoCorporateEvent, DaoCashMovement, DaoTax
 from dataImport.importPDFTABULAMovementFromGBM2 import MovementImporter
 from engine.engine import Engine
 from frame.ImportMovementFilter import ImportMovementFilter
@@ -15,6 +16,7 @@ from modelClass.cashMovement import CashMovement
 from modelClass.constant import Constant
 from modelClass.corporateEvent import CorporateEvent
 from modelClass.movement import Movement
+from modelClass.tax import Tax
 
 
 class ImportMovementPanel(PanelWithTable):
@@ -48,6 +50,7 @@ class ImportMovementPanel(PanelWithTable):
         self.table.setHorizontalHeaderLabels(self.columnList)
         #self.pnLTableWidget.resizeColumnsToContents()
         self.table.sortItems(Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_DATE)
+        self.table.doubleClicked.connect(self.doImportOrDelete)
         self.table.resizeRowsToContents()
         self.table.setFixedSize(1100, 900) 
         return self.table 
@@ -71,7 +74,7 @@ class ImportMovementPanel(PanelWithTable):
         isBold = False
         color = QtGui.QColor(204, 255, 153)
         for movement in tableList:
-            self.addItemtoTable2(self.table,None,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_ID, isBold, color)
+            self.addItemtoTable2(self.table,"NEW",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_ID, isBold, color)
             self.addItemtoTable2(self.table,movement.externalID,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EXTERNAL_ID, isBold, color)
             self.addItemtoTable2(self.table,movement.comment,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_COMMENT, isBold, color)
             self.addItemtoTable2(self.table,movement.custody.name,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_CUSTODY_NAME, isBold, color)
@@ -79,7 +82,8 @@ class ImportMovementPanel(PanelWithTable):
                 self.addItemtoTable2(self.table,"MOVEMENT",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_TYPE, isBold, color)
                 self.addItemtoTable2(self.table,"TRX",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_SUB_TYPE, isBold, color)
                 self.addItemtoTable2(self.table,movement.buySell,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_DIRECTION, isBold, color)
-                self.addItemtoTable2(self.table,movement.asset.name,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_ASSET_NAME, isBold, color)
+                if(movement.asset is not None):
+                    self.addItemtoTable2(self.table,movement.asset.name,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_ASSET_NAME, isBold, color)
                 self.addItemtoTable2(self.table,movement.acquisitionDate,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_DATE, isBold, color)
                 self.addItemtoTable2(self.table,movement.quantity,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_QUANTITY, isBold, color)
                 self.addItemtoTable2(self.table,movement.price,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_PRICE, isBold, color)
@@ -95,10 +99,14 @@ class ImportMovementPanel(PanelWithTable):
             elif(isinstance(movement, CorporateEvent)):
                 self.addItemtoTable2(self.table,"CORP EVENT",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_TYPE, isBold, color)
                 self.addItemtoTable2(self.table,"CASH DIVIDEND",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_SUB_TYPE, isBold, color)
-                self.addItemtoTable2(self.table,movement.asset.name,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_ASSET_NAME, isBold, color)
+                if(movement.asset is not None):
+                    self.addItemtoTable2(self.table,movement.asset.name,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_ASSET_NAME, isBold, color)
                 self.addItemtoTable2(self.table,movement.paymentDate,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_DATE, isBold, color)
                 self.addItemtoTable2(self.table,movement.grossAmount,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_GROSS_AMOUNT, isBold, color)
                 self.addItemtoTable2(self.table,movement.netAmount,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_NET_AMOUNT, isBold, color)
+                if (movement.tax is not None):
+                    self.addItemtoTable2(self.table,"NEW",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_TAX_ID, isBold, color)
+                    self.addItemtoTable2(self.table,movement.tax.taxAmount,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_TAX_AMOUNT, isBold, color)    
             elif(isinstance(movement, CashMovement)):
                 self.addItemtoTable2(self.table,"MOVEMENT",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_TYPE, isBold, color)
                 self.addItemtoTable2(self.table,"CASH",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_SUB_TYPE, isBold, color)
@@ -137,38 +145,55 @@ class ImportMovementPanel(PanelWithTable):
             self.addItemtoTable(self.table,listItem,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EXTERNAL_ID, isBold)
             self.row += 1
     
+    def doImportOrDelete(self):
+        index = self.getCurrentRowValue(Constant.CONST_COLUMN_IMPORT_MOVEMENT_HIDDEN_ID)
+        if (index is not None): 
+            self.doImport()
+        else:
+            self.doDelete()
+            
     def doImport(self):
-        index = self.table.item(self.table.currentRow(), Constant.CONST_COLUMN_IMPORT_MOVEMENT_HIDDEN_ID).text()
-        operation = self.imLO.movementList[int(index)]
-        print (operation.externalID)
-        if(isinstance(operation, Movement)):
-            rs = DaoMovement.getMovementsByExternalID(operation.externalID)
-            if len(rs) == 0:
-                newID = DaoMovement.insertMovement(operation)
-                print("ADD externalID " + str(operation.externalID) + " newID: " + str(newID))
+        index = self.getCurrentRowValue(Constant.CONST_COLUMN_IMPORT_MOVEMENT_HIDDEN_ID)
+        if (index is not None): 
+            operation = self.imLO.movementList[int(index)]
+            print (operation.externalID)
+            newID = None
+            taxNewID = None
+            if(isinstance(operation, Movement)):
+                rs = DaoMovement.getMovementsByExternalID(operation.externalID)
+                if len(rs) == 0:
+                    newID = DaoMovement.insertMovement(operation)
+            elif(isinstance(operation, CorporateEvent)):
+                rs = DaoCorporateEvent.getCorporateEventByExternalID(operation.externalID)
+                if len(rs) == 0:
+                    newID = DaoCorporateEvent.insert(operation)
+                    print(newID)
+                    if (operation.tax is not None):
+                        rs = DaoTax.getTaxByExternalID(operation.tax.externalID);
+                        if len(rs) == 0:
+                            operation.tax.originOID = newID
+                            taxNewID = DaoTax.insert(operation.tax)
+            elif(isinstance(operation, CashMovement)):
+                rs = DaoCashMovement.getCashMovementsByExternalID(operation.externalID)
+                if len(rs) == 0:
+                    newID = DaoCashMovement.insert(operation)
+            box = QMessageBox()
+            box.setWindowTitle('ADD')
+            if (newID is None):
+                box.setText("CANNOT ADD externalID "+ operation.externalID)
             else:
-                print("CANNOT ADD externalID " + str(operation.externalID))
-        elif(isinstance(operation, CorporateEvent)):
-            rs = DaoCorporateEvent.getCorporateEventByExternalID(operation.externalID)
-            if len(rs) == 0:
-                newID = DaoCorporateEvent.insert(operation)
-                print(newID)
-                print("ADD externalID " + str(operation.externalID) + " newID: " + str(newID))
-            else:
-                print("CANNOT ADD externalID " + str(operation.externalID))
-        elif(isinstance(operation, CashMovement)):
-            rs = DaoCashMovement.getCashMovementsByExternalID(operation.externalID)
-            if len(rs) == 0:
-                newID = DaoCashMovement.insert(operation)
-                print("ADD externalID " + str(operation.externalID) + " newID: " + str(newID))
-            else:
-                print("CANNOT ADD externalID " + str(operation.externalID))
-        
+                if(newID is not None and taxNewID is not None):
+                    box.setText("INSERTED " + operation.externalID + " NEWID: " + str(newID) + " NEWTAXID: "+ str(taxNewID))
+                else:
+                    box.setText("INSERTED " + operation.externalID + " NEWID: " + str(newID))
+            box.exec_()
+            
     def doDelete(self):
-        movementOID = self.table.item(self.table.currentRow(), Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_ID).text()
-        movementType = self.table.item(self.table.currentRow(), Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_TYPE).text()
-        movementSubType = self.table.item(self.table.currentRow(), Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_SUB_TYPE).text()
-        print(movementOID)
+        movementOID = self.getCurrentRowValue(Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_ID)
+        movementType = self.getCurrentRowValue(Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_TYPE) 
+        movementSubType = self.getCurrentRowValue(Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_SUB_TYPE) 
+        taxOID = self.getCurrentRowValue(Constant.CONST_COLUMN_IMPORT_MOVEMENT_TAX_ID)
+        result = 0
         if(movementType == 'MOVEMENT' and movementSubType == 'TRX'):
             result = DaoMovement.deleteMovement(movementOID)
             print (result)
@@ -176,5 +201,17 @@ class ImportMovementPanel(PanelWithTable):
             result = DaoCashMovement.deleteCashMovement(movementOID)
             print (result)
         elif(movementType == 'CORP EVENT' and movementSubType == 'CASH DIVIDEND'):
+            if (taxOID):
+                taxResult = DaoTax.deleteTax(taxOID)
             result = DaoCorporateEvent.deleteCorporateEvent(movementOID)
             print (result)
+        box = QMessageBox()
+        box.setWindowTitle('DELETED')
+        if (result == 0):
+            box.setText("CANNOT DELETE "+ movementType + "-" + movementSubType + "-" + movementOID)
+        else:
+            if(taxOID is None or taxOID == ""):
+                box.setText(movementType + "-" + movementSubType + "-" + movementOID +": " + str(result) + " record(s) deleted")
+            else:
+                box.setText(movementType + "-" + movementSubType + "-" + movementOID +": " + str(result) + " record(s) deleted and taxID: " + taxOID + " " + str(taxResult) + " record(s) deleted")
+        box.exec_()

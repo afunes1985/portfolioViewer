@@ -64,7 +64,7 @@ class DaoMovement():
                                %s,%s,%s,%s,
                                %s,%s,%s,%s,
                                %s,%s,%s,%s)"""
-        DbConnector().doInsert(insertSentence, (movement.asset.OID, movement.buySell, movement.acquisitionDate, movement.quantity,
+        return DbConnector().doInsert(insertSentence, (movement.asset.OID, movement.buySell, movement.acquisitionDate, movement.quantity,
                                                 movement.price, movement.rate, movement.grossAmount, movement.netAmount,
                                                 movement.commissionPercentage, movement.commissionAmount, movement.commissionVATAmount, movement.tenor, 
                                                 movement.maturityDate, movement.custody.OID, movement.externalID, movement.comment))
@@ -72,7 +72,7 @@ class DaoMovement():
     @staticmethod
     def deleteMovement(movementOID):
         deleteSentence = """delete from movement where id =%s"""
-        DbConnector().doDelete(deleteSentence, (movementOID,))
+        return DbConnector().doDelete(deleteSentence, (movementOID,))
         
 class DaoAsset():
     def getAssetTypes(self):
@@ -173,7 +173,7 @@ class DaoCorporateEvent():
     @staticmethod
     def deleteCorporateEvent(movementOID):
         deleteSentence = """delete from corporate_event where id =%s"""
-        DbConnector().doDelete(deleteSentence, (movementOID,))
+        return DbConnector().doDelete(deleteSentence, (movementOID,))
     
 class DaoTax():
     @staticmethod
@@ -189,6 +189,11 @@ class DaoTax():
                     WHERE t.external_id = %s'''
         resultSet = DbConnector().doQuery(query, (externalID,))
         return resultSet
+    
+    @staticmethod
+    def deleteTax(taxOID):
+        deleteSentence = """delete from tax where id =%s"""
+        return DbConnector().doDelete(deleteSentence, (taxOID,))
 
 class DaoPrice():
     @staticmethod
@@ -244,7 +249,7 @@ class DaoCashMovement():
     @staticmethod
     def deleteCashMovement(cashMovementOID):
         deleteSentence = """delete from cash_movement where id =%s"""
-        DbConnector().doDelete(deleteSentence, (cashMovementOID,))
+        return DbConnector().doDelete(deleteSentence, (cashMovementOID,))
     
 class DaoReportMovement():  
     @staticmethod

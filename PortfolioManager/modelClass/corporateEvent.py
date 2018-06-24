@@ -14,26 +14,27 @@ class CorporateEvent():
     netAmount = 0
     comment = None
     externalID = None
+    tax = None
         
     def __init__(self, corporateEventRow):
         from core.cache import Singleton, MainCache
         if(corporateEventRow is not None):
             mainCache = Singleton(MainCache)
-            self.setAttr(corporateEventRow[0],corporateEventRow[1] , mainCache.corporateEventTypeOID[corporateEventRow[2]], mainCache.assetDictOID[corporateEventRow[3]], corporateEventRow[4], corporateEventRow[5], corporateEventRow[6], corporateEventRow[7], corporateEventRow[8])
+            self.setAttr(corporateEventRow[0],corporateEventRow[1] , mainCache.corporateEventTypeOID[corporateEventRow[2]], corporateEventRow[3], corporateEventRow[4], corporateEventRow[5], corporateEventRow[6], corporateEventRow[7], corporateEventRow[8])
     
-    def setAttr(self, OID, custodyOID, corporateEventType, asset, paymentDate, grossAmount, netAmount, comment, externalID):
+    def setAttr(self, OID, custodyOID, corporateEventType, assetOID, paymentDate, grossAmount, netAmount, comment, externalID):
         from core.cache import Singleton, MainCache
         mainCache = Singleton(MainCache)
         self.OID = OID
         self.custody = mainCache.custodyDictOID[custodyOID]
         self.corporateEventType = corporateEventType
-        self.asset = asset
+        self.asset = mainCache.assetDictOID.get(assetOID, None)
         self.paymentDate = paymentDate
         self.grossAmount = grossAmount
         self.netAmount = netAmount
         self.comment = comment
         self.externalID = externalID
-        
+    
 class Custody():
     OID = None
     name = None

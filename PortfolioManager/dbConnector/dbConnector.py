@@ -47,10 +47,10 @@ class DbConnector():
         cursor = cnx.cursor()
         cursor.execute(sentence,params)
         cursor.fetchone()
-        lastRowID = cursor.lastrowid
+        rowCount = cursor.rowcount
         cnx.commit()
         self.closeConnection(cnx)
-        return lastRowID
+        return rowCount
     
     def convertParams(self, params):
         paramToReturn = []

@@ -22,7 +22,7 @@ class Movement():
         from core.cache import Singleton, MainCache
         mainCache = Singleton(MainCache)
         self.OID = OID
-        self.asset = mainCache.assetDictOID[assetOID]
+        self.asset = mainCache.assetDictOID.get(assetOID,None)
         self.buySell = buySell
         self.acquisitionDate = acquisitionDate
         self.quantity = quantity

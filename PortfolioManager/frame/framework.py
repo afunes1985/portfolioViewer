@@ -110,3 +110,10 @@ class PanelWithTable(QtGui.QWidget):
         if (backgroundColor is not None):
             Item.setBackground(backgroundColor)
         table.setItem(row,column,Item)
+        
+    def getCurrentRowValue(self, rowNum):
+        value = self.table.item(self.table.currentRow(), rowNum)
+        if (value is not None):
+            return value.text()
+        else:
+            return None
