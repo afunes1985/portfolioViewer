@@ -11,12 +11,11 @@ from dao.dao import DaoMovement, DaoCorporateEvent, DaoCashMovement, DaoTax
 from dataImport.importPDFTABULAMovementFromGBM2 import MovementImporter
 from engine.engine import Engine
 from frame.ImportMovementFilter import ImportMovementFilter
-from frame.framework import PanelWithTable, QTableWidgetItemDecimal
+from frame.framework import PanelWithTable
 from modelClass.cashMovement import CashMovement
 from modelClass.constant import Constant
 from modelClass.corporateEvent import CorporateEvent
 from modelClass.movement import Movement
-from modelClass.tax import Tax
 
 
 class ImportMovementPanel(PanelWithTable):
@@ -55,19 +54,20 @@ class ImportMovementPanel(PanelWithTable):
         self.table.setFixedSize(1100, 900) 
         return self.table 
     
-    def doSubmit(self, filePath):
-        self.imLO = MovementImporter().getMovementList(filePath) 
+    def doSubmit(self, filePath, assetName):
+        self.imLO = MovementImporter().getMovementList(filePath, assetName) 
         self.table.setSortingEnabled(False) 
         self.table.clearContents()
-        countRowTable = len(self.imLO.movementList)
-        self.table.setRowCount(countRowTable)
-        self.renderTableForObject(self.imLO.movementList)
-        imLO2 = Engine.getReportMovementList(self.imLO.fromDate, self.imLO.toDate, 'ALL', 'ALL', self.imLO.custodyName)
-        countRowTable += len(imLO2.movementList)
-        self.table.setRowCount(countRowTable)
-        self.renderTableForRS(imLO2.movementList)
-        self.table.setSortingEnabled(True)
-        self.table.resizeRowsToContents() 
+        if (self.imLO.movementList is not None):
+            countRowTable = len(self.imLO.movementList)
+            self.table.setRowCount(countRowTable)
+            self.renderTableForObject(self.imLO.movementList)
+            imLO2 = Engine.getReportMovementList(self.imLO.fromDate, self.imLO.toDate, 'ALL', assetName, self.imLO.custodyName)
+            countRowTable += len(imLO2.movementList)
+            self.table.setRowCount(countRowTable)
+            self.renderTableForRS(imLO2.movementList)
+            self.table.setSortingEnabled(True)
+            self.table.resizeRowsToContents() 
     
     def renderTableForObject(self, tableList):
         self.row = 0
@@ -78,9 +78,9 @@ class ImportMovementPanel(PanelWithTable):
             self.addItemtoTable2(self.table,movement.externalID,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EXTERNAL_ID, isBold, color)
             self.addItemtoTable2(self.table,movement.comment,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_COMMENT, isBold, color)
             self.addItemtoTable2(self.table,movement.custody.name,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_CUSTODY_NAME, isBold, color)
+            self.addItemtoTable2(self.table,movement.getMovementType(),self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_TYPE, isBold, color)
+            self.addItemtoTable2(self.table,movement.getMovementSubType(),self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_SUB_TYPE, isBold, color)
             if(isinstance(movement, Movement)):
-                self.addItemtoTable2(self.table,"MOVEMENT",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_TYPE, isBold, color)
-                self.addItemtoTable2(self.table,"TRX",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_SUB_TYPE, isBold, color)
                 self.addItemtoTable2(self.table,movement.buySell,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_DIRECTION, isBold, color)
                 if(movement.asset is not None):
                     self.addItemtoTable2(self.table,movement.asset.name,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_ASSET_NAME, isBold, color)
@@ -97,8 +97,6 @@ class ImportMovementPanel(PanelWithTable):
                 #self.addItemtoTable2(self.table,movement,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_TAX_ID, isBold, color)    
 #             self.addItemtoTable2(self.table,listItem,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_TAX_AMOUNT, isBold, color)
             elif(isinstance(movement, CorporateEvent)):
-                self.addItemtoTable2(self.table,"CORP EVENT",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_TYPE, isBold, color)
-                self.addItemtoTable2(self.table,"CASH DIVIDEND",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_SUB_TYPE, isBold, color)
                 if(movement.asset is not None):
                     self.addItemtoTable2(self.table,movement.asset.name,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_ASSET_NAME, isBold, color)
                 self.addItemtoTable2(self.table,movement.paymentDate,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_DATE, isBold, color)
@@ -108,9 +106,7 @@ class ImportMovementPanel(PanelWithTable):
                     self.addItemtoTable2(self.table,"NEW",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_TAX_ID, isBold, color)
                     self.addItemtoTable2(self.table,movement.tax.taxAmount,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_TAX_AMOUNT, isBold, color)    
             elif(isinstance(movement, CashMovement)):
-                self.addItemtoTable2(self.table,"MOVEMENT",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_TYPE, isBold, color)
-                self.addItemtoTable2(self.table,"CASH",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_SUB_TYPE, isBold, color)
-                self.addItemtoTable2(self.table,"MXN",self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_ASSET_NAME, isBold, color)
+                self.addItemtoTable2(self.table,movement.asset.name,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_ASSET_NAME, isBold, color)
                 self.addItemtoTable2(self.table,movement.inOut,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_DIRECTION, isBold, color)
                 self.addItemtoTable2(self.table,movement.movementDate,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_DATE, isBold, color)
                 self.addItemtoTable2(self.table,movement.amount,self.row,Constant.CONST_COLUMN_IMPORT_MOVEMENT_GROSS_AMOUNT, isBold, color)
@@ -194,13 +190,13 @@ class ImportMovementPanel(PanelWithTable):
         movementSubType = self.getCurrentRowValue(Constant.CONST_COLUMN_IMPORT_MOVEMENT_EVENT_SUB_TYPE) 
         taxOID = self.getCurrentRowValue(Constant.CONST_COLUMN_IMPORT_MOVEMENT_TAX_ID)
         result = 0
-        if(movementType == 'MOVEMENT' and movementSubType == 'TRX'):
+        if(movementType == Constant.CONST_MOVEMENT_TYPE and movementSubType == Constant.CONST_MOVEMENT_SUB_TYPE):
             result = DaoMovement.deleteMovement(movementOID)
             print (result)
-        elif(movementType == 'MOVEMENT' and movementSubType == 'CASH'):
+        elif(movementType == Constant.CONST_MOVEMENT_TYPE and movementSubType == Constant.CONST_CASH_MOVEMENT_SUB_TYPE):
             result = DaoCashMovement.deleteCashMovement(movementOID)
             print (result)
-        elif(movementType == 'CORP EVENT' and movementSubType == 'CASH DIVIDEND'):
+        elif(movementType == Constant.CONST_CORP_EVENT_TYPE and movementSubType == Constant.CONST_CORP_EVENT_SUB_TYPE):
             if (taxOID):
                 taxResult = DaoTax.deleteTax(taxOID)
             result = DaoCorporateEvent.deleteCorporateEvent(movementOID)

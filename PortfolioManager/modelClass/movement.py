@@ -3,6 +3,7 @@ Created on Mar 18, 2017
 
 @author: afunes
 '''
+from modelClass.constant import Constant
 
 class Movement():
         
@@ -50,6 +51,12 @@ class Movement():
 
     def getAcquisitionDate(self):
         return self.acquisitionDate.strftime("%Y-%m-%d")
+    
+    def getMovementType(self):
+        return Constant.CONST_MOVEMENT_TYPE
+    
+    def getMovementSubType(self):
+        return Constant.CONST_MOVEMENT_SUB_TYPE
     
 class BondMovement(Movement):
     rate = 0

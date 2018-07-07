@@ -3,6 +3,8 @@ Created on Mar 18, 2017
 
 @author: afunes
 '''
+from modelClass.constant import Constant
+
 
 class CorporateEvent():
     OID = None
@@ -34,6 +36,12 @@ class CorporateEvent():
         self.netAmount = netAmount
         self.comment = comment
         self.externalID = externalID
+        
+    def getMovementType(self):
+        return Constant.CONST_CORP_EVENT_TYPE
+
+    def getMovementSubType(self):
+        return Constant.CONST_CORP_EVENT_SUB_TYPE
     
 class Custody():
     OID = None

@@ -8,7 +8,7 @@ from PySide import QtGui
 from PySide.QtGui import QLabel, QSizePolicy, QComboBox, QPushButton, \
     QLineEdit
 
-from dao.dao import DaoCustody
+from dao.dao import DaoCustody, DaoReportMovement
 
 
 class ImportMovementFilter(QtGui.QWidget):
@@ -22,6 +22,14 @@ class ImportMovementFilter(QtGui.QWidget):
         #txtFile
         self.txtFile = QLineEdit(self)
         self.layout.addWidget(self.txtFile, 1, 1)
+        #lblAssetName
+        self.lblAssetName = QLabel("Asset Name")
+        self.layout.addWidget(self.lblAssetName, 2, 0)
+        #cmdAssetName
+        self.cmdAssetName = QComboBox(self)
+        self.cmdAssetName.addItems(DaoReportMovement.getAssetNames())
+        self.cmdAssetName.setCurrentIndex(self.cmdAssetName.findText("ALL"))
+        self.layout.addWidget(self.cmdAssetName, 2, 1)
         #btnSubmit
         self.btnSubmit = QPushButton("Submit", self)
         self.btnSubmit.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
@@ -35,8 +43,8 @@ class ImportMovementFilter(QtGui.QWidget):
         self.btnfileFinder.show()
     
     def doSubmit(self):
-        #custodyName = self.cmdCustodyName.currentText()
-        self.parent.doSubmit(self.txtFile.text())
+        assetName = self.cmdAssetName.currentText()
+        self.parent.doSubmit(self.txtFile.text(), assetName)
     
     def doFile(self):
         filePath = QtGui.QFileDialog.getOpenFileName()

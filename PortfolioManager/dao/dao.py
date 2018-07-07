@@ -48,7 +48,7 @@ class DaoMovement():
                         inner join asset as a on m.asset_oid = a.id 
                         inner join custody as c on c.ID = m.CUSTODY_OID
                         left join tax as t on t.origin_oid = m.id and t.origin_type = 'MOVEMENT'
-                    WHERE ACQUISITION_DATE BETWEEN %s AND %s 
+                    WHERE ACQUISITION_DATE  >= %s AND ACQUISITION_DATE <= %s
                         AND (a.NAME = %s or %s is null)
                     ORDER BY m.asset_oid,ACQUISITION_DATE'''
         resultSet = DbConnector().doQuery(query, (fromDate, toDate, assetName, assetName))
@@ -225,7 +225,7 @@ class DaoPrice():
 class DaoCashMovement():
     @staticmethod
     def getCashMovement(fromDate, toDate):
-        query = """SELECT ID, amount, in_out, custody_oid, movement_date, comment
+        query = """SELECT ID, amount, in_out, custody_oid, movement_date, comment, external_id
                         FROM cash_movement 
                     WHERE movement_date BETWEEN %s AND %s  
                     order by movement_date desc"""
@@ -234,9 +234,9 @@ class DaoCashMovement():
     
     @staticmethod
     def insert(cashMovement):
-        insertSentence = """insert cash_movement(amount, in_out, custody_oid, movement_date, comment, external_id) 
-                       values (%s,%s,%s,%s,%s,%s)"""
-        return DbConnector().doInsert(insertSentence, (cashMovement.amount, cashMovement.inOut, cashMovement.custody.OID, cashMovement.movementDate, cashMovement.comment, cashMovement.externalID))    
+        insertSentence = """insert cash_movement(amount, in_out, custody_oid, movement_date, asset_oid,comment, external_id) 
+                       values (%s,%s,%s,%s,%s,%s,%s)"""
+        return DbConnector().doInsert(insertSentence, (cashMovement.amount, cashMovement.inOut, cashMovement.custody.OID, cashMovement.movementDate, cashMovement.asset.OID, cashMovement.comment, cashMovement.externalID))    
     
     @staticmethod
     def getCashMovementsByExternalID(externalID):
@@ -284,7 +284,7 @@ class DaoReportMovement():
                     left join asset as a on m.asset_oid = a.id 
                     left join custody as c on c.id = m.custody_oid 
                     left join tax as t on t.origin_oid = m.id and t.origin_type = 'MOVEMENT'
-                WHERE ACQUISITION_DATE BETWEEN %(fromdate)s AND %(toDate)s 
+                WHERE ACQUISITION_DATE  >= %(fromdate)s AND ACQUISITION_DATE <= %(toDate)s
                     AND (a.asset_type = %(movementType)s or %(movementType)s = 'ALL') 
                     AND (a.name = %(assetName)s or %(assetName)s = 'ALL')
                     AND (c.name = %(custodyName)s or %(custodyName)s = 'ALL')
@@ -315,7 +315,7 @@ class DaoReportMovement():
                     left join custody as c on c.id = ce.custody_oid 
                     left join corporate_event_type as cet on cet.id = ce.corporate_event_type_oid
                     left join tax as t on t.origin_oid = ce.id and t.origin_type = 'CORPORATE_EVENT'
-                WHERE payment_date BETWEEN %(fromdate)s AND %(toDate)s  
+                WHERE payment_date  >= %(fromdate)s AND payment_date <= %(toDate)s 
                     AND (a.asset_type = %(movementType)s or %(movementType)s = 'ALL') 
                     AND (a.name = %(assetName)s or %(assetName)s = 'ALL')
                     AND (c.name = %(custodyName)s or %(custodyName)s = 'ALL')
@@ -325,7 +325,7 @@ class DaoReportMovement():
                     'MOVEMENT' as EVENT_TYPE,
                     'CASH' AS EVENT_SUB_TYPE,
                     in_out as EVENT_DIRECTION,
-                    'MXN' as ASSET_NAME,
+                    a.name as ASSET_NAME,
                     movement_date AS EVENT_DATE,
                     NULL AS QUANTITY,
                     NULL AS PRICE,
@@ -343,9 +343,10 @@ class DaoReportMovement():
                     EXTERNAL_ID AS EXTERNAL_ID
                 FROM cash_movement CM
                     left join custody as c on c.id = CM.custody_oid
-                WHERE movement_date BETWEEN %(fromdate)s AND %(toDate)s  
+                    left join asset as a on a.id = CM.asset_oid
+                WHERE movement_date  >= %(fromdate)s AND movement_date <= %(toDate)s
                     AND ('CASH' = %(movementType)s or %(movementType)s = 'ALL')
-                    AND ('CASH' = %(assetName)s or %(assetName)s = 'ALL')
+                    AND (a.name = %(assetName)s or %(assetName)s = 'ALL')
                     AND (c.name = %(custodyName)s or %(custodyName)s = 'ALL') '''
         resultSet = DbConnector().doQuery(query, paramns)
         return resultSet  
@@ -369,7 +370,6 @@ class DaoReportMovement():
         returnList = []
         for (row) in resultSet:
             returnList.append(row[0])
-        returnList.append('MXN')
         returnList.append('ALL')
         return sorted(returnList)
     
