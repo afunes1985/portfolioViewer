@@ -41,6 +41,8 @@ class MovementImporter():
     MovementTypeSELLList =[ "Venta Soc. de Inv. - Cliente","Venta de Acciones.","Venta por Autoentrada", "VTASI"]
     MovementTypeList = MovementTypeBUYList + MovementTypeSELLList
     
+    corporateEventTypeList =[ "Abono Efectivo Dividendo, Cust. Normal","ABONO DIVIDENDO EMISORA EXTRANJERA"]
+    
     def last_day_of_month(self, any_day):
         next_month = any_day.replace(day=28) + datetime.timedelta(days=4)  # this will never fail
         return next_month - datetime.timedelta(days=next_month.day)
@@ -105,11 +107,10 @@ class MovementImporter():
             return movementList
 
                 
-    def getMovementListFromGBM(self, filePath, fileName, imLO, assetName):
+    def getMovementListFromGBM(self, filePath, fileName, imLO, filterAssetName):
         json_data = self.getRawDataFromGBM(filePath)
         if (len(json_data) != 0):
-            print(json_data)
-            custodyOID = Engine.getCustodyDictName()['GBM'].OID
+            custody = Engine.getCustodyDictName()['GBM']
             date =  fileName.replace(".pdf", '')
             date = date.replace("GBM_","")
             fromDate = date + "-" + "01"
@@ -119,64 +120,43 @@ class MovementImporter():
             movementList = []
             for index, key in enumerate(json_data):
                 if index > 2:
-                    dateAndExternalID = key[0]['text']
+                    dateAndExternalID = self.getColumnValueFromList(key, 0)
                     paymentDate = dateAndExternalID[0: 2]
                     externalID = dateAndExternalID[dateAndExternalID.find(' ', 0)+1: len(dateAndExternalID)]
                     print (externalID)
                     paymentDate = date + "-" + paymentDate
                     paymentDate =  pandas.to_datetime(datetime.strptime(paymentDate, '%y-%m-%d')).to_pydatetime() 
                     print (paymentDate)
-                    movementType = key[2]['text']
-                    print (movementType)
-                    comment = "UPLOAD 20" + date
-                    netAmount = self.replaceComma(key[10]['text'])
-                    assetName = key[3]['text']
-                    assetOID = self.getAssetbyName(assetName)
-                    print (assetName)
-                    if(movementType == 'DEPOSITO DE EFECTIVO'
-                       or movementType == "RETIRO DE EFECTIVO"):
-                        m = CashMovement(None)
-                        m.setAttr(None, float(netAmount), self.getInOrOut(movementType), custodyOID, paymentDate, comment, externalID)
-                        movementList.append(m)  
-                    elif(movementType == 'Abono Efectivo Dividendo, Cust. Normal'
-                         or movementType == 'ABONO DIVIDENDO EMISORA EXTRANJERA'):
-                        ce = CorporateEvent(None)
-                        ce.setAttr(None, custodyOID, mainCache.corporateEventTypeOID[1], assetOID, paymentDate, float(netAmount), float(netAmount), comment, externalID)
-                        movementList.append(ce)
-                    elif(movementType == 'Compra Soc. de Inv. - Cliente'
-                            or movementType == "Compra de Acciones."
-                            or movementType == "Venta Soc. de Inv. - Cliente"
-                            or movementType ==  "Venta de Acciones."
-                            or movementType == "Venta por Autoentrada"
-                            or movementType == "Compra por Autoentrada"
-                            or movementType == "Compra de Acciones por Oferta Publica"):
-                        quantity = self.replaceComma(key[4]['text'])
-                        price = self.replaceComma(key[5]['text'])
-                        commission = self.replaceComma(key[7]['text'])
-                        commissionVAT = self.replaceComma(key[9]['text'])
-                        grossAmount = float(str('{0:.6f}'.format(float(price*quantity))))
-                        m = Movement(None)
-                        m.setAttr( None, assetOID, self.getBuyOrSell(movementType), paymentDate, float(quantity), float(price), None, grossAmount , float(netAmount), self.getCommissionPercentage(movementType), float(commission), float(commissionVAT), externalID, custodyOID, comment, None, None)
-                        movementList.append(m)
-                    elif(movementType == "ISR 10 % POR DIVIDENDOS SIC"):
-                        ce = movementList[len(movementList)-1]
-                        if(isinstance(ce, CorporateEvent)):
-                            isrAmount = netAmount
-                            tax = Tax(None)
-                            tax.setAttr(None, 'CORPORATE_EVENT', None, isrAmount, externalID)
-                            ce.netAmount =  float("%6.f" % (ce.grossAmount - isrAmount))
-                            ce.tax = tax
-                            #movementList.remove(ce)
-                            #movementList.append(ce)
-                    else:
-                        quantity = self.replaceComma(key[4]['text'])
-                        price = self.replaceComma(key[5]['text'])
-                        commission = self.replaceComma(key[7]['text'])
-                        commissionVAT = self.replaceComma(key[9]['text'])
-                        grossAmount = float(str('{0:.6f}'.format(float(price*quantity))))
-                        m = Movement(None)
-                        m.setAttr( None, assetOID, 'NOT CATEGORY', paymentDate, float(quantity), float(price), None, grossAmount, float(netAmount), self.getCommissionPercentage(movementType), float(commission), float(commissionVAT), externalID, custodyOID, "NOT CATEGORY", None, None)
-                        movementList.append(m)
+                    quantity = self.replaceComma(self.getColumnValueFromList(key, 4))
+                    price = self.replaceComma(self.getColumnValueFromList(key, 5))
+                    commission = self.replaceComma(self.getColumnValueFromList(key, 7))
+                    commissionVAT = self.replaceComma(self.getColumnValueFromList(key, 9))
+                    grossAmount = float(str('{0:.6f}'.format(float(price*quantity))))
+                    importerMovementVO = ImporterMovementVO()
+                    importerMovementVO.setPaymentDate(paymentDate)
+                    importerMovementVO.setExternalID(externalID)
+                    importerMovementVO.setOriginMovementType(self.getColumnValueFromList(key, 2))
+                    importerMovementVO.setAssetName(self.getColumnValueFromList(key, 3))
+                    importerMovementVO.setNetAmount(self.replaceComma(self.getColumnValueFromList(key, 10)))
+                    importerMovementVO.setCustody(custody)
+                    importerMovementVO.setQuantity(quantity)
+                    importerMovementVO.setPrice(price)
+                    importerMovementVO.setCommission(commission)
+                    importerMovementVO.setCommissionVAT(commissionVAT)
+                    importerMovementVO.setGrossAmount(grossAmount)
+                    importerMovementVO.setComment("UPLOAD " + str(importerMovementVO.getPaymentDate())[0:7])
+                    self.convertToPersistent(importerMovementVO)
+                    if (importerMovementVO.persistentObject is not None
+                            and (filterAssetName == importerMovementVO.persistentObject.asset.name or filterAssetName == 'ALL')):
+                        movementList.append(importerMovementVO.persistentObject)
+#                     elif(movementType == "ISR 10 % POR DIVIDENDOS SIC"):
+#                         ce = movementList[len(movementList)-1]
+#                         if(isinstance(ce, CorporateEvent)):
+#                             isrAmount = netAmount
+#                             tax = Tax(None)
+#                             tax.setAttr(None, 'CORPORATE_EVENT', None, isrAmount, externalID)
+#                             ce.netAmount =  float("%6.f" % (ce.grossAmount - isrAmount))
+#                             ce.tax = tax
             return movementList 
     
     def getCommissionPercentage(self, movementType):
@@ -210,14 +190,11 @@ class MovementImporter():
                         return json_data[0]['data']
                 
     def getAssetbyName(self, assetName):
-        if(assetName == "Efec *"):
-            return None
+        asset = self.assetDict.get(self.assetTranslator.get(assetName, assetName), None)
+        if (asset is None):
+            logging.warning(assetName)
         else:
-            asset = self.assetDict.get(self.assetTranslator.get(assetName, assetName), None)
-            if (asset is None):
-                logging.warning(assetName)
-            else:
-                return asset.OID
+            return asset.OID
     
     def getColumnValueFromList(self, row, indColumn):
         columnValue = row[indColumn]['text']
@@ -236,6 +213,10 @@ class MovementImporter():
                                                             importerMovementVO.netAmount, self.getCommissionPercentage(importerMovementVO.originMovementType), importerMovementVO.commission, 
                                                             importerMovementVO.commissionVAT, importerMovementVO.externalID, importerMovementVO.custody.OID, importerMovementVO.comment, 
                                                             importerMovementVO.getTenor(), importerMovementVO.getMaturityDate())
+        elif any(importerMovementVO.originMovementType in s for s in self.corporateEventTypeList): 
+            importerMovementVO.persistentObject = CorporateEvent(None)
+            assetOID = self.getAssetbyName(importerMovementVO.assetName)
+            importerMovementVO.persistentObject.setAttr(None, importerMovementVO.custody.OID, mainCache.corporateEventTypeOID[1], assetOID, importerMovementVO.paymentDate, importerMovementVO.netAmount, importerMovementVO.netAmount, importerMovementVO.comment, importerMovementVO.externalID)
         elif (importerMovementVO.originMovementType == "ISR"):
             maturityDate = date(int('20' +importerMovementVO.assetNameSerie[:2]), int(importerMovementVO.assetNameSerie[2:4]), int(importerMovementVO.assetNameSerie[4:6]))
             totalAmount = 0
