@@ -32,11 +32,10 @@ class Position():
     changePercentage = None
     
     def __init__(self, asset, movement):
-        from core.cache import MainCache, Singleton
         self.asset = asset
         print('New position ' + self.getAssetName())
-        self.custody = Singleton(MainCache).custodyDictOID[movement[Constant.CONST_MOVEMENT_CUSTODY_OID]]
-        self.acquisitionDate = movement[Constant.CONST_MOVEMENT_ACQUISITION_DATE]
+        self.custody = movement.custody
+        self.acquisitionDate = movement.acquisitionDate
         self.movementList = []
         if (self.asset.assetType == 'BOND'):
             self.addBondMovement(movement)
@@ -81,18 +80,18 @@ class Position():
     
     def addMovement(self, movement):   
         self.movementList.append(movement)
-        quantity = movement[Constant.CONST_MOVEMENT_QUANTITY]
-        grossAmount = movement[Constant.CONST_MOVEMENT_GROSS_AMOUNT]
-        if movement[Constant.CONST_MOVEMENT_BUY_SELL] == 'BUY':
+        quantity = movement.quantity
+        grossAmount = movement.grossAmount
+        if movement.buySell == 'BUY':
             self.totalQuantity = self.totalQuantity + abs(quantity)#quantity
             self.accumulatedAmount = self.accumulatedAmount + abs(grossAmount)#gross amount
-            self.accumulatedBuyCommission += movement[Constant.CONST_MOVEMENT_COM_AMOUNT]
-            self.accumulatedBuyVATCommission += movement[Constant.CONST_MOVEMENT_COM_VAT_AMOUNT]
+            self.accumulatedBuyCommission += movement.commissionAmount
+            self.accumulatedBuyVATCommission += movement.commissionVATAmount
         else:
             self.accumulatedAmount = self.accumulatedAmount - abs(quantity) * self.unitCost
             self.totalQuantity = self.totalQuantity - abs(quantity)#quantity
-            sellCommissionAmount = movement[Constant.CONST_MOVEMENT_COM_AMOUNT]
-            sellVATCommissionAmount = movement[Constant.CONST_MOVEMENT_COM_VAT_AMOUNT]
+            sellCommissionAmount = movement.commissionAmount
+            sellVATCommissionAmount = movement.commissionVATAmount
             self.accumulatedSellCommission += sellCommissionAmount
             self.accumulatedSellVATCommission += sellVATCommissionAmount
             self.realizedPnl += (grossAmount - (quantity * self.unitCost) - sellCommissionAmount - sellVATCommissionAmount)
@@ -105,14 +104,17 @@ class Position():
     
     def addBondMovement(self, movement):
         self.movementList.append(movement)
-        self.totalQuantity = movement[Constant.CONST_MOVEMENT_QUANTITY]
-        self.accumulatedAmount = movement[Constant.CONST_MOVEMENT_GROSS_AMOUNT]
-        self.unitCost = movement[Constant.CONST_MOVEMENT_PRICE]
-        self.rate = movement[Constant.CONST_MOVEMENT_RATE]
-        self.tenor = movement[Constant.CONST_MOVEMENT_TENOR]
-        self.maturityDate = movement[Constant.CONST_MOVEMENT_MATURITY_DATE]
-        self.taxAmount = movement[Constant.CONST_MOVEMENT_TAX_AMOUNT]
+        self.totalQuantity = movement.quantity
+        self.accumulatedAmount = movement.grossAmount
+        self.unitCost = movement.price
+        self.rate = movement.rate
+        self.tenor = movement.tenor
+        self.maturityDate = movement.maturityDate
         today = datetime.datetime.now()
+        if (movement.tax is not None):
+            self.taxAmount = movement.tax.taxAmount
+        else:
+            self.taxAmount  = 0
         if((self.maturityDate)<today):
             self.isMatured = 1
             self.realizedPnl = self.getNetPnL()
@@ -155,8 +157,8 @@ class Position():
             else:
                 return 0
     
-    def getMovementList(self):
-        return self.movementList
+    #def getMovementList(self):
+     #   return self.movementList
     
     def setMarketPriceOrig(self, marketPriceOrig):
         self.marketPriceOrig = Decimal(marketPriceOrig)

@@ -23,6 +23,7 @@ class CashMovement():
         self.comment = comment
         self.externalID = externalID
         self.asset = mainCache.assetDictOID.get(assetOID,None)
+        self.tax = None
         
     def getMovementType(self):
         return Constant.CONST_MOVEMENT_TYPE    

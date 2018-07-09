@@ -8,6 +8,21 @@ from dbConnector.dbConnector import DbConnector
 class DaoMovement():
     
     @staticmethod
+    def getMovementByOID(movementOID):
+        query = '''SELECT m.ID, m.asset_oid, m.buy_sell, m.ACQUISITION_DATE, 
+                    m.quantity, m.price, m.rate, m.GROSS_AMOUNT, 
+                    m.NET_AMOUNT, m.COMMISSION_PERCENTAGE, m.COMMISSION_AMOUNT, m.COMMISSION_IVA_AMOUNT, 
+                    m.TENOR, c.ID, m.MATURITY_DATE, IFNULL(t.tax_amount, 0),
+                    m.external_id, m.comment
+                    FROM movement as m 
+                        inner join asset as a on m.asset_oid = a.id 
+                        inner join custody as c on c.ID = m.CUSTODY_OID
+                        left join tax as t on t.origin_oid = m.id and t.origin_type = 'MOVEMENT'
+                    WHERE m.ID = %s'''
+        resultSet = DbConnector().doQuery(query, (movementOID,))
+        return resultSet
+    
+    @staticmethod
     def getMovementsByExternalID(externalID):
         query = '''SELECT m.external_id
                     FROM movement as m 
@@ -28,22 +43,11 @@ class DaoMovement():
 
     @staticmethod
     def getMovementsByDate(assetName, fromDate, toDate):
-        query = '''SELECT m.ID, 
-                    m.asset_oid, 
-                    m.buy_sell, 
-                    m.ACQUISITION_DATE, 
-                    m.quantity, 
-                    m.price,
-                    m.rate, 
-                    m.GROSS_AMOUNT, 
-                    m.NET_AMOUNT, 
-                    m.COMMISSION_PERCENTAGE, 
-                    m.COMMISSION_AMOUNT, 
-                    m.COMMISSION_IVA_AMOUNT, 
-                    m.TENOR,
-                    c.ID,
-                    m.MATURITY_DATE,
-                    IFNULL(t.tax_amount, 0)
+        query = '''SELECT m.ID, m.asset_oid, m.buy_sell, m.ACQUISITION_DATE, 
+                    m.quantity, m.price, m.rate, m.GROSS_AMOUNT, 
+                    m.NET_AMOUNT, m.COMMISSION_PERCENTAGE, m.COMMISSION_AMOUNT, m.COMMISSION_IVA_AMOUNT, 
+                    m.TENOR, c.ID, m.MATURITY_DATE, IFNULL(t.tax_amount, 0),
+                    m.external_id, m.comment
                     FROM movement as m 
                         inner join asset as a on m.asset_oid = a.id 
                         inner join custody as c on c.ID = m.CUSTODY_OID
@@ -191,6 +195,14 @@ class DaoTax():
         return resultSet
     
     @staticmethod
+    def getTaxByOriginID(originType, originOID):
+        query = '''SELECT t.ID, t.origin_type,  origin_oid, tax_amount, external_id
+                    FROM tax as t 
+                    WHERE t.origin_type = %s and t.origin_oid = %s '''
+        resultSet = DbConnector().doQuery(query, (originType, originOID))
+        return resultSet
+    
+    @staticmethod
     def deleteTax(taxOID):
         deleteSentence = """delete from tax where id =%s"""
         return DbConnector().doDelete(deleteSentence, (taxOID,))
@@ -275,6 +287,7 @@ class DaoReportMovement():
                     COMMISSION_AMOUNT AS COMMISSION_AMOUNT,
                     COMMISSION_IVA_AMOUNT AS COMMISSION_IVA_AMOUNT,
                     TENOR AS TENOR,
+                    MATURITY_DATE AS MATURITY_DATE,
                     c.name AS CUSTODY_NAME,
                     t.ID AS TAX_ID,
                     t.TAX_AMOUNT as TAX_AMOUNT,
@@ -305,6 +318,7 @@ class DaoReportMovement():
                     NULL AS COMMISSION_AMOUNT,
                     NULL AS COMMISSION_IVA_AMOUNT,
                     NULL AS TENOR,
+                    NULL AS MATURITY_DATE,
                     c.name AS CUSTODY_NAME,
                     t.ID AS TAX_ID,
                     t.TAX_AMOUNT as TAX_AMOUNT,
@@ -336,6 +350,7 @@ class DaoReportMovement():
                     NULL AS COMMISSION_AMOUNT,
                     NULL AS COMMISSION_IVA_AMOUNT,
                     NULL AS TENOR,
+                    NULL AS MATURITY_DATE,
                     c.name AS CUSTODY_NAME,
                     null AS TAX_ID,
                     null as TAX_AMOUNT,

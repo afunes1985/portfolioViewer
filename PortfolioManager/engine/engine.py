@@ -7,7 +7,7 @@ from datetime import datetime
 import threading
 
 from dao.dao import DaoMovement, DaoAsset, DaoCorporateEvent, DaoCustody, \
-    DaoCashMovement, DaoReportMovement
+    DaoCashMovement, DaoReportMovement, DaoTax
 from logicObject.PnLLO import PnLLO
 from logicObject.ReportMovementLO import ReportMovementLO
 from modelClass import constant
@@ -19,6 +19,7 @@ from modelClass.corporateEventPosition import CorporateEventPosition
 from modelClass.movement import Asset, Movement
 from modelClass.position import Position    
 from modelClass.summaryItem import SummaryItem
+from modelClass.tax import Tax
 
 
 class Engine:
@@ -249,21 +250,36 @@ class Engine:
         return returnDict      
     
     @staticmethod
-    def buildPositions(fromDate, toDate, setLastMarketData):
-        from core.cache import Singleton, MainCache
-        mainCache = Singleton(MainCache)
+    def getTaxByOriginID(originType, originOID):
+        rs = DaoTax.getTaxByOriginID(originType, originOID)
+        for (taxRow) in rs:
+            tax = Tax(taxRow)
+            return tax
+    
+    @staticmethod
+    def getMovementsByDate(assetName, fromDate, toDate):
+        movementList = []
         movementRS = DaoMovement.getMovementsByDate(None, fromDate, toDate)
+        for (movementRow) in movementRS:
+            movement = Movement(movementRow)
+            tax = Engine.getTaxByOriginID(movement.getMovementType(), movement.OID)
+            movement.tax = tax
+            movementList.append(movement)
+        return movementList
+    
+    @staticmethod
+    def buildPositions(fromDate, toDate, setLastMarketData):
+        movementList = Engine.getMovementsByDate(None, fromDate, toDate)
         positionDict = {}
         oldPositionDict = {}
         threads = []
         today = datetime.now().date()
-        #toDate = toDate.replace(hour=12, minute=0, second=0, microsecond=0)
-        for (movement) in movementRS:
+        for (movement) in movementList:
             position = None
-            asset = mainCache.assetDictOID.get(movement[Constant.CONST_ASSET_OID])
+            asset = movement.asset
             assetName = asset.name
             if(asset.assetType == 'BOND'):
-                assetName = assetName + str(movement[Constant.CONST_MOVEMENT_OID])
+                assetName = assetName + str(movement.OID)
             position =  positionDict.get(assetName, None)
             if position == None:
                 position = Position(asset, movement)
@@ -303,7 +319,13 @@ class Engine:
             movement = Movement(movementRow)
             movementList.append(movement)
         return movementList
-    
+   
+    @staticmethod
+    def getMovementByOID(movementOID):
+        movementRS = DaoMovement.getMovementByOID(movementOID)
+        for (movementRow) in movementRS:
+            movement = Movement(movementRow)
+            return movement
     @staticmethod
     def buildCorporateEventPosition():
         from core.cache import Singleton, MainCache

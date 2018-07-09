@@ -24,6 +24,7 @@ class ImporterMovementVO():
         self.custody = None
         self.tenor = None
         self.persistentObject = None
+        self.persistentObjectList = []
 
     def setPaymentDate(self, paymentDate):
         self.paymentDate = paymentDate

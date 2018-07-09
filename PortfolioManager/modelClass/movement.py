@@ -12,14 +12,14 @@ class Movement():
             self.setAttr(movementRow[0], movementRow[1], movementRow[2], movementRow[3], 
                          movementRow[4], movementRow[5], movementRow[6], movementRow[7], 
                          movementRow[8], movementRow[9], movementRow[10], movementRow[11], 
-                         None, movementRow[13], None, None,
-                         None)
+                         movementRow[12], movementRow[13], movementRow[14], movementRow[16],
+                         movementRow[17])
     
     def setAttr(self, OID, assetOID, buySell, acquisitionDate, 
                     quantity, price, rate, grossAmount, 
                     netAmount, commissionPercentage, commissionAmount, commissionVATAmount, 
-                    externalID, custodyOID, comment, tenor,
-                    maturityDate):
+                    tenor, custodyOID, maturityDate, externalID, 
+                    comment, tax = None):
         from core.cache import Singleton, MainCache
         mainCache = Singleton(MainCache)
         self.OID = OID
@@ -39,6 +39,7 @@ class Movement():
         self.comment = comment
         self.tenor = tenor
         self.maturityDate = maturityDate
+        self.tax = tax
     
     @staticmethod 
     def constructMovementByType(assetType):

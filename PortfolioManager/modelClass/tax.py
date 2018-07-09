@@ -7,7 +7,7 @@ class Tax():
     
     def __init__(self, row):
         if(row is not None):
-            self.setAttr(row[0], row[1], row[2], None)
+            self.setAttr(row[0], row[1], row[2], row[3], row[4])
     
     def setAttr(self, OID, originType, originOID, taxAmount, externalID):
         self.OID = OID

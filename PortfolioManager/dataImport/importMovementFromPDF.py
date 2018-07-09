@@ -3,13 +3,9 @@ Created on 11 jun. 2018
 
 @author: afunes
 '''
-
-
-
-
-
 import calendar
 from datetime import datetime, date
+from decimal import Decimal
 import logging
 
 import pandas
@@ -37,15 +33,18 @@ class MovementImporter():
     cashMovementTypeOUTList = ["RETIRO DE EFECTIVO"]
     cashMovementTypeList = cashMovementTypeINList + cashMovementTypeOUTList
     
-    MovementTypeBUYList =[ 'Compra Soc. de Inv. - Cliente',"Compra de Acciones.","Compra por Autoentrada","Compra de Acciones por Oferta Publica", "COMPSI", "COMPRA"]
-    MovementTypeSELLList =[ "Venta Soc. de Inv. - Cliente","Venta de Acciones.","Venta por Autoentrada", "VTASI"]
-    MovementTypeList = MovementTypeBUYList + MovementTypeSELLList
+    movementTypeBUYCOMList = ["Compra de Acciones.","Compra por Autoentrada"]
+    movementTypeSELLCOMList = ["Venta de Acciones.","Venta por Autoentrada"]
+    movementTypeCOMList = movementTypeBUYCOMList + movementTypeSELLCOMList
+    movementTypeBUYList =[ 'Compra Soc. de Inv. - Cliente',"Compra de Acciones por Oferta Publica", "COMPSI", "COMPRA"] + movementTypeBUYCOMList
+    movementTypeSELLList =[ "Venta Soc. de Inv. - Cliente", "VTASI"] + movementTypeSELLCOMList
+    movementTypeList = movementTypeBUYList + movementTypeSELLList
     
     corporateEventTypeList =[ "Abono Efectivo Dividendo, Cust. Normal","ABONO DIVIDENDO EMISORA EXTRANJERA"]
     
-    def last_day_of_month(self, any_day):
-        next_month = any_day.replace(day=28) + datetime.timedelta(days=4)  # this will never fail
-        return next_month - datetime.timedelta(days=next_month.day)
+    corporateEventTAXTypeList = ["ISR 10 % POR DIVIDENDOS SIC"]
+    
+    nonMovementTypeList = corporateEventTAXTypeList
     
     def getMovementList(self, filePath, assetName):
         self.assetDict = Engine.getAssetDict()
@@ -53,18 +52,18 @@ class MovementImporter():
         imLO = ImportMovementLO()
         fileName = filePath[filePath.rfind("/", 0, len(filePath))+1: len(filePath)]
         custodyName = fileName[0:fileName.find("_")]
-        if (custodyName == 'GBM'):
-            imLO.setMovementList(self.getMovementListFromGBM(filePath, fileName, imLO, assetName))
-        elif (custodyName == 'CETESDIRECTO'):
-            imLO.setMovementList(self.getMovementListFromCETESDIRECTO(filePath, fileName, imLO, assetName))
+        custody = Engine.getCustodyDictName()[custodyName]
+        if (custody.name == 'GBM'):
+            imLO.setMovementList(self.getMovementListFromGBM(filePath, fileName, imLO, assetName, custody))
+        elif (custody.name == 'CETESDIRECTO'):
+            imLO.setMovementList(self.getMovementListFromCETESDIRECTO(filePath, fileName, imLO, assetName, custody))
         imLO.setCustodyName(custodyName)
         return imLO
     
-    def getMovementListFromCETESDIRECTO(self, filePath, fileName, imLO, filterAssetName):
+    def getMovementListFromCETESDIRECTO(self, filePath, fileName, imLO, filterAssetName, custody):
         json_data = self.getRawDataFromCETESDIRECTO(filePath)
         if (len(json_data) != 0):
-            custody = Engine.getCustodyDictName()['CETESDIRECTO']
-            movementList = []
+            self.movementList = []
             isAfterBegin = False
             isFromToDateNOTSetter = True
             for index, row in enumerate(json_data):
@@ -101,23 +100,20 @@ class MovementImporter():
                     importerMovementVO.setComment("UPLOAD " + str(importerMovementVO.getPaymentDate())[0:7])
                     importerMovementVO.logObject()
                     self.convertToPersistent(importerMovementVO)
-                    if (importerMovementVO.persistentObject is not None
-                            and (filterAssetName == importerMovementVO.persistentObject.asset.name or filterAssetName == 'ALL')):
-                        movementList.append(importerMovementVO.persistentObject)
-            return movementList
+                    self.appendToMovementList(importerMovementVO, filterAssetName)
+            return self.movementList
 
                 
-    def getMovementListFromGBM(self, filePath, fileName, imLO, filterAssetName):
+    def getMovementListFromGBM(self, filePath, fileName, imLO, filterAssetName, custody):
         json_data = self.getRawDataFromGBM(filePath)
         if (len(json_data) != 0):
-            custody = Engine.getCustodyDictName()['GBM']
             date =  fileName.replace(".pdf", '')
             date = date.replace("GBM_","")
             fromDate = date + "-" + "01"
             fromDate =  pandas.to_datetime(datetime.strptime(fromDate, '%y-%m-%d')).to_pydatetime() 
             imLO.setFromDate(fromDate)
             imLO.setToDate(fromDate.replace(day = calendar.monthrange(fromDate.year, fromDate.month)[1]))
-            movementList = []
+            self.movementList = []
             for index, key in enumerate(json_data):
                 if index > 2:
                     dateAndExternalID = self.getColumnValueFromList(key, 0)
@@ -146,23 +142,92 @@ class MovementImporter():
                     importerMovementVO.setGrossAmount(grossAmount)
                     importerMovementVO.setComment("UPLOAD " + str(importerMovementVO.getPaymentDate())[0:7])
                     self.convertToPersistent(importerMovementVO)
-                    if (importerMovementVO.persistentObject is not None
-                            and (filterAssetName == importerMovementVO.persistentObject.asset.name or filterAssetName == 'ALL')):
-                        movementList.append(importerMovementVO.persistentObject)
-#                     elif(movementType == "ISR 10 % POR DIVIDENDOS SIC"):
-#                         ce = movementList[len(movementList)-1]
-#                         if(isinstance(ce, CorporateEvent)):
-#                             isrAmount = netAmount
-#                             tax = Tax(None)
-#                             tax.setAttr(None, 'CORPORATE_EVENT', None, isrAmount, externalID)
-#                             ce.netAmount =  float("%6.f" % (ce.grossAmount - isrAmount))
-#                             ce.tax = tax
-            return movementList 
+                    self.appendToMovementList(importerMovementVO, filterAssetName)
+            return self.movementList 
     
+    def appendToMovementList(self, importerMovementVO, filterAssetName):
+        if((filterAssetName == 'ALL' or filterAssetName == importerMovementVO.assetName or filterAssetName == importerMovementVO.persistentObject.asset.name)
+                            and not (importerMovementVO.originMovementType in self.nonMovementTypeList)):
+            if (importerMovementVO.persistentObject is not None):
+                self.movementList.append(importerMovementVO.persistentObject)
+            else:
+                self.movementList.extend(importerMovementVO.persistentObjectList)
+    
+
+    def convertToPersistent(self, importerMovementVO):
+        if (importerMovementVO.originMovementType in self.cashMovementTypeList):
+            importerMovementVO.persistentObject = CashMovement(None)
+            assetOID = self.getAssetbyName(importerMovementVO.assetName)
+            importerMovementVO.persistentObject.setAttr("NEW", importerMovementVO.netAmount, self.getInOrOut(importerMovementVO.originMovementType), importerMovementVO.custody.OID, importerMovementVO.paymentDate, importerMovementVO.comment, importerMovementVO.externalID, assetOID)
+        elif (importerMovementVO.originMovementType in self.movementTypeList):    
+            importerMovementVO.persistentObject = Movement(None)
+            assetOID = self.getAssetbyName(importerMovementVO.assetName)
+            importerMovementVO.persistentObject.setAttr( "NEW", assetOID, self.getBuyOrSell(importerMovementVO.originMovementType), importerMovementVO.paymentDate, 
+                                                            importerMovementVO.quantity, importerMovementVO.price, importerMovementVO.getRate(), importerMovementVO.grossAmount , 
+                                                            importerMovementVO.netAmount, self.getCommissionPercentage(importerMovementVO.originMovementType), importerMovementVO.commission, importerMovementVO.commissionVAT, 
+                                                            importerMovementVO.getTenor(), importerMovementVO.custody.OID, importerMovementVO.getMaturityDate(), importerMovementVO.externalID,
+                                                            importerMovementVO.comment )
+        elif (importerMovementVO.originMovementType in self.corporateEventTypeList): 
+            importerMovementVO.persistentObject = CorporateEvent(None)
+            assetOID = self.getAssetbyName(importerMovementVO.assetName)
+            importerMovementVO.persistentObject.setAttr("NEW", importerMovementVO.custody.OID, mainCache.corporateEventTypeOID[1], assetOID, importerMovementVO.paymentDate, importerMovementVO.netAmount, importerMovementVO.netAmount, importerMovementVO.comment, importerMovementVO.externalID)
+        elif (importerMovementVO.originMovementType == "ISR"):
+            maturityDate = date(int('20' +importerMovementVO.assetNameSerie[:2]), int(importerMovementVO.assetNameSerie[2:4]), int(importerMovementVO.assetNameSerie[4:6]))
+            totalAmount = 0
+            movementRs = DaoMovement.getMovementsByMaturityDate(maturityDate)
+            if len(movementRs) > 0:
+                    for row in movementRs:
+                        totalAmount += Decimal(row[1])
+                    rowNum = 0    
+                    for row in movementRs:    
+                        movementID = row[0]
+                        movement = Engine.getMovementByOID(movementID)
+                        if movementID is not None:
+                            tax = Tax(None)
+                            tax.setAttr("NEW", 'MOVEMENT', movementID, round((movement.grossAmount/totalAmount) * Decimal(importerMovementVO.netAmount), 8) , importerMovementVO.externalID + "-" + str(rowNum))
+                            movement.tax = tax
+                            rowNum += 1
+                            importerMovementVO.persistentObjectList.append(movement)
+        elif(importerMovementVO.originMovementType in self.corporateEventTAXTypeList):
+            try:
+                oldPersisteObject = self.movementList[len(self.movementList)-1]
+            except IndexError:
+                return 
+            if (importerMovementVO.assetName == oldPersisteObject.asset.name):
+                tax = Tax(None)
+                tax.setAttr("NEW", 'CORPORATE_EVENT', None, importerMovementVO.netAmount, importerMovementVO.externalID)
+                oldPersisteObject.tax = tax
+                oldPersisteObject.netAmount =  float("%6.f" % (oldPersisteObject.grossAmount - importerMovementVO.netAmount))
+        else:
+            logging.warning(importerMovementVO.originMovementType)
+     
+     
+####################################################################### TOOLS #################################################################################################     
+     
+
+    def getColumnValueFromList(self, row, indColumn):
+        columnValue = row[indColumn]['text']
+        return columnValue
+     
+                
+    def getInOrOut(self, movementType):
+        if any(movementType in s for s in self.cashMovementTypeOUTList):
+            return Constant.CONST_OUT
+        elif any(movementType in s for s in self.cashMovementTypeINList):
+            return Constant.CONST_IN
+        else:
+            return 'NOT CATEGORY'
+        
+    def getBuyOrSell(self, movementType):
+        if any(movementType in s for s in self.movementTypeBUYList):
+            return Constant.CONST_BUY
+        elif any(movementType in s for s in self.movementTypeSELLList):
+            return Constant.CONST_SELL
+        else:
+            return 'NOT CATEGORY'
+
     def getCommissionPercentage(self, movementType):
-        if(movementType == "Compra de Acciones."
-            or movementType ==  "Venta de Acciones."
-            or movementType == "Venta por Autoentrada"):
+        if(any(movementType in s for s in self.movementTypeCOMList)):
             return Constant.CONST_DEF_EQUITY_COMMISSION_PERCENTAGE
         else:
             return 0
@@ -195,60 +260,7 @@ class MovementImporter():
             logging.warning(assetName)
         else:
             return asset.OID
-    
-    def getColumnValueFromList(self, row, indColumn):
-        columnValue = row[indColumn]['text']
-        return columnValue
 
-    def convertToPersistent(self, importerMovementVO):
-        if any(importerMovementVO.originMovementType in s for s in self.cashMovementTypeList):
-            importerMovementVO.persistentObject = CashMovement(None)
-            assetOID = self.getAssetbyName(importerMovementVO.assetName)
-            importerMovementVO.persistentObject.setAttr(None, importerMovementVO.netAmount, self.getInOrOut(importerMovementVO.originMovementType), importerMovementVO.custody.OID, importerMovementVO.paymentDate, importerMovementVO.comment, importerMovementVO.externalID, assetOID)
-        elif any(importerMovementVO.originMovementType in s for s in self.MovementTypeList):    
-            importerMovementVO.persistentObject = Movement(None)
-            assetOID = self.getAssetbyName(importerMovementVO.assetName)
-            importerMovementVO.persistentObject.setAttr( None, assetOID, self.getBuyOrSell(importerMovementVO.originMovementType), importerMovementVO.paymentDate, 
-                                                            importerMovementVO.quantity, importerMovementVO.price, importerMovementVO.getRate(), importerMovementVO.grossAmount , 
-                                                            importerMovementVO.netAmount, self.getCommissionPercentage(importerMovementVO.originMovementType), importerMovementVO.commission, 
-                                                            importerMovementVO.commissionVAT, importerMovementVO.externalID, importerMovementVO.custody.OID, importerMovementVO.comment, 
-                                                            importerMovementVO.getTenor(), importerMovementVO.getMaturityDate())
-        elif any(importerMovementVO.originMovementType in s for s in self.corporateEventTypeList): 
-            importerMovementVO.persistentObject = CorporateEvent(None)
-            assetOID = self.getAssetbyName(importerMovementVO.assetName)
-            importerMovementVO.persistentObject.setAttr(None, importerMovementVO.custody.OID, mainCache.corporateEventTypeOID[1], assetOID, importerMovementVO.paymentDate, importerMovementVO.netAmount, importerMovementVO.netAmount, importerMovementVO.comment, importerMovementVO.externalID)
-        elif (importerMovementVO.originMovementType == "ISR"):
-            maturityDate = date(int('20' +importerMovementVO.assetNameSerie[:2]), int(importerMovementVO.assetNameSerie[2:4]), int(importerMovementVO.assetNameSerie[4:6]))
-            totalAmount = 0
-            movementRs = DaoMovement.getMovementsByMaturityDate(maturityDate)
-#             if len(movementRs) > 0:
-#                     for row in movementRs:
-#                         totalAmount += float(row[1])
-#                     rowNum = 0    
-#                     for row in movementRs:    
-#                         movementID = row[0]
-#                         grossAmount = float(row[1])
-#                         if movementID is not None:
-#                             t = Tax(None)
-#                             t.setAttr(None, 'MOVEMENT', movementID, round((grossAmount/totalAmount) * amount, 8) , externalID + "-" + str(rowNum))
-#                             rowNum += 1
-#                             print("ADD externalID " + str(externalID) + " ID: " + str(newID))
-        else:
-            logging.warning(importerMovementVO.originMovementType)
-                
-    def getInOrOut(self, movementType):
-        if any(movementType in s for s in self.cashMovementTypeOUTList):
-            return Constant.CONST_OUT
-        elif any(movementType in s for s in self.cashMovementTypeINList):
-            return Constant.CONST_IN
-        else:
-            return 'NOT CATEGORY'
-        
-    def getBuyOrSell(self, movementType):
-        if any(movementType in s for s in self.MovementTypeBUYList):
-            return Constant.CONST_BUY
-        elif any(movementType in s for s in self.MovementTypeSELLList):
-            return Constant.CONST_SELL
-        else:
-            return 'NOT CATEGORY'
-
+    def last_day_of_month(self, any_day):
+        next_month = any_day.replace(day=28) + datetime.timedelta(days=4)  # this will never fail
+        return next_month - datetime.timedelta(days=next_month.day)
