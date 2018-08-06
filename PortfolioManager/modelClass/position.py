@@ -6,8 +6,6 @@ Created on Mar 18, 2017
 import datetime
 from decimal import Decimal
 
-from modelClass.constant import Constant
-
 
 class Position():
     unitCost = 0
@@ -22,7 +20,6 @@ class Position():
     realizedPnlPercentage = 0
     marketPrice = 0
     marketPriceOrig = 0
-    movementList = None
     acquisitionDate = 0
     asset = None
     tenor = 0
@@ -36,7 +33,6 @@ class Position():
         print('New position ' + self.getAssetName())
         self.custody = movement.custody
         self.acquisitionDate = movement.acquisitionDate
-        self.movementList = []
         if (self.asset.assetType == 'BOND'):
             self.addBondMovement(movement)
         else:    
@@ -79,7 +75,6 @@ class Position():
         self.accumulatedBuyVATCommission += position.accumulatedBuyVATCommission
     
     def addMovement(self, movement):   
-        self.movementList.append(movement)
         quantity = movement.quantity
         grossAmount = movement.grossAmount
         if movement.buySell == 'BUY':
@@ -103,7 +98,6 @@ class Position():
         
     
     def addBondMovement(self, movement):
-        self.movementList.append(movement)
         self.totalQuantity = movement.quantity
         self.accumulatedAmount = movement.grossAmount
         self.unitCost = movement.price
@@ -156,9 +150,6 @@ class Position():
                 return Decimal(self.totalQuantity) * self.marketPriceOrig
             else:
                 return 0
-    
-    #def getMovementList(self):
-     #   return self.movementList
     
     def setMarketPriceOrig(self, marketPriceOrig):
         self.marketPriceOrig = Decimal(marketPriceOrig)

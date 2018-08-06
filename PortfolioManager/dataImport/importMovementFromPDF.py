@@ -234,7 +234,7 @@ class MovementImporter():
     
     def replaceComma(self, value):
         if (value != ""):
-            return float(float(value.replace(',','')))
+            return Decimal(str('{0:.6f}'.format(float(float(value.replace(',',''))))))
     
     def getRawDataFromGBM(self, filePath):
         for page in range(4, 6):

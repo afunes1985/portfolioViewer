@@ -183,6 +183,8 @@ class ImportMovementPanel(PanelWithTable):
             else:
                 if(newID is not None and taxNewID is not None):
                     box.setText("INSERTED MOVEMENT " + operation.externalID + " NEWID: " + str(newID) + " NEWTAXID: "+ str(taxNewID))
+                elif(newID is not None and taxNewID is None):
+                    box.setText("INSERTED MOVEMENT " + operation.externalID + " NEWID: " + str(newID))
                 else:
                     box.setText("INSERTED TAX " + operation.tax.externalID + " NEWTAXID: " + str(taxNewID))
             box.exec_()
