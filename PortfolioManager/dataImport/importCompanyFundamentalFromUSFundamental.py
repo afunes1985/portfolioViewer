@@ -21,17 +21,17 @@ try:
     print(content)
     list1 = content.split("\n")
     headerList = None
-    for row in list1:
-        if headerList is None:
-            headerList = row.split(",")
-        else:
-            cf = CompanyQFundamental(None)
-            for index, item in enumerate(row.split(",")):
-                if not isinstance(item, str):
-                    item = Decimal(item)
-                if item != '':
-                    setattr(cf, "q_" + headerList[index], item)
-            print(cf.__dict__)
-            DaoCompanyFundamental.insertCompanyFundamental(cf)
+#     for row in list1:
+#         if headerList is None:
+#             headerList = row.split(",")
+#         else:
+#             cf = CompanyQFundamental(None)
+#             for index, item in enumerate(row.split(",")):
+#                 if not isinstance(item, str):
+#                     item = Decimal(item)
+#                 if item != '':
+#                     setattr(cf, "q_" + headerList[index], item)
+#             print(cf.__dict__)
+#             DaoCompanyFundamental.insertCompanyFundamental(cf)
 except httplib.HTTPException:
     print('Exception during request')
