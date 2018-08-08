@@ -411,3 +411,10 @@ class DaoCurrency():
                     WHERE C.NAME = %s"""
         resultSet = DbConnector().doQuery(query, (currencyName,))
         return resultSet 
+
+class DaoCompany():
+    @staticmethod
+    def insertCompany(company):
+        insertSentence = """insert company(company_id, name) 
+                       values (%s,%s)"""
+        return DbConnector().doInsert(insertSentence, (company.companyID, company.name))
