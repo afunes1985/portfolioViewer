@@ -7,7 +7,7 @@ from datetime import datetime
 import threading
 
 from dao.dao import DaoMovement, DaoAsset, DaoCorporateEvent, DaoCustody, \
-    DaoCashMovement, DaoReportMovement, DaoTax
+    DaoCashMovement, DaoReportMovement, DaoTax, DaoCompanyFundamental
 from logicObject.PnLLO import PnLLO
 from logicObject.ReportMovementLO import ReportMovementLO
 from modelClass import constant
@@ -20,6 +20,7 @@ from modelClass.movement import Asset, Movement
 from modelClass.position import Position    
 from modelClass.summaryItem import SummaryItem
 from modelClass.tax import Tax
+from modelClass.companyqfundamental import CompanyQFundamental
 
 
 class Engine:
@@ -379,6 +380,15 @@ class Engine:
         for (row) in rs:
             returnDict[row[0]] = row[1]
         return returnDict
+    
+    @staticmethod
+    def getCompanyFundamentalList(company_id, indicator_id):
+        rs = DaoCompanyFundamental().getCompanyFundamental(company_id, indicator_id)
+        returnList = []
+        for (row) in rs:
+            obj = CompanyQFundamental(row)
+            returnList.append(obj)
+        return returnList
         
         
         

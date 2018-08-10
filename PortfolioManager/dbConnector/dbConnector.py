@@ -71,6 +71,16 @@ class DbConnector():
         self.closeConnection(cnx);
         return resultList
     
+    def doQuery2(self, query, params):
+        resultDict = {}
+        cnx = self.initConnection()
+        cursor = cnx.cursor()
+        #convertedParams = self.convertParams(params)
+        cursor.execute(query,params)
+        resultDict['rs'] = list(cursor)
+        resultDict['column'] = list(cursor.column_names)
+        self.closeConnection(cnx);
+        return resultDict
     
     
 
