@@ -446,9 +446,27 @@ class DaoCompanyFundamental():
         resultDict = DbConnector().doQuery2(query, (company_id, indicator_id))
         return resultDict 
 
-class DaoFAItem():
+class DaoFAConcept():
     @staticmethod
-    def insertFAItem(faItem):
-        insertSentence = """insert fa_item(section, item_name) 
-                       values (%s,%s)"""
-        return DbConnector().doInsert(insertSentence, (faItem.section, faItem.itemName))
+    def insertFAConcept(faConcept):
+        insertSentence = """insert fa_concept(section, indicator_id, label) 
+                       values (%s,%s,%s)"""
+        return DbConnector().doInsert(insertSentence, (faConcept.section, faConcept.indicatorID, faConcept.label))
+    
+    @staticmethod
+    def updateLabelByOID(OID, label):
+        insertSentence = """update fa_concept set label = %s where ID = %s"""
+        return DbConnector().doInsert(insertSentence, (label, OID))
+    
+    @staticmethod
+    def updateLabelByIndicatorID(indicatorID, label):
+        insertSentence = """update fa_concept set label = %s where indicator_id = %s"""
+        return DbConnector().doInsert(insertSentence, (label, indicatorID))
+    
+    @staticmethod
+    def getConceptByIndicatorID(indicatorID):
+        query = '''SELECT ID
+                    FROM fa_concept 
+                    WHERE indicator_ID = %s'''
+        resultSet = DbConnector().doQuery(query, (indicatorID,))
+        return resultSet
