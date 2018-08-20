@@ -418,6 +418,33 @@ class DaoCompany():
         insertSentence = """insert company(company_id, name) 
                        values (%s,%s)"""
         return DbConnector().doInsert(insertSentence, (company.companyID, company.name))
+    
+    @staticmethod
+    def getCompanyByName(companyName):
+        query = """SELECT c.id
+                    FROM COMPANY C
+                    WHERE C.NAME = %s"""
+        resultSet = DbConnector().doQuery(query, (companyName,))
+        return resultSet 
+    
+    @staticmethod
+    def getCompanyByCIK(companyID):
+        query = """SELECT c.id
+                    FROM COMPANY C
+                    WHERE C.COMPANY_ID = %s"""
+        resultSet = DbConnector().doQuery(query, (companyID,))
+        return resultSet 
+    
+    @staticmethod
+    def updateCompanyNameAndTicker(id, ticker):
+        insertSentence = """update COMPANY set ticker = %s where id = %s"""
+        return DbConnector().doInsert(insertSentence, (ticker, id))
+    
+    @staticmethod
+    def getCompany():
+        query = """SELECT ID, NAME, TICKER FROM COMPANY"""
+        resultSet = DbConnector().doQuery(query, "")
+        return resultSet 
 
 class DaoCompanyFundamental():
     @staticmethod
@@ -445,6 +472,23 @@ class DaoCompanyFundamental():
                     AND cf.indicator_id = %s"""
         resultDict = DbConnector().doQuery2(query, (company_id, indicator_id))
         return resultDict 
+    
+    @staticmethod
+    def getCompanyFundamental2(company_id, indicator_id):
+        paramns = {'company_id' : company_id,
+                   'indicator_id': indicator_id}
+        query = """SELECT c.name, i.section, cf.indicator_id, i.label,2011Q2,2011Q3,2011Q4,2012Q1,2012Q2,2012Q3,2012Q4,
+                            2013Q1,2013Q2,2013Q3,2013Q4,2014Q1,2014Q2,2014Q3,2014Q4,
+                            2015Q1,2015Q2,2015Q3,2015Q4,2016Q1,2016Q2,2016Q3,2016Q4,
+                            2017Q1,2017Q2,2017Q3,2017Q4,2018Q1,2018Q2
+                    FROM company c
+                        inner join company_fundamental cf on c.company_id = cf.company_id
+                        left join fa_concept i on i.indicator_id = cf.indicator_id
+                WHERE c.company_id = %(company_id)s
+                    AND (cf.indicator_id = %(indicator_id)s or %(indicator_id)s is null)
+                order by  i.section, cf.indicator_id"""
+        resultDict = DbConnector().doQuery2(query, paramns)
+        return resultDict 
 
 class DaoFAConcept():
     @staticmethod
@@ -470,3 +514,14 @@ class DaoFAConcept():
                     WHERE indicator_ID = %s'''
         resultSet = DbConnector().doQuery(query, (indicatorID,))
         return resultSet
+    
+class DaoFAValue():
+    @staticmethod
+    def insertFAConcept(faValue):
+        insertSentence = """insert fa_value(companyID, key,
+                            2011Q2,2011Q3,2011Q4,2012Q1,2012Q2,2012Q3,2012Q4,
+                            2013Q1,2013Q2,2013Q3,2013Q4,2014Q1,2014Q2,2014Q3,2014Q4,
+                            2015Q1,2015Q2,2015Q3,2015Q4,2016Q1,2016Q2,2016Q3,2016Q4,
+                            2017Q1,2017Q2,2017Q3,2017Q4,2018Q1,2018Q2) 
+                       values (%s,%s,%s)"""
+        return DbConnector().doInsert(insertSentence, (faValue.companyID, faValue.key, ))
