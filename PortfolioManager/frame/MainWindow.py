@@ -13,6 +13,7 @@ from frame.MovementEditor import MovementEditor
 from frame.PnLPanel import PnLPanel
 from frame.PositionPanel import PositionPanel
 from frame.ReportMovementPanel import ReportMovementPanel
+from core.dumpexporter import DumpExporter
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -66,6 +67,11 @@ class MainWindow(QtGui.QMainWindow):
             shortcut="Ctrl+E", statusTip="Add movement",
             triggered=self.openCorporateEventEditor)
         self.fileMenu.addAction(self.actionOpenCorporateEventEditor)
+        self.fileMenu = self.menuBar().addMenu("&Dump")
+        self.actionExportDump = QtGui.QAction("&Export Dump", self, checkable=True,
+            statusTip="Export Dumpt",
+            triggered=self.exportAllDump)
+        self.fileMenu.addAction(self.actionExportDump)
 
     def openMovementEditor(self):
         self.movementEditor = MovementEditor()
@@ -74,7 +80,10 @@ class MainWindow(QtGui.QMainWindow):
     def openCorporateEventEditor(self):
         self.corporateEditor = CorporateEventEditor()
         self.corporateEditor.show()
-    
+        
+    def exportAllDump(self):
+        DumpExporter.exportAllDump(self)
+        
     def clearTable(self):
         self.positionPanel.clearTables()
 

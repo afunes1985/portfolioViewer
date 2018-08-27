@@ -18,7 +18,8 @@ class DumpExporter():
         os.system(dumpcmd)
         print(dumpcmd)
         print ("Backup script completed " + fileName)
-
-
-DumpExporter.exportDump('localhost', 'root', 'root', 'portfolio')
-DumpExporter.exportDump('localhost', 'root', 'root', 'fundamenalanalytics')
+    
+    @staticmethod  
+    def exportAllDump(self):
+        DumpExporter.exportDump('localhost', 'root', 'root', 'portfolio')
+        DumpExporter.exportDump('localhost', 'root', 'root', 'fundamenalanalytics')
