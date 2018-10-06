@@ -37,10 +37,15 @@ class Engine:
             else:
                 summaryItem.sumPosition(position)
         #Old positions 
-        for (positionKey, position) in oldPositionDict.iteritems():
-            summaryKey = position.custody.name + position.asset.assetType
+        for (positionKey, oldPosition) in oldPositionDict.iteritems():
+            summaryKey = oldPosition.custody.name + oldPosition.asset.assetType
             summaryItem = summaryDict.get(summaryKey)
-            summaryItem.addRealizedPnl(position.realizedPnl)
+            if (summaryItem == None):
+                summaryItem = SummaryItem(oldPosition) #arreglar porque cuando no hay posicion de bonos suma en el summary
+                summaryDict[summaryKey] = summaryItem
+                summaryItem.addRealizedPnl(oldPosition.realizedPnl)
+            else:
+                summaryItem.addRealizedPnl(oldPosition.realizedPnl)
         #Corporate event        
         for (positionKey, corporateEventPosition) in corporateEventPositionDict.iteritems():
             summaryKey = corporateEventPosition.custody.name + corporateEventPosition.asset.assetType
@@ -96,9 +101,11 @@ class Engine:
     
     @staticmethod
     def getAccGrossPnlPercentage(positionDict, assetType, isSIC):
+        accGrossPnlPercentage = 0
         accValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, assetType, isSIC)
         accInvestedAmount = Engine.getSubTotalInvestedAmount(positionDict, assetType, isSIC)
-        accGrossPnlPercentage = (accValuatedAmount / accInvestedAmount -1 ) * 100
+        if (accInvestedAmount != 0):
+            accGrossPnlPercentage = (accValuatedAmount / accInvestedAmount -1 ) * 100
         return accGrossPnlPercentage
     
     @staticmethod
@@ -110,11 +117,13 @@ class Engine:
     
     @staticmethod
     def getAccNetPnlPercentage(positionDict, assetType, isSIC):
+        subTotalNetPnlPercentage = 0
         accBuyCommissionAmount = Engine.getAccBuyCommissionAmount(positionDict, assetType, isSIC)
         accBuyVATCommissionAmount = Engine.getAccBuyCommissionVATAmount(positionDict, assetType, isSIC)
         accValuatedAmount = Engine.getSubTotalValuatedAmount(positionDict, assetType, isSIC)
         accInvestedAmount = Engine.getSubTotalInvestedAmount(positionDict, assetType, isSIC)
-        subTotalNetPnlPercentage = (accValuatedAmount / (accInvestedAmount + accBuyCommissionAmount + accBuyVATCommissionAmount) -1 ) * 100
+        if (accInvestedAmount != 0):
+            subTotalNetPnlPercentage = (accValuatedAmount / (accInvestedAmount + accBuyCommissionAmount + accBuyVATCommissionAmount) -1 ) * 100
         return subTotalNetPnlPercentage
     
     @staticmethod
