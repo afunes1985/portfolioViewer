@@ -193,7 +193,8 @@ class MovementImporter():
                 oldPersisteObject = self.movementList[len(self.movementList)-1]
             except IndexError:
                 return 
-            if (importerMovementVO.assetName == oldPersisteObject.asset.name):
+            assetOID = self.getAssetbyName(importerMovementVO.assetName)
+            if (assetOID == oldPersisteObject.asset.OID):
                 tax = Tax(None)
                 tax.setAttr("NEW", 'CORPORATE_EVENT', None, importerMovementVO.netAmount, importerMovementVO.externalID)
                 oldPersisteObject.tax = tax
