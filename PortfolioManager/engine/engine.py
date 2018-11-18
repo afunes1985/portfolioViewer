@@ -268,7 +268,7 @@ class Engine:
     @staticmethod
     def getMovementsByDate(assetName, fromDate, toDate):
         movementList = []
-        movementRS = DaoMovement.getMovementsByDate(None, fromDate, toDate)
+        movementRS = DaoMovement.getMovementsByDate(assetName, fromDate, toDate)
         for (movementRow) in movementRS:
             movement = Movement(movementRow)
             tax = Engine.getTaxByOriginID(movement.getMovementType(), movement.OID)
@@ -295,11 +295,11 @@ class Engine:
                 positionDict[assetName] = position
             else:           
                 position.addMovement(movement)
-            
+            #pasa la posicion al viejo diccionario de posiciones si no tiene mas posición o esta vencida
             if (position.asset.assetType == 'BOND'
                  and ((position.isMatured and today == toDate)
-                    or (position.maturityDate.date() < toDate and today != toDate) 
-                    or position.totalQuantity == 0)):
+                    or (position.maturityDate.date() < toDate and today != toDate))
+                or position.totalQuantity == 0):
                 oldPosition =  oldPositionDict.get(assetName, None)
                 if oldPosition == None:
                     oldPositionDict[assetName] = position
