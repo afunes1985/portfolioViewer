@@ -295,7 +295,7 @@ class Engine:
                 positionDict[assetName] = position
             else:           
                 position.addMovement(movement)
-            #pasa la posicion al viejo diccionario de posiciones si no tiene mas posición o esta vencida
+            #pasa la posicion al viejo diccionario de posiciones si no tiene mas posicion o esta vencida
             if (position.asset.assetType == 'BOND'
                  and ((position.isMatured and today == toDate)
                     or (position.maturityDate.date() < toDate and today != toDate))
