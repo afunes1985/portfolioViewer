@@ -30,7 +30,7 @@ mainCache.refreshReferenceData()
 class MovementImporter():
     
     cashMovementTypeINList = ["DEPOSITO DE EFECTIVO", "INGEFVO"]
-    cashMovementTypeOUTList = ["RETIRO DE EFECTIVO"]
+    cashMovementTypeOUTList = ["RETIRO DE EFECTIVO", "EGREFVO"]
     cashMovementTypeList = cashMovementTypeINList + cashMovementTypeOUTList
     
     movementTypeBUYCOMList = ["Compra de Acciones.","Compra por Autoentrada"]
@@ -68,10 +68,13 @@ class MovementImporter():
             isFromToDateNOTSetter = True
             for index, row in enumerate(json_data):
                 paymentDate = self.getColumnValueFromList(row, 0)
-                if ("Saldo inicial"  == paymentDate):
-                    isAfterBegin = True
-                elif (isAfterBegin):
+                try:
                     paymentDate = pandas.to_datetime(datetime.strptime(paymentDate[paymentDate.find(" ", 0)+1:len(paymentDate)], '%d/%m/%y')).to_pydatetime()
+                    isAfterBegin = True
+                except Exception as err:
+                    isAfterBegin = False
+                    
+                if (isAfterBegin):
                     if (isFromToDateNOTSetter):
                         isFromToDateNOTSetter = False
                         imLO.setFromDate(paymentDate.replace(day=1))
@@ -117,32 +120,33 @@ class MovementImporter():
             for index, key in enumerate(json_data):
                 if index > 2:
                     dateAndExternalID = self.getColumnValueFromList(key, 0)
-                    paymentDate = dateAndExternalID[0: 2]
-                    externalID = dateAndExternalID[dateAndExternalID.find(' ', 0)+1: len(dateAndExternalID)]
-                    print (externalID)
-                    paymentDate = date + "-" + paymentDate
-                    paymentDate =  pandas.to_datetime(datetime.strptime(paymentDate, '%y-%m-%d')).to_pydatetime() 
-                    print (paymentDate)
-                    quantity = self.replaceComma(self.getColumnValueFromList(key, 4))
-                    price = self.replaceComma(self.getColumnValueFromList(key, 5))
-                    commission = self.replaceComma(self.getColumnValueFromList(key, 7))
-                    commissionVAT = self.replaceComma(self.getColumnValueFromList(key, 9))
-                    grossAmount = float(str('{0:.6f}'.format(float(price*quantity))))
-                    importerMovementVO = ImporterMovementVO()
-                    importerMovementVO.setPaymentDate(paymentDate)
-                    importerMovementVO.setExternalID(externalID)
-                    importerMovementVO.setOriginMovementType(self.getColumnValueFromList(key, 2))
-                    importerMovementVO.setAssetName(self.getColumnValueFromList(key, 3))
-                    importerMovementVO.setNetAmount(self.replaceComma(self.getColumnValueFromList(key, 10)))
-                    importerMovementVO.setCustody(custody)
-                    importerMovementVO.setQuantity(quantity)
-                    importerMovementVO.setPrice(price)
-                    importerMovementVO.setCommission(commission)
-                    importerMovementVO.setCommissionVAT(commissionVAT)
-                    importerMovementVO.setGrossAmount(grossAmount)
-                    importerMovementVO.setComment("UPLOAD " + str(importerMovementVO.getPaymentDate())[0:7])
-                    self.convertToPersistent(importerMovementVO)
-                    self.appendToMovementList(importerMovementVO, filterAssetName)
+                    if dateAndExternalID != "":
+                        paymentDate = dateAndExternalID[0: 2]
+                        externalID = dateAndExternalID[dateAndExternalID.find(' ', 0)+1: len(dateAndExternalID)]
+                        print (externalID)
+                        paymentDate = date + "-" + paymentDate
+                        paymentDate =  pandas.to_datetime(datetime.strptime(paymentDate, '%y-%m-%d')).to_pydatetime() 
+                        print (paymentDate)
+                        quantity = self.replaceComma(self.getColumnValueFromList(key, 4))
+                        price = self.replaceComma(self.getColumnValueFromList(key, 5))
+                        commission = self.replaceComma(self.getColumnValueFromList(key, 7))
+                        commissionVAT = self.replaceComma(self.getColumnValueFromList(key, 9))
+                        grossAmount = float(str('{0:.6f}'.format(float(price*quantity))))
+                        importerMovementVO = ImporterMovementVO()
+                        importerMovementVO.setPaymentDate(paymentDate)
+                        importerMovementVO.setExternalID(externalID)
+                        importerMovementVO.setOriginMovementType(self.getColumnValueFromList(key, 2))
+                        importerMovementVO.setAssetName(self.getColumnValueFromList(key, 3))
+                        importerMovementVO.setNetAmount(self.replaceComma(self.getColumnValueFromList(key, 10)))
+                        importerMovementVO.setCustody(custody)
+                        importerMovementVO.setQuantity(quantity)
+                        importerMovementVO.setPrice(price)
+                        importerMovementVO.setCommission(commission)
+                        importerMovementVO.setCommissionVAT(commissionVAT)
+                        importerMovementVO.setGrossAmount(grossAmount)
+                        importerMovementVO.setComment("UPLOAD " + str(importerMovementVO.getPaymentDate())[0:7])
+                        self.convertToPersistent(importerMovementVO)
+                        self.appendToMovementList(importerMovementVO, filterAssetName)
             return self.movementList 
     
     def appendToMovementList(self, importerMovementVO, filterAssetName):
@@ -246,13 +250,13 @@ class MovementImporter():
                     return json_data[0]['data']
                 
     def getRawDataFromCETESDIRECTO(self, filePath):
-        for page in range(2, 3):
+        for page in range(1, 3):
             json_data = read_pdf(filePath, 'json', 'latin_1', pages=page)
             if (len(json_data) != 0):
                 for row in range(0, len(json_data[0]['data'])):
-                    key = json_data[0]['data'][row][0]['text']
+                    key = json_data[0]['data'][row][3]['text']
                     #print(key)
-                    if ("Saldo inicial"  == key):
+                    if (key == "Emisora"):
                         return json_data[0]['data']
                 
     def getAssetbyName(self, assetName):

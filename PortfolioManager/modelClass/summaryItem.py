@@ -51,4 +51,7 @@ class SummaryItem:
         return (self.valuatedAmount / self.investedAmount -1 ) * 100
     
     def getNetPnLPercentage(self):
-        return (self.valuatedAmount / (self.investedAmount + self.accumulatedBuyCommissionAmount + self.accumulatedBuyVATCommissionAmount) -1 ) * 100
+        try:
+            return (self.valuatedAmount / (self.investedAmount + self.accumulatedBuyCommissionAmount + self.accumulatedBuyVATCommissionAmount) -1 ) * 100
+        except Exception as e:
+            raise e
