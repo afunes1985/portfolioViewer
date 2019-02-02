@@ -7,7 +7,7 @@ import calendar
 from datetime import datetime, date
 from decimal import Decimal
 import logging
-
+ 
 import pandas
 from tabula import read_pdf
 
