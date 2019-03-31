@@ -81,18 +81,18 @@ class MovementImporter():
                         imLO.setToDate(paymentDate.replace(day = calendar.monthrange(paymentDate.year, paymentDate.month)[1]))
                     importerMovementVO = ImporterMovementVO()
                     importerMovementVO.setPaymentDate(paymentDate)
-                    importerMovementVO.setExternalID(self.getColumnValueFromList(row, 1))
-                    importerMovementVO.setOriginMovementType(self.getColumnValueFromList(row, 2))
-                    assetName = self.getColumnValueFromList(row, 3)
-                    assetNameSerie = self.getColumnValueFromList(row, 4)
+                    importerMovementVO.setExternalID(self.getColumnValueFromList(row, 2))
+                    importerMovementVO.setOriginMovementType(self.getColumnValueFromList(row, 3))
+                    assetName = self.getColumnValueFromList(row, 4)
+                    assetNameSerie = self.getColumnValueFromList(row, 5)
                     importerMovementVO.assetNameSerie = assetNameSerie
                     importerMovementVO.setAssetName(assetName)
-                    importerMovementVO.setQuantity(self.replaceComma(self.getColumnValueFromList(row, 5)))
-                    price = self.getColumnValueFromList(row, 6)
+                    importerMovementVO.setQuantity(self.replaceComma(self.getColumnValueFromList(row, 6)))
+                    price = self.getColumnValueFromList(row, 7)
                     importerMovementVO.setPrice(self.replaceComma(price[0: price.find(" ", 0)]))
-                    importerMovementVO.setRate(self.replaceComma(self.getColumnValueFromList(row, 7)))
-                    cargo = self.replaceComma(self.getColumnValueFromList(row, 8))
-                    abono = self.replaceComma(self.getColumnValueFromList(row, 9))
+                    importerMovementVO.setRate(self.replaceComma(self.getColumnValueFromList(row, 8)))
+                    cargo = self.replaceComma(self.getColumnValueFromList(row, 10))
+                    abono = self.replaceComma(self.getColumnValueFromList(row, 11))
                     if (cargo == 0):
                         importerMovementVO.setNetAmount(abono)
                         importerMovementVO.setGrossAmount(abono)
@@ -254,9 +254,9 @@ class MovementImporter():
             json_data = read_pdf(filePath, 'json', 'latin_1', pages=page)
             if (len(json_data) != 0):
                 for row in range(0, len(json_data[0]['data'])):
-                    key = json_data[0]['data'][row][3]['text']
-                    #print(key)
-                    if (key == "Emisora"):
+                    key = json_data[0]['data'][row][0]['text']
+                    print(key)
+                    if (key == "Fecha de"):
                         return json_data[0]['data']
                 
     def getAssetbyName(self, assetName):
