@@ -67,7 +67,7 @@ class MovementImporter():
             isAfterBegin = False
             isFromToDateNOTSetter = True
             for index, row in enumerate(json_data):
-                paymentDate = self.getColumnValueFromList(row, 0)
+                paymentDate = self.getColumnValueFromList(row, 1)
                 try:
                     paymentDate = pandas.to_datetime(datetime.strptime(paymentDate[paymentDate.find(" ", 0)+1:len(paymentDate)], '%d/%m/%y')).to_pydatetime()
                     isAfterBegin = True
@@ -90,7 +90,7 @@ class MovementImporter():
                     importerMovementVO.setQuantity(self.replaceComma(self.getColumnValueFromList(row, 6)))
                     price = self.getColumnValueFromList(row, 7)
                     importerMovementVO.setPrice(self.replaceComma(price[0: price.find(" ", 0)]))
-                    importerMovementVO.setRate(self.replaceComma(self.getColumnValueFromList(row, 8)))
+                    importerMovementVO.setRate(self.replaceComma(self.getColumnValueFromList(row, 9)))
                     cargo = self.replaceComma(self.getColumnValueFromList(row, 10))
                     abono = self.replaceComma(self.getColumnValueFromList(row, 11))
                     if (cargo == 0):
