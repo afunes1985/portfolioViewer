@@ -78,7 +78,7 @@ class PnLLO():
         pnlVO.initialPosition = Engine.getSubTotalValuatedAmountByCustodyOID(self.startPositionDict[Constant.CONST_POSITION_DICT], custodyOID)
         pnlVO.pnlAmount =  pnlVO.finalPosition - pnlVO.initialPosition - (pnlVO.totalCashIn - pnlVO.totalCashOut)
         pnlVO.pnlWeightedAmount =  0 #pnlVO.finalPosition - pnlVO.initialPosition - (pnlVO.totalWeightedCashIn - pnlVO.totalWeightedCashOut)
-        pnlVO.tir = (pnlVO.pnlAmount / (pnlVO.initialPosition + (pnlVO.totalCashIn - pnlVO.totalCashOut)))*100
+        pnlVO.tir = (pnlVO.pnlAmount / (pnlVO.initialPosition + abs(pnlVO.totalCashIn - pnlVO.totalCashOut)))*100
         pnlVO.weightedTir = 0 #(pnlVO.pnlAmount / (pnlVO.initialPosition + (pnlVO.totalWeightedCashIn - pnlVO.totalWeightedCashOut)))*100
         return pnlVO
         
@@ -118,19 +118,19 @@ class PnLLO():
             self.finalWorkingDay = Function.getLastWorkingDay(toDate)
             currencyRS = DaoCurrency.getCurrencyValueByDate("USD/MXN", self.finalWorkingDay)
             if len(currencyRS) == 0:
-                logging.warning("final USDMXN not found: " + str(self.finalWorkingDay))
+                raise Exception("final USDMXN not found: " + str(self.finalWorkingDay))
             finalUsdMxn =  currencyRS[0][0]
         for position in (self.startPositionDict[Constant.CONST_POSITION_DICT]).itervalues():
             if position.asset.assetType != 'BOND':
                 price = DaoPrice.getPriceByDate(position.getMainName(), self.startWorkingDay)
                 if len(price) == 0:
-                    logging.warning("price not found: " + position.getMainName() + " " + str(self.startWorkingDay))    
+                    raise Exception("price not found: " + position.getMainName() + " " + str(self.startWorkingDay))    
                 position.setSpecificMarketData(price[0][0], startUsdMxn[0][0])
         if not setLastMarketData: 
             for position in (self.finalPositionDict[Constant.CONST_POSITION_DICT]).itervalues():
                 if position.asset.assetType != 'BOND':
                     price = DaoPrice.getPriceByDate(position.getMainName(), self.finalWorkingDay)
                     if len(price) == 0:
-                        logging.warning("price not found: " + position.getMainName() + " " + str(self.finalWorkingDay)) 
+                        raise Exception("price not found: " + position.getMainName() + " " + str(self.finalWorkingDay)) 
                     position.setSpecificMarketData(price[0][0], finalUsdMxn)
         
