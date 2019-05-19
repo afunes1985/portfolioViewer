@@ -135,7 +135,7 @@ class Position():
     
     def getValuatedAmount(self):
         if (self.asset.assetType == 'BOND'):
-            return self.accumulatedAmount * (1 + (self.getElapsedDays() * (self.rate / 360))) - self.taxAmount
+            return self.accumulatedAmount * (1 + (self.getElapsedDays() * (self.rate / 360)))
         else:  
             if (self.marketPrice == 0):
                 return Decimal(self.totalQuantity) * self.unitCost
