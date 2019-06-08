@@ -12,6 +12,7 @@ class ImporterMovementVO():
         self.paymentDate = None
         self.externalID = None
         self.assetName = None
+        self.assetSerie = None
         self.quantity = None
         self.price = None
         self.rate = 0
@@ -64,6 +65,9 @@ class ImporterMovementVO():
 
     def setCustody(self, custody):
         self.custody = custody
+        
+    def setAssetSerie(self, assetSerie):
+        self.assetSerie = assetSerie
     
     def getPaymentDate(self):
         return self.paymentDate
@@ -113,5 +117,8 @@ class ImporterMovementVO():
 
     def logObject(self):
         print (self.__dict__)
+        
+    def getAssetNamePlusSerie(self):
+        return self.assetName + "-" + self.assetSerie
         
     

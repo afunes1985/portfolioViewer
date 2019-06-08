@@ -85,7 +85,7 @@ class MovementImporter():
                     importerMovementVO.setOriginMovementType(self.getColumnValueFromList(row, 3))
                     assetName = self.getColumnValueFromList(row, 4)
                     assetNameSerie = self.getColumnValueFromList(row, 5)
-                    importerMovementVO.assetNameSerie = assetNameSerie
+                    importerMovementVO.setAssetSerie(assetNameSerie)
                     importerMovementVO.setAssetName(assetName)
                     importerMovementVO.setQuantity(self.replaceComma(self.getColumnValueFromList(row, 6)))
                     price = self.getColumnValueFromList(row, 7)
@@ -161,11 +161,11 @@ class MovementImporter():
     def convertToPersistent(self, importerMovementVO):
         if (importerMovementVO.originMovementType in self.cashMovementTypeList):
             importerMovementVO.persistentObject = CashMovement(None)
-            assetOID = self.getAssetbyName(importerMovementVO.assetName)
+            assetOID = self.getAssetbyName(importerMovementVO)
             importerMovementVO.persistentObject.setAttr("NEW", importerMovementVO.netAmount, self.getInOrOut(importerMovementVO.originMovementType), importerMovementVO.custody.OID, importerMovementVO.paymentDate, importerMovementVO.comment, importerMovementVO.externalID, assetOID)
         elif (importerMovementVO.originMovementType in self.movementTypeList):    
             importerMovementVO.persistentObject = Movement(None)
-            assetOID = self.getAssetbyName(importerMovementVO.assetName)
+            assetOID = self.getAssetbyName(importerMovementVO)
             importerMovementVO.persistentObject.setAttr( "NEW", assetOID, self.getBuyOrSell(importerMovementVO.originMovementType), importerMovementVO.paymentDate, 
                                                             importerMovementVO.quantity, importerMovementVO.price, importerMovementVO.getRate(), importerMovementVO.grossAmount , 
                                                             importerMovementVO.netAmount, self.getCommissionPercentage(importerMovementVO.originMovementType), importerMovementVO.commission, importerMovementVO.commissionVAT, 
@@ -173,10 +173,10 @@ class MovementImporter():
                                                             importerMovementVO.comment )
         elif (importerMovementVO.originMovementType in self.corporateEventTypeList): 
             importerMovementVO.persistentObject = CorporateEvent(None)
-            assetOID = self.getAssetbyName(importerMovementVO.assetName)
+            assetOID = self.getAssetbyName(importerMovementVO)
             importerMovementVO.persistentObject.setAttr("NEW", importerMovementVO.custody.OID, mainCache.corporateEventTypeOID[1], assetOID, importerMovementVO.paymentDate, importerMovementVO.netAmount, importerMovementVO.netAmount, importerMovementVO.comment, importerMovementVO.externalID)
         elif (importerMovementVO.originMovementType == "ISR"):
-            maturityDate = date(int('20' +importerMovementVO.assetNameSerie[:2]), int(importerMovementVO.assetNameSerie[2:4]), int(importerMovementVO.assetNameSerie[4:6]))
+            maturityDate = date(int('20' +importerMovementVO.assetSerie[:2]), int(importerMovementVO.assetSerie[2:4]), int(importerMovementVO.assetSerie[4:6]))
             totalAmount = 0
             movementRs = DaoMovement.getMovementsByMaturityDate(maturityDate)
             if len(movementRs) > 0:
@@ -197,7 +197,7 @@ class MovementImporter():
                 oldPersisteObject = self.movementList[len(self.movementList)-1]
             except IndexError:
                 return 
-            assetOID = self.getAssetbyName(importerMovementVO.assetName)
+            assetOID = self.getAssetbyName(importerMovementVO)
             if (assetOID == oldPersisteObject.asset.OID):
                 tax = Tax(None)
                 tax.setAttr("NEW", 'CORPORATE_EVENT', None, importerMovementVO.netAmount, importerMovementVO.externalID)
@@ -259,12 +259,14 @@ class MovementImporter():
                     if (key == "Fecha de"):
                         return json_data[0]['data']
                 
-    def getAssetbyName(self, assetName):
-        asset = self.assetDict.get(self.assetTranslator.get(assetName, assetName), None)
+    def getAssetbyName(self, importerMovementVO):
+        asset = self.assetDict.get(self.assetTranslator.get(importerMovementVO.assetName, importerMovementVO.assetName), None)
         if (asset is None):
-            logging.warning(assetName)
-        else:
-            return asset.OID
+            asset = self.assetDict.get(self.assetTranslator.get(importerMovementVO.getAssetNamePlusSerie(), None), None)
+            if(asset is None):
+                logging.warning("ASSET NOT FOUND " + importerMovementVO.assetName)
+                return None
+        return asset.OID
 
     def last_day_of_month(self, any_day):
         next_month = any_day.replace(day=28) + datetime.timedelta(days=4)  # this will never fail
