@@ -25,7 +25,7 @@ from modelClass.tax import Tax
 class Engine:
     
     @staticmethod
-    def buildSummaryByCustody(positionDict, oldPositionDict, corporateEventPositionDict):
+    def buildSummaryByCustody(positionDict, oldPositionDict):
         summaryDict = {}
         #Positions
         for (positionKey, position) in positionDict.iteritems():
@@ -46,11 +46,6 @@ class Engine:
                 summaryItem.addRealizedPnl(oldPosition.realizedPnl)
             else:
                 summaryItem.addRealizedPnl(oldPosition.realizedPnl)
-        #Corporate event        
-        for (positionKey, corporateEventPosition) in corporateEventPositionDict.iteritems():
-            summaryKey = corporateEventPosition.custody.name + corporateEventPosition.asset.assetType
-            summaryItem = summaryDict.get(summaryKey)
-            summaryItem.addRealizedPnl(corporateEventPosition.accNetAmount)
         #Sub Total
         subTotalSummary = {}
         for (sumKey, summaryItem) in summaryDict.iteritems():
@@ -171,7 +166,7 @@ class Engine:
         accRealizedPnl = 0
         positionList = Engine.getPositionByAssetType(positionDict, assetType, isSIC)
         for position in positionList:
-            accRealizedPnl += position.realizedPnl
+            accRealizedPnl += position.getConsolidatedRealizedPnl()
         return accRealizedPnl
     
     @staticmethod
@@ -293,6 +288,7 @@ class Engine:
             if position == None:
                 position = Position(asset, movement)
                 positionDict[assetName] = position
+                oldPositionDict.pop(assetName, None)
             else:           
                 position.addMovement(movement)
             #pasa la posicion al viejo diccionario de posiciones si no tiene mas posicion o esta vencida
@@ -317,6 +313,14 @@ class Engine:
         returnDict = {}
         returnDict[Constant.CONST_POSITION_DICT] = positionDict
         returnDict[Constant.CONST_OLD_POSITION_DICT] = oldPositionDict
+        corporateEventPositionDict = Engine.buildCorporateEventPosition()
+        returnDict[Constant.CONST_CORPORATE_POSITION_DICT] = corporateEventPositionDict
+        #Corporate event        
+        for (positionKey, corporateEventPosition) in corporateEventPositionDict.iteritems():
+            position = positionDict.get(positionKey, None)
+            if(position is not None):
+                position.addRealizedPnlCorporateEvent(corporateEventPosition.accGrossAmount)
+        
         return returnDict
 
     
@@ -337,8 +341,6 @@ class Engine:
             return movement
     @staticmethod
     def buildCorporateEventPosition():
-        from core.cache import Singleton, MainCache
-        mainCache = Singleton(MainCache)
         resultDict = {}
         resultSet = DaoCorporateEvent.getCorporateEventList()
         for (row) in resultSet:
@@ -348,7 +350,7 @@ class Engine:
                 resultDict[o.asset.name] = CorporateEventPosition(o)
             else:
                 corporateEventPosition.addCorporateEvent(o)
-        mainCache.corporateEventPositionDictAsset = resultDict
+        return resultDict
     
     @staticmethod
     def getCorporateEventTypeDictOID():

@@ -39,7 +39,7 @@ class SummaryItem:
         self.investedAmount += position.getInvestedAmount()  
         self.accumulatedBuyCommissionAmount += position.accumulatedBuyCommission
         self.accumulatedBuyVATCommissionAmount += position.accumulatedBuyVATCommission
-        self.realizedPnl += position.realizedPnl
+        self.realizedPnl += position.getConsolidatedRealizedPnl()
         self.positionPercentage += position.getPositionPercentage()
         self.weightedPnL += position.getWeightedPnl()
         self.netPnL += position.getNetPnL()

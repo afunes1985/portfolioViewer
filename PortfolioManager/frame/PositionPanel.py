@@ -206,7 +206,7 @@ class PositionPanel(QtGui.QWidget):
                 pnLNetPercentageItem = QTableWidgetItemDecimalColor(position.getNetPnLPercentage(), False)
                 self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_GROSS_NET_PERCENTAGE,pnLNetPercentageItem)
                 #realizedPnL
-                realizedPnLItem = QTableWidgetItemDecimalColor(position.realizedPnl, False)
+                realizedPnLItem = QTableWidgetItemDecimalColor(position.getConsolidatedRealizedPnl(), False)
                 self.positionTableWidget.setItem(self.row,Constant.CONST_COLUMN_POSITION_REALIZED_PNL,realizedPnLItem)
                 #positionPercentage
                 positionPercentageItem = QTableWidgetItemDecimal(position.getPositionPercentage(), False)

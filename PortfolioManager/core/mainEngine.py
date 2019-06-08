@@ -28,6 +28,7 @@ class MainEngine(object):
         mainCache.positionDict = resultPositionDict[Constant.CONST_POSITION_DICT]
         mainCache.oldPositionDict = resultPositionDict[Constant.CONST_OLD_POSITION_DICT]
         mainCache.setGlobalAttribute(resultPositionDict[Constant.CONST_POSITION_DICT])
+        mainCache.corporateEventPositionDictAsset = resultPositionDict[Constant.CONST_CORPORATE_POSITION_DICT]
         progressBar.setLabelText("EQUITY")
         progressBar.setValue(3)
         self.mainWindow.renderPositions(mainCache.positionDict, 'EQUITY', 0)
@@ -44,10 +45,9 @@ class MainEngine(object):
         self.mainWindow.renderSubtotal(mainCache.positionDict, 'ALL', 0)
         progressBar.setLabelText("CORPORATE EVENT")
         progressBar.setValue(10)
-        Engine.buildCorporateEventPosition()
         self.mainWindow.renderCorpEvent(mainCache.corporateEventPositionDictAsset)
         #======================================================================
-        mainCache.summaryDict = Engine.buildSummaryByCustody(mainCache.positionDict, mainCache.oldPositionDict, mainCache.corporateEventPositionDictAsset)
+        mainCache.summaryDict = Engine.buildSummaryByCustody(mainCache.positionDict, mainCache.oldPositionDict)
         self.mainWindow.renderSummary(mainCache.summaryDict)
         self.mainWindow.renderGeneralInfoPanel(mainCache.usdMXN)
         

@@ -17,7 +17,7 @@ class Position():
     accumulatedSellCommission = 0
     accumulatedSellVATCommission = 0
     realizedPnl = 0
-    realizedPnlPercentage = 0
+    realizedPnlCorporateEvent = 0
     marketPrice = 0
     marketPriceOrig = 0
     acquisitionDate = 0
@@ -217,3 +217,9 @@ class Position():
         else:
             return self.asset.name
     
+    def addRealizedPnlCorporateEvent(self, corporateEventGrossAmount):
+        self.realizedPnlCorporateEvent += corporateEventGrossAmount
+        
+    def getConsolidatedRealizedPnl(self):
+        return self.realizedPnl + self.realizedPnlCorporateEvent
+        
