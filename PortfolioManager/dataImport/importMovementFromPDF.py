@@ -46,6 +46,8 @@ class MovementImporter():
     
     nonMovementTypeList = corporateEventTAXTypeList
     
+    headerCetes = {"Folio": None, "Descripci": None, "Emisora": None, "Serie": None, "tulos": None, "Precio": None, "Plazo": None, "Tasa": None, "Cargo": None, "Abono": None}
+    
     def getMovementList(self, filePath, assetName):
         self.assetDict = Engine.getAssetDict()
         self.assetTranslator = Engine.getAssetTranslatorDict()
@@ -64,46 +66,62 @@ class MovementImporter():
         json_data = self.getRawDataFromCETESDIRECTO(filePath)
         if (len(json_data) != 0):
             self.movementList = []
-            isAfterBegin = False
+            isReadyToReadMov = False
+            isReadyToReadFirstMov = False
             isFromToDateNOTSetter = True
             for index, row in enumerate(json_data):
-                paymentDate = self.getColumnValueFromList(row, 1)
-                try:
-                    paymentDate = pandas.to_datetime(datetime.strptime(paymentDate[paymentDate.find(" ", 0)+1:len(paymentDate)], '%d/%m/%y')).to_pydatetime()
-                    isAfterBegin = True
-                except Exception as err:
-                    isAfterBegin = False
+                for i in range(len(row)):
+                    cellValue = self.getColumnValueFromList(row, i)
+                    for headerKey in self.headerCetes.keys():
+                        if (cellValue.find(headerKey) != -1):
+                            self.headerCetes[headerKey] = i
+                            break
+                for value in self.headerCetes.values():
+                    if value is None:
+                        isReadyToReadFirstMov = False
+                        break
+                    isReadyToReadFirstMov = True
                     
-                if (isAfterBegin):
-                    if (isFromToDateNOTSetter):
-                        isFromToDateNOTSetter = False
-                        imLO.setFromDate(paymentDate.replace(day=1))
-                        imLO.setToDate(paymentDate.replace(day = calendar.monthrange(paymentDate.year, paymentDate.month)[1]))
-                    importerMovementVO = ImporterMovementVO()
-                    importerMovementVO.setPaymentDate(paymentDate)
-                    importerMovementVO.setExternalID(self.getColumnValueFromList(row, 2))
-                    importerMovementVO.setOriginMovementType(self.getColumnValueFromList(row, 3))
-                    assetName = self.getColumnValueFromList(row, 4)
-                    assetNameSerie = self.getColumnValueFromList(row, 5)
-                    importerMovementVO.setAssetSerie(assetNameSerie)
-                    importerMovementVO.setAssetName(assetName)
-                    importerMovementVO.setQuantity(self.replaceComma(self.getColumnValueFromList(row, 6)))
-                    price = self.getColumnValueFromList(row, 7)
-                    importerMovementVO.setPrice(self.replaceComma(price[0: price.find(" ", 0)]))
-                    importerMovementVO.setRate(self.replaceComma(self.getColumnValueFromList(row, 9)))
-                    cargo = self.replaceComma(self.getColumnValueFromList(row, 10))
-                    abono = self.replaceComma(self.getColumnValueFromList(row, 11))
-                    if (cargo == 0):
-                        importerMovementVO.setNetAmount(abono)
-                        importerMovementVO.setGrossAmount(abono)
-                    elif (abono  == 0):
-                        importerMovementVO.setNetAmount(cargo)
-                        importerMovementVO.setGrossAmount(cargo)
-                    importerMovementVO.setCustody(custody)
-                    importerMovementVO.setComment("UPLOAD " + str(importerMovementVO.getPaymentDate())[0:7])
-                    importerMovementVO.logObject()
-                    self.convertToPersistent(importerMovementVO)
-                    self.appendToMovementList(importerMovementVO, filterAssetName)
+                if(isReadyToReadFirstMov):
+                    for i in range(2):
+                        cellValue = self.getColumnValueFromList(row, i)
+                        try:
+                            paymentDate = pandas.to_datetime(datetime.strptime(cellValue[cellValue.find(" ", 0)+1:len(cellValue)], '%d/%m/%y')).to_pydatetime()
+                            isReadyToReadMov = True
+                        except Exception:
+                            if(not isReadyToReadMov):
+                                isReadyToReadMov = False
+                        
+                    if (isReadyToReadMov):
+                        if (isFromToDateNOTSetter):
+                            isFromToDateNOTSetter = False
+                            imLO.setFromDate(paymentDate.replace(day=1))
+                            imLO.setToDate(paymentDate.replace(day = calendar.monthrange(paymentDate.year, paymentDate.month)[1]))
+                        importerMovementVO = ImporterMovementVO()
+                        importerMovementVO.setPaymentDate(paymentDate)
+                        importerMovementVO.setExternalID(self.getColumnValueFromList(row, self.headerCetes["Folio"]))
+                        importerMovementVO.setOriginMovementType(self.getColumnValueFromList(row, self.headerCetes["Descripci"]))
+                        assetName = self.getColumnValueFromList(row, self.headerCetes["Emisora"])
+                        assetNameSerie = self.getColumnValueFromList(row, self.headerCetes["Serie"])
+                        importerMovementVO.setAssetSerie(assetNameSerie)
+                        importerMovementVO.setAssetName(assetName)
+                        importerMovementVO.setQuantity(self.replaceComma(self.getColumnValueFromList(row, self.headerCetes["tulos"])))
+                        price = self.getColumnValueFromList(row, self.headerCetes["Precio"])
+                        importerMovementVO.setPrice(self.replaceComma(price[0: price.find(" ", 0)]))
+                        importerMovementVO.setRate(self.replaceComma(self.getColumnValueFromList(row, self.headerCetes["Tasa"])))
+                        cargo = self.replaceComma(self.getColumnValueFromList(row, self.headerCetes["Cargo"]))
+                        abono = self.replaceComma(self.getColumnValueFromList(row, self.headerCetes["Abono"]))
+                        if (cargo == 0):
+                            importerMovementVO.setNetAmount(abono)
+                            importerMovementVO.setGrossAmount(abono)
+                        elif (abono  == 0):
+                            importerMovementVO.setNetAmount(cargo)
+                            importerMovementVO.setGrossAmount(cargo)
+                        importerMovementVO.setCustody(custody)
+                        importerMovementVO.setComment("UPLOAD " + str(importerMovementVO.getPaymentDate())[0:7])
+                        importerMovementVO.logObject()
+                        self.convertToPersistent(importerMovementVO)
+                        self.appendToMovementList(importerMovementVO, filterAssetName)
             return self.movementList
 
                 
@@ -255,8 +273,7 @@ class MovementImporter():
             if (len(json_data) != 0):
                 for row in range(0, len(json_data[0]['data'])):
                     key = json_data[0]['data'][row][0]['text']
-                    print(key)
-                    if (key == "Fecha de"):
+                    if (key.find("Fecha de") != -1):
                         return json_data[0]['data']
                 
     def getAssetbyName(self, importerMovementVO):
