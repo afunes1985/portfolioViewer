@@ -127,7 +127,7 @@ class MovementImporter():
                 
     def getMovementListFromGBM(self, filePath, fileName, imLO, filterAssetName, custody):
         json_data = self.getRawDataFromGBM(filePath)
-        if (len(json_data) != 0):
+        if (json_data is not None and len(json_data) != 0):
             date =  fileName.replace(".pdf", '')
             date = date.replace("GBM_","")
             fromDate = date + "-" + "01"

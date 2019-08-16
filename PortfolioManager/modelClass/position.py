@@ -104,7 +104,7 @@ class Position():
         self.rate = movement.rate
         self.tenor = movement.tenor
         self.maturityDate = movement.maturityDate
-        today = datetime.datetime.now()
+        today = datetime.datetime.now().replace(minute=0, hour=0, second=0, microsecond=0)
         if (movement.tax is not None):
             self.taxAmount = movement.tax.taxAmount
         else:
