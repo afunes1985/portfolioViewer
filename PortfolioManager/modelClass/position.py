@@ -109,7 +109,7 @@ class Position():
             self.taxAmount = movement.tax.taxAmount
         else:
             self.taxAmount  = 0
-        if((self.maturityDate)<today):
+        if(self.maturityDate <= today):
             self.isMatured = 1
             self.realizedPnl = self.getNetPnL()
     

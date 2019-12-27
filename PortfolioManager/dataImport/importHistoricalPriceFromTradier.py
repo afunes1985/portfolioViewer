@@ -13,7 +13,7 @@ connection = httplib.HTTPSConnection('sandbox.tradier.com', 443, timeout = 30)
 headers = {"Accept":"application/json",
            "Authorization":"Bearer XGabnWN7VqBkIuSVvS6QrhwtiQcK"}
 
-dateToImport = date(2018, 01, 01)
+dateToImport = date(2019, 01, 01)
 dateToImport -= timedelta(days=1)
 while dateToImport.weekday() > 4: # Mon-Fri are 0-4
     dateToImport -= timedelta(days=1)

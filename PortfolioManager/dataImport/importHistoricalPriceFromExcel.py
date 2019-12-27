@@ -16,7 +16,7 @@ dateValues = df['Date'].values
 closePriceValues = df['Close*'].values
 isCurrencyValues = df['Is currency'].values
 
-dateToImport = date(2017, 01, 01)
+dateToImport = date(2017, 1, 1)
 dateToImport -= timedelta(days=1)
 while dateToImport.weekday() > 4: # Mon-Fri are 0-4
     dateToImport -= timedelta(days=1)
