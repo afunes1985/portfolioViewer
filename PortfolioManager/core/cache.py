@@ -37,9 +37,6 @@ class MainCache:
         self.totalValuatedAmount = Engine.getSubTotalValuatedAmount2(positionDict, 'ALL')
     
     def refreshReferenceData(self):
-        self.custodyDictOID = Engine.getCustodyDictOID()
-        self.corporateEventTypeOID = Engine.getCorporateEventTypeDictOID()
-        self.assetDictOID = Engine.getAssetDictOID()
         USDMXN = PricingInterface.getExchangeRateByCurrency('USD','MXN')
         if USDMXN == 0:
             USDMXN = 1

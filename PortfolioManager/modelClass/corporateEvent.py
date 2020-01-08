@@ -3,66 +3,26 @@ Created on Mar 18, 2017
 
 @author: afunes
 '''
-from modelClass.constant import Constant
+from sqlalchemy.sql.schema import Column
+from sqlalchemy.sql.sqltypes import DateTime, Float, String
+
+from modelClass import Base
 
 
-class CorporateEvent():
-    OID = None
-    asset = None
-    paymentDate = None
-    grossAmount = 0
-    custody = None
-    corporateEventType = None
-    netAmount = 0
-    comment = None
-    externalID = None
-    tax = None
+class CorporateEvent(Base):
+    __tablename__ = 'corporate_event'
+    #asset = None
+    paymentDate = Column('payment_date', DateTime, nullable=False)
+    grossAmount = Column('gross_amount', Float(), nullable=False)
+    #custody = None
+    #corporateEventType = None
+    netAmount = Column('net_amount', Float(), nullable=False)
+    comment = Column(String(), nullable=False)
+    externalID = Column('external_id', String(), nullable=False)
+    #tax = None
         
-    def __init__(self, corporateEventRow):
-        from core.cache import Singleton, MainCache
-        if(corporateEventRow is not None):
-            mainCache = Singleton(MainCache)
-            self.setAttr(corporateEventRow[0],corporateEventRow[1] , mainCache.corporateEventTypeOID[corporateEventRow[2]], corporateEventRow[3], corporateEventRow[4], corporateEventRow[5], corporateEventRow[6], corporateEventRow[7], corporateEventRow[8])
+class Custody(Base):
+    name = Column(String(), nullable=False)
     
-    def setAttr(self, OID, custodyOID, corporateEventType, assetOID, paymentDate, grossAmount, netAmount, comment, externalID):
-        from core.cache import Singleton, MainCache
-        mainCache = Singleton(MainCache)
-        self.OID = OID
-        self.custody = mainCache.custodyDictOID[custodyOID]
-        self.corporateEventType = corporateEventType
-        self.asset = mainCache.assetDictOID.get(assetOID, None)
-        self.paymentDate = paymentDate
-        self.grossAmount = grossAmount
-        self.netAmount = netAmount
-        self.comment = comment
-        self.externalID = externalID
-        
-    def getMovementType(self):
-        return Constant.CONST_CORP_EVENT_TYPE
-
-    def getMovementSubType(self):
-        return Constant.CONST_CORP_EVENT_SUB_TYPE
-    
-class Custody():
-    OID = None
-    name = None
-    
-    def __init__(self, row):
-        if(row is not None):
-            self.setAttr(row[0], row[1])
-    
-    def setAttr(self, OID, name):
-        self.OID = OID
-        self.name = name
-
-class CorporateEventType():
-    OID = None
-    name = None
-    
-    def __init__(self, row):
-        if(row is not None):
-            self.setAttr(row[0], row[1])
-    
-    def setAttr(self, OID, name):
-        self.OID = OID
-        self.name = name
+class CorporateEventType(Base):
+    name = Column(String(), nullable=False)

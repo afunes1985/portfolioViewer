@@ -41,8 +41,7 @@ class DaoMovement():
         resultSet = DbConnector().doQuery(query, (maturityDate,))
         return resultSet
 
-    @staticmethod
-    def getMovementsByDate(assetName, fromDate, toDate):
+    def getMovementsByDate(self, assetName, fromDate, toDate):
         query = '''SELECT m.ID, m.asset_oid, m.buy_sell, m.ACQUISITION_DATE, 
                     m.quantity, m.price, m.rate, m.GROSS_AMOUNT, 
                     m.NET_AMOUNT, m.COMMISSION_PERCENTAGE, m.COMMISSION_AMOUNT, m.COMMISSION_IVA_AMOUNT, 

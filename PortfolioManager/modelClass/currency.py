@@ -3,14 +3,11 @@ Created on 18 mar. 2018
 
 @author: afunes
 '''
+from sqlalchemy.sql.schema import Column
+from sqlalchemy.sql.sqltypes import DateTime, Float
+
 
 class CurrencyValue():
-    def __init__(self, row):
-        if(row is not None):
-            self.setAttr(row[0], row[1], row[2], row[3])
-    
-    def setAttr(self, OID, currencyOID, date, value):
-        self.OID = OID
-        self.currencyOID = currencyOID
-        self.date = date
-        self.value = value
+    #currencyOID = currencyOID
+    date = Column(DateTime, nullable=False)
+    value = Column(Float(), nullable=False)

@@ -1,6 +1,6 @@
 from datetime import date, timedelta
-import httplib
-import json
+import http.client
+import json 
 import logging
 
 from dao.dao import DaoAsset, DaoPrice
@@ -8,7 +8,7 @@ from modelClass.price import Price
 
 
 # Request: Market Quotes (https://sandbox.tradier.com/v1/markets/quotes?symbols=spy)
-connection = httplib.HTTPSConnection('sandbox.tradier.com', 443, timeout = 30)
+connection = http.client.HTTPSConnection('sandbox.tradier.com', 443, timeout = 30)
 # Headers
 headers = {"Accept":"application/json",
            "Authorization":"Bearer XGabnWN7VqBkIuSVvS6QrhwtiQcK"}
