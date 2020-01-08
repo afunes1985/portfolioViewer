@@ -14,7 +14,7 @@ from frame.framework import QTableWidgetItemDecimal, \
     QTableWidgetItemDecimalColor, QTableWidgetItemString, QTableWidgetItemInt, \
     QTableWidgetItemDuoDecimal, QTableWidgetItemDuoInt, \
     QTableWidgetItemStringPlusMinus
-from modelClass.constant import Constant
+from core.constant import Constant
 
 
 class PositionPanel(QtGui.QWidget):

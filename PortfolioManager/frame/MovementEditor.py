@@ -11,7 +11,7 @@ from PySide.QtGui import QWidget, QLabel, QComboBox, QCheckBox, QLineEdit, \
     QDoubleValidator, QDateEdit, QIntValidator, QPushButton
 
 from dao.dao import DaoAsset, DaoMovement, DaoCustody
-from modelClass.constant import Constant
+from core.constant import Constant
 from modelClass.movement import Movement
 
 

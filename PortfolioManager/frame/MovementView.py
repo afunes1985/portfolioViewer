@@ -8,7 +8,7 @@ from PySide.QtGui import QWidget, QTableWidget
 
 from frame.framework import QTableWidgetItemString, QTableWidgetItem6Decimal, \
     QTableWidgetItemInt
-from modelClass.constant import Constant
+from core.constant import Constant
 
 
 class MovementView(QWidget):

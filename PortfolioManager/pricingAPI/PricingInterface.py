@@ -4,11 +4,12 @@ Created on 8 nov. 2017
 @author: afunes
 '''
 from decimal import Decimal
-import logging
-import string
-import httplib
+import http
 import json
+import logging
+
 import requests
+
 from dao.dao import DaoPrice
 
 
@@ -17,7 +18,7 @@ class PricingInterface:
     @staticmethod
     def getPriceInterfacesDict():
         return dict({"EXCEL":PricingInterfaceExcel, 
-                    "YAHOO":PricingInterfaceYahoo,
+                    #"YAHOO":PricingInterfaceYahoo,
                     "TRADIER":PricingInterfaceTradier,
                     "ALPHAVANTAGE":PricingInterfaceAlphaVantage,
                     "DB":PricingInterfaceDB}) 
@@ -49,20 +50,6 @@ class PricingInterface:
 
 
 
-class PricingInterfaceYahoo:
-    @staticmethod
-    def getMarketPriceByAssetName(assetName):
-        result = requests.get('http://download.finance.yahoo.com/d/quotes.csv?s='+assetName+'&f=l1')
-        return Decimal(result.text)
-    
-    @staticmethod
-    def getReferenceDataByAssetNames(assetNames):
-        result = requests.get('http://download.finance.yahoo.com/d/quotes.csv?s='+assetNames+'&f=sl1p2')
-        wsResult = string.replace(result.text,'"', '')
-        return wsResult.split()
-
-
-
 
 class PricingInterfaceAlphaVantage:
     @staticmethod
@@ -78,7 +65,7 @@ class PricingInterfaceTradier:
     @staticmethod
     def getMarketPriceByAssetName(assetName):
         # Request: Market Quotes (https://sandbox.tradier.com/v1/markets/quotes?symbols=spy)
-        connection = httplib.HTTPSConnection('sandbox.tradier.com', 443, timeout = 30)
+        connection = http.client.HTTPSConnection('sandbox.tradier.com', 443, timeout = 30)
         # Headers
         headers = {"Accept":"application/json",
                    "Authorization":"Bearer XGabnWN7VqBkIuSVvS6QrhwtiQcK"}
@@ -93,7 +80,7 @@ class PricingInterfaceTradier:
     def getReferenceDataByAssetNames(assetNames):
         returnList = []
         # Request: Market Quotes (https://sandbox.tradier.com/v1/markets/quotes?symbols=spy)
-        connection = httplib.HTTPSConnection('sandbox.tradier.com', 443, timeout = 30)
+        connection = http.client.HTTPSConnection('sandbox.tradier.com', 443, timeout = 30)
         # Headers
         headers = {"Accept":"application/json",
                    "Authorization":"Bearer XGabnWN7VqBkIuSVvS6QrhwtiQcK"}

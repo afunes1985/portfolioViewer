@@ -3,89 +3,56 @@ Created on Mar 18, 2017
 
 @author: afunes
 '''
-from modelClass.constant import Constant
+from sqlalchemy.sql.schema import Column
+from sqlalchemy.sql.sqltypes import String, DateTime, Float
 
-class Movement():
+from modelClass import Base
+
+
+class Movement(Base):
         
-    def __init__(self, movementRow):
-        if(movementRow is not None):
-            self.setAttr(movementRow[0], movementRow[1], movementRow[2], movementRow[3], 
-                         movementRow[4], movementRow[5], movementRow[6], movementRow[7], 
-                         movementRow[8], movementRow[9], movementRow[10], movementRow[11], 
-                         movementRow[12], movementRow[13], movementRow[14], movementRow[16],
-                         movementRow[17])
+    #asset = mainCache.assetDictOID.get(assetOID,None)
+    buySell = Column('buy_sell', String(), nullable=False)
+    acquisitionDate = Column(DateTime, nullable=False)
+    quantity = Column(Float(), nullable=False)
+    price = Column(Float(), nullable=False)
+    rate = Column(Float(), nullable=False)
+    grossAmount = Column('gross_amount',Float(), nullable=False)
+    netAmount = Column('net_amount', Float(), nullable=False)
+    commissionPercentage = Column(Float(), nullable=False)
+    commissionAmount = Column(Float(), nullable=False)
+    commissionVATAmount = Column(Float(), nullable=False)
+    #custody = mainCache.custodyDictOID[custodyOID]
+    comment = Column(String(), nullable=False)
+    externalID = Column('external_id', String(), nullable=False)
+    tenor = Column(Float(), nullable=False)
+    maturityDate = Column('maturity_date', DateTime, nullable=False)
+    #tax = tax
     
-    def setAttr(self, OID, assetOID, buySell, acquisitionDate, 
-                    quantity, price, rate, grossAmount, 
-                    netAmount, commissionPercentage, commissionAmount, commissionVATAmount, 
-                    tenor, custodyOID, maturityDate, externalID, 
-                    comment, tax = None):
-        from core.cache import Singleton, MainCache
-        mainCache = Singleton(MainCache)
-        self.OID = OID
-        self.asset = mainCache.assetDictOID.get(assetOID,None)
-        self.buySell = buySell
-        self.acquisitionDate = acquisitionDate
-        self.quantity = quantity
-        self.price = price
-        self.rate = rate
-        self.grossAmount = grossAmount
-        self.netAmount = netAmount
-        self.commissionPercentage = commissionPercentage
-        self.commissionAmount = commissionAmount
-        self.commissionVATAmount = commissionVATAmount
-        self.externalID = externalID
-        self.custody = mainCache.custodyDictOID[custodyOID]
-        self.comment = comment
-        self.tenor = tenor
-        self.maturityDate = maturityDate
-        self.tax = tax
+#     @staticmethod 
+#     def constructMovementByType(assetType):
+#         if assetType == 'EQUITY':
+#             return EquityMovement(None)
+#         elif assetType == 'FUND':
+#             return FundMovement(None)
+#         elif assetType == 'BOND':
+#             return BondMovement(None)
+# 
+#     def getAcquisitionDate(self):
+#         return acquisitionDate.strftime("%Y-%m-%d")
+#     
+#     def getMovementType(self):
+#         return Constant.CONST_MOVEMENT_TYPE
+#     
+#     def getMovementSubType(self):
+#         return Constant.CONST_MOVEMENT_SUB_TYPE
     
-    @staticmethod 
-    def constructMovementByType(assetType):
-        if assetType == 'EQUITY':
-            return EquityMovement(None)
-        elif assetType == 'FUND':
-            return FundMovement(None)
-        elif assetType == 'BOND':
-            return BondMovement(None)
-
-    def getAcquisitionDate(self):
-        return self.acquisitionDate.strftime("%Y-%m-%d")
-    
-    def getMovementType(self):
-        return Constant.CONST_MOVEMENT_TYPE
-    
-    def getMovementSubType(self):
-        return Constant.CONST_MOVEMENT_SUB_TYPE
-    
-class BondMovement(Movement):
-    rate = 0
-
-class EquityMovement(Movement):
-    price = 0
-
-class FundMovement(Movement):
-    price = 0
-
-class Asset():
-    OID = 0
-    assetType = None
-    name = None
-    originName = None
-    isSIC = 0
-    isOnlinePrice = 0
-    priceSource = None
-    defaultCustody = None
-    def __init__(self, assetRow):
-        from core.cache import Singleton, MainCache
-        mainCache = Singleton(MainCache)
-        self.OID = assetRow[0]
-        self.assetType = assetRow[1]
-        self.name = assetRow[2]
-        self.originName = assetRow[3]
-        self.isSIC = assetRow[4]
-        self.isOnlinePrice = assetRow[5]
-        self.priceSource = assetRow[6]
-        self.defaultCustody = mainCache.custodyDictOID[assetRow[7]]
+# class BondMovement(Movement):
+#     rate = 0
+# 
+# class EquityMovement(Movement):
+#     price = 0
+# 
+# class FundMovement(Movement):
+#     price = 0
 

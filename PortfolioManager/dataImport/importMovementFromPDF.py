@@ -16,7 +16,7 @@ from dao.dao import DaoMovement
 from engine.engine import Engine
 from logicObject.ImportMovementLO import ImportMovementLO
 from modelClass.cashMovement import CashMovement
-from modelClass.constant import Constant
+from core.constant import Constant
 from modelClass.corporateEvent import CorporateEvent
 from modelClass.movement import Movement
 from modelClass.tax import Tax

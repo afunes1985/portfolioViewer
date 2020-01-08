@@ -9,7 +9,7 @@ from PySide.QtGui import QTableWidget
 from engine.engine import Engine
 from frame.PnLFilter import PnLFilter
 from frame.framework import QTableWidgetItemDecimal, QTableWidgetItemString
-from modelClass.constant import Constant
+from core.constant import Constant
 
 
 class PnLPanel(QtGui.QWidget):

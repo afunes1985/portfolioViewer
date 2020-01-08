@@ -9,7 +9,7 @@ import logging
 
 from core.function import Function
 from dao.dao import DaoPrice, DaoCurrency
-from modelClass.constant import Constant
+from core.constant import Constant
 from valueObject.PnLVO import PnLVO
 
 

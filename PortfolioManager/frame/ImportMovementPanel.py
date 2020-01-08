@@ -14,7 +14,7 @@ from frame.ImportMovementFilter import ImportMovementFilter
 from frame.ReportMovementPanel import ReportMovementPanel
 from frame.framework import PanelWithTable
 from modelClass.cashMovement import CashMovement
-from modelClass.constant import Constant
+from core.constant import Constant
 from modelClass.corporateEvent import CorporateEvent
 from modelClass.movement import Movement
 

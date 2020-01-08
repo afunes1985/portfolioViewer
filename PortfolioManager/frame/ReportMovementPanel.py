@@ -10,7 +10,7 @@ from PySide.QtGui import QTableWidget
 from engine.engine import Engine
 from frame.ReportMovementFilter import ReportMovementFilter
 from frame.framework import PanelWithTable
-from modelClass.constant import Constant
+from core.constant import Constant
 
 
 class ReportMovementPanel(PanelWithTable):
