@@ -3,14 +3,15 @@ Created on 17 mar. 2018
 
 @author: afunes
 '''
-class Price():
+from sqlalchemy.sql.schema import Column
+from sqlalchemy.sql.sqltypes import Float, DateTime
+
+from modelClass import PersistenObject
+
+
+class Price(PersistenObject):
+    __tablename__ = 'price'
     
-    def __init__(self, row):
-        if(row is not None):
-            self.setAttr(row[0], row[1], row[2], row[3])
-    
-    def setAttr(self, OID, assetOID, lastPrice, date):
-        self.OID = OID
-        self.assetOID = assetOID
-        self.lastPrice = lastPrice
-        self.date = date
+    #assetOID = assetOID
+    lastPrice = Column(Float(), nullable=False)
+    date = Column(DateTime, nullable=False)

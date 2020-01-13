@@ -3,7 +3,12 @@ Created on Feb 13, 2017
 
 @author: afunes
 '''
+from sqlalchemy.sql.elements import and_
+
+from base.dbConnector import DBConnector
 from dbConnector.dbConnector import DbConnector
+from modelClass.movement import Movement
+
 
 class DaoMovement():
     
@@ -41,22 +46,21 @@ class DaoMovement():
         resultSet = DbConnector().doQuery(query, (maturityDate,))
         return resultSet
 
-    def getMovementsByDate(self, assetName, fromDate, toDate):
-        query = '''SELECT m.ID, m.asset_oid, m.buy_sell, m.ACQUISITION_DATE, 
-                    m.quantity, m.price, m.rate, m.GROSS_AMOUNT, 
-                    m.NET_AMOUNT, m.COMMISSION_PERCENTAGE, m.COMMISSION_AMOUNT, m.COMMISSION_IVA_AMOUNT, 
-                    m.TENOR, c.ID, m.MATURITY_DATE, IFNULL(t.tax_amount, 0),
-                    m.external_id, m.comment
-                    FROM movement as m 
-                        inner join asset as a on m.asset_oid = a.id 
-                        inner join custody as c on c.ID = m.CUSTODY_OID
-                        left join tax as t on t.origin_oid = m.id and t.origin_type = 'MOVEMENT'
-                    WHERE ACQUISITION_DATE  >= %s AND ACQUISITION_DATE <= %s
-                        AND (a.NAME = %s or %s is null)
-                    ORDER BY m.asset_oid,ACQUISITION_DATE'''
-        resultSet = DbConnector().doQuery(query, (fromDate, toDate, assetName, assetName))
-        return resultSet    
-    
+#         query = '''SELECT m.ID, m.asset_oid, m.buy_sell, m.ACQUISITION_DATE, 
+#                     m.quantity, m.price, m.rate, m.GROSS_AMOUNT, 
+#                     m.NET_AMOUNT, m.COMMISSION_PERCENTAGE, m.COMMISSION_AMOUNT, m.COMMISSION_IVA_AMOUNT, 
+#                     m.TENOR, c.ID, m.MATURITY_DATE, IFNULL(t.tax_amount, 0),
+#                     m.external_id, m.comment
+#                     FROM movement as m 
+#                         inner join asset as a on m.asset_oid = a.id 
+#                         inner join custody as c on c.ID = m.CUSTODY_OID
+#                         left join tax as t on t.origin_oid = m.id and t.origin_type = 'MOVEMENT'
+#                     WHERE ACQUISITION_DATE  >= %s AND ACQUISITION_DATE <= %s
+#                         AND (a.NAME = %s or %s is null)
+#                     ORDER BY m.asset_oid,ACQUISITION_DATE'''
+#         resultSet = DbConnector().doQuery(query, (fromDate, toDate, assetName, assetName))
+#         return resultSet    
+#     
     @staticmethod
     def insertMovement(movement):
         insertSentence = """insert movement(asset_oid, buy_sell,acquisition_date, quantity, 

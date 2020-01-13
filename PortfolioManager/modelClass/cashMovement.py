@@ -6,10 +6,10 @@ Created on Jan 13, 2018
 from sqlalchemy.sql.schema import Column
 from sqlalchemy.sql.sqltypes import Float, String, DateTime
 
-from modelClass import Base
+from modelClass import PersistenObject
 
 
-class CashMovement(Base):
+class CashMovement(PersistenObject):
     __tablename__ = 'cash_movement'
             
     amount = Column(Float(), nullable=False)

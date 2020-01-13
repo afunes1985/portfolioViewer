@@ -3,15 +3,16 @@ Created on 21 nov. 2017
 
 @author: afunes
 '''
-class Tax():
+from sqlalchemy.sql.schema import Column
+from sqlalchemy.sql.sqltypes import Float, String
+
+from modelClass import PersistenObject
+
+
+class Tax(PersistenObject):
+    __tablename__ = 'tax'
     
-    def __init__(self, row):
-        if(row is not None):
-            self.setAttr(row[0], row[1], row[2], row[3], row[4])
-    
-    def setAttr(self, OID, originType, originOID, taxAmount, externalID):
-        self.OID = OID
-        self.originType = originType
-        self.originOID = originOID
-        self.taxAmount = taxAmount
-        self.externalID = externalID
+    #originType = originType
+    #originOID = originOID
+    taxAmount = Column(Float(), nullable=False)
+    externalID = Column('external_id', String(), nullable=False)

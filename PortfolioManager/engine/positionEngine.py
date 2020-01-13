@@ -9,25 +9,26 @@ import threading
 
 from core.cache import Singleton, MainCache
 from core.constant import Constant
-from modelClass.position import Position
-from engine.movementEngine import MovementEngine
+from core.position import Position
+from dao.movementDao import MovementDao
 
 
 class PositionEngine():
 
     def refreshAll(self, fromDate, toDate):
         mainCache = Singleton(MainCache)
-        mainCache.refreshReferenceData()
-        resultPositionDict = self.buildPositions(fromDate, toDate, True)
+        #mainCache.refreshReferenceData()
+        resultPositionDict = self.buildPositions(fromDate, toDate, False)
         mainCache.positionDict = resultPositionDict[Constant.CONST_POSITION_DICT]
         #mainCache.oldPositionDict = resultPositionDict[Constant.CONST_OLD_POSITION_DICT]
         #mainCache.setGlobalAttribute(resultPositionDict[Constant.CONST_POSITION_DICT])
         #mainCache.corporateEventPositionDictAsset = Engine.buildCorporateEventPosition()
         #mainCache.summaryDict = Engine.buildSummaryByCustody(mainCache.positionDict, mainCache.oldPositionDict, mainCache.corporateEventPositionDictAsset)
-        return mainCache
+        #return mainCache
+        print(resultPositionDict)
         
     def buildPositions(self, fromDate, toDate, setLastMarketData):
-        movementList = MovementEngine().getMovementsByDate(None, fromDate, toDate)
+        movementList = MovementDao().getMovementsByDate(fromDate, toDate)
         positionDict = {}
         oldPositionDict = {}
         threads = []
@@ -37,7 +38,7 @@ class PositionEngine():
             asset = movement.asset
             assetName = asset.name
             if(asset.assetType == 'BOND'):
-                assetName = assetName + str(movement.OID)
+                assetName = assetName + str(movement.ID)
             position =  positionDict.get(assetName, None)
             if position == None:
                 position = Position(asset, movement)

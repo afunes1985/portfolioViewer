@@ -1,15 +1,14 @@
 from datetime import date, datetime
-import sys
 
-
-from core.cache import Singleton
-from core.mainEngine import MainEngine
+from base.initializer import Initializer
+from engine.positionEngine import PositionEngine
 
 
 def main():
     import logging
     logging.basicConfig(level=logging.INFO)
-    mainEngine.refreshAll(datetime(2001, 7, 14).date(), datetime.now().date())
+    Initializer()
+    PositionEngine().refreshAll(datetime(2001, 7, 14).date(), datetime.now().date())
 
 if __name__== '__main__':
     main()

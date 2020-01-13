@@ -6,6 +6,8 @@ Created on Mar 18, 2017
 import datetime
 from decimal import Decimal
 
+from sqlalchemy.sql.sqltypes import Float
+
 
 class Position():
     unitCost = 0
@@ -105,10 +107,11 @@ class Position():
         self.tenor = movement.tenor
         self.maturityDate = movement.maturityDate
         today = datetime.datetime.now()
-        if (movement.tax is not None):
-            self.taxAmount = movement.tax.taxAmount
-        else:
-            self.taxAmount  = 0
+#         if (movement.tax is not None):
+#             self.taxAmount = movement.tax.taxAmount
+#         else:
+#             self.taxAmount  = 0
+        self.taxAmount  = 0
         if((self.maturityDate)<today):
             self.isMatured = 1
             self.realizedPnl = self.getNetPnL()
@@ -135,7 +138,7 @@ class Position():
     
     def getValuatedAmount(self):
         if (self.asset.assetType == 'BOND'):
-            return self.accumulatedAmount * (1 + (self.getElapsedDays() * (self.rate / 360))) - self.taxAmount
+            return self.accumulatedAmount * (1 + (float(self.getElapsedDays()) * (self.rate / 360))) - self.taxAmount
         else:  
             if (self.marketPrice == 0):
                 return Decimal(self.totalQuantity) * self.unitCost

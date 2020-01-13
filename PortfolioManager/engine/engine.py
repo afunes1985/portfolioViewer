@@ -15,10 +15,10 @@ from modelClass.cashMovement import CashMovement
 from core.constant import Constant
 from modelClass.corporateEvent import CorporateEvent, Custody, \
     CorporateEventType
-from modelClass.corporateEventPosition import CorporateEventPosition
+from core.corporateEventPosition import CorporateEventPosition
 from modelClass.movement import Asset, Movement
-from modelClass.position import Position    
-from modelClass.summaryItem import SummaryItem
+from core.position import Position    
+from core.summaryItem import SummaryItem
 from modelClass.tax import Tax
 
 

@@ -3,7 +3,7 @@ Created on Jun 4, 2017
 
 @author: afunes
 '''
-from modelClass.position import Position
+from core.position import Position
 class SummaryItem:
 
     def __init__(self, obj):

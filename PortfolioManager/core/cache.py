@@ -5,8 +5,8 @@ Created on Apr 26, 2017
 '''
 from decimal import Decimal
 
-from engine.engine import Engine
-from pricingAPI.PricingInterface import PricingInterface
+# from engine.engine import Engine
+#from pricingAPI.PricingInterface import PricingInterface
 
 
 def Singleton(klass):
@@ -33,11 +33,11 @@ class MainCache:
     def setUSDMXN(self, usdMXN):
         self.usdMXN = Decimal(usdMXN)
     
-    def setGlobalAttribute(self, positionDict):    
-        self.totalValuatedAmount = Engine.getSubTotalValuatedAmount2(positionDict, 'ALL')
+#     def setGlobalAttribute(self, positionDict):    
+#         self.totalValuatedAmount = Engine.getSubTotalValuatedAmount2(positionDict, 'ALL')
     
-    def refreshReferenceData(self):
-        USDMXN = PricingInterface.getExchangeRateByCurrency('USD','MXN')
-        if USDMXN == 0:
-            USDMXN = 1
-        self.setUSDMXN(USDMXN)
+#     def refreshReferenceData(self):
+#         USDMXN = PricingInterface.getExchangeRateByCurrency('USD','MXN')
+#         if USDMXN == 0:
+#             USDMXN = 1
+#         self.setUSDMXN(USDMXN)
