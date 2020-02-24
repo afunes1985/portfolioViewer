@@ -10,21 +10,21 @@ from sqlalchemy.sql.sqltypes import Float
 
 
 class Position():
-    unitCost = 0
-    rate = 0
-    totalQuantity = 0
-    accumulatedAmount = 0
-    accumulatedBuyCommission = 0
-    accumulatedBuyVATCommission = 0
-    accumulatedSellCommission = 0
-    accumulatedSellVATCommission = 0
-    realizedPnl = 0
-    realizedPnlPercentage = 0
-    marketPrice = 0
+    unitCost = Decimal(0)
+    rate = Decimal(0)
+    totalQuantity = Decimal(0)
+    accumulatedAmount = Decimal(0)
+    accumulatedBuyCommission = Decimal(0)
+    accumulatedBuyVATCommission = Decimal(0)
+    accumulatedSellCommission = Decimal(0)
+    accumulatedSellVATCommission = Decimal(0)
+    realizedPnl = Decimal(0)
+    realizedPnlPercentage = Decimal(0)
+    marketPrice = Decimal(0)
     marketPriceOrig = 0
     acquisitionDate = 0
     asset = None
-    tenor = 0
+    tenor = Decimal(0)
     row = 0
     isMatured = 0
     maturityDate = None
@@ -53,13 +53,12 @@ class Position():
         
     def setReferenceData(self, assetName, price, changePercentage):
         from core.cache import MainCache
-        from core.cache import Singleton
         if(assetName == self.asset.name):
             self.setMarketPrice(price)
             self.changePercentage = str(changePercentage) + '%'
         elif(assetName == self.asset.originName):
             self.setMarketPriceOrig(Decimal(price)) 
-            self.setMarketPrice(Decimal(price) * Singleton(MainCache).usdMXN)#Tal vez hay que quitar esta linea
+            self.setMarketPrice(Decimal(price) * Decimal(MainCache.usdMXN))#Tal vez hay que quitar esta linea
             self.changePercentage = str(changePercentage) + '%'
     
     def setSpecificMarketData(self, price, usdMXN):
@@ -138,19 +137,19 @@ class Position():
     
     def getValuatedAmount(self):
         if (self.asset.assetType == 'BOND'):
-            return self.accumulatedAmount * (1 + (float(self.getElapsedDays()) * (self.rate / 360))) - self.taxAmount
+            return self.accumulatedAmount * (1 + (self.getElapsedDays() * (self.rate / 360))) - self.taxAmount
         else:  
             if (self.marketPrice == 0):
-                return Decimal(self.totalQuantity) * self.unitCost
+                return self.totalQuantity * self.unitCost
             else:
-                return Decimal(self.totalQuantity) * self.marketPrice
+                return self.totalQuantity * self.marketPrice
             
     def getValuatedAmountOrig(self):
         if (self.asset.assetType == 'BOND'):
             return 0
         else:  
             if (self.asset.isSIC):
-                return Decimal(self.totalQuantity) * self.marketPriceOrig
+                return self.totalQuantity * self.marketPriceOrig
             else:
                 return 0
     
@@ -162,31 +161,29 @@ class Position():
         
     def getMarketPrice(self):
         from core.cache import MainCache
-        from core.cache import Singleton
         from pricingAPI.PricingInterface import PricingInterface
         if self.asset.isOnlinePrice:
             if (self.marketPrice == 0):
                 self.setMarketPrice(PricingInterface.getMarketPriceByAssetName(self.getAssetName(), self.asset.priceSource))
                 if (self.marketPrice == 0 and self.asset.isSIC):
                     marketPriceOrigAux = PricingInterface.getMarketPriceByAssetName(self.asset.originName, self.asset.priceSource)
-                    self.setMarketPrice(marketPriceOrigAux * Singleton(MainCache).usdMXN)
+                    self.setMarketPrice(marketPriceOrigAux * Decimal(MainCache.usdMXN))
         return self.marketPrice
     
     def getMarketPriceOrig(self):
         from pricingAPI.PricingInterface import PricingInterface
         from core.cache import MainCache
-        from core.cache import Singleton
         if self.asset.isOnlinePrice and self.asset.isSIC:
             if (self.marketPriceOrig == 0):
                 self.setMarketPriceOrig(PricingInterface.getMarketPriceByAssetName(self.asset.originName, self.asset.priceSource))
-                self.marketPriceOrig = self.marketPriceOrig * Singleton(MainCache).usdMXN
+                self.marketPriceOrig = self.marketPriceOrig * Decimal(MainCache.usdMXN)
         return self.marketPriceOrig
     
     def getGrossPnL(self):
-        return self.getValuatedAmount() - self.getInvestedAmount()
+        return Decimal(self.getValuatedAmount()) - Decimal(self.getInvestedAmount())
     
     def getNetPnL(self):
-        return self.getGrossPnL() - self.accumulatedBuyCommission - self.accumulatedBuyVATCommission
+        return Decimal(self.getGrossPnL()) - Decimal(self.accumulatedBuyCommission) - Decimal(self.accumulatedBuyVATCommission)
         
     def getGrossPnLPercentage(self):
         try:
@@ -199,8 +196,7 @@ class Position():
     
     def getPositionPercentage(self):
         from core.cache import MainCache
-        from core.cache import Singleton
-        return (self.getValuatedAmount() * 100) / Singleton(MainCache).totalValuatedAmount
+        return Decimal(1) #'FIX' #(self.getValuatedAmount() * 100) / Singleton(MainCache).totalValuatedAmount
     
     def getWeightedPnl(self):
         return self.getGrossPnLPercentage() * self.getPositionPercentage() / 100

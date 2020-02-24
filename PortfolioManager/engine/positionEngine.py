@@ -7,7 +7,7 @@ Created on May 4, 2017
 from datetime import datetime
 import threading
 
-from core.cache import Singleton, MainCache
+from core.cache import MainCache
 from core.constant import Constant
 from core.position import Position
 from dao.movementDao import MovementDao
@@ -16,16 +16,20 @@ from dao.movementDao import MovementDao
 class PositionEngine():
 
     def refreshAll(self, fromDate, toDate):
-        mainCache = Singleton(MainCache)
+        #mainCache = Singleton(MainCache)
         #mainCache.refreshReferenceData()
-        resultPositionDict = self.buildPositions(fromDate, toDate, False)
-        mainCache.positionDict = resultPositionDict[Constant.CONST_POSITION_DICT]
+        resultPositionDict = self.buildPositions(fromDate, toDate, True)
+        MainCache.positionDict = resultPositionDict[Constant.CONST_POSITION_DICT]
         #mainCache.oldPositionDict = resultPositionDict[Constant.CONST_OLD_POSITION_DICT]
         #mainCache.setGlobalAttribute(resultPositionDict[Constant.CONST_POSITION_DICT])
         #mainCache.corporateEventPositionDictAsset = Engine.buildCorporateEventPosition()
         #mainCache.summaryDict = Engine.buildSummaryByCustody(mainCache.positionDict, mainCache.oldPositionDict, mainCache.corporateEventPositionDictAsset)
         #return mainCache
-        print(resultPositionDict)
+        for row in MainCache.positionDict.items():
+            position = row[1]
+            print(row[0], position.getTotalQuantity(), "{:.2f}".format(position.getUnitCostOrRate()), "{:.2f}".format(position.getMarketPrice()), position.changePercentage, "{:.2f}".format(position.getInvestedAmount()), 
+                  "{:.2f}".format(position.getValuatedAmount()), position.getElapsedDays(), position.getMaturityDate(), "{:.2f}".format(position.getGrossPnL()), "{:.2f}".format(position.getNetPnL()), "{:.2f}".format(position.getGrossPnLPercentage()), 
+                  "{:.2f}".format(position.getNetPnLPercentage()), "{:.2f}".format(position.realizedPnl), "{:.2f}".format(position.getPositionPercentage()), "{:.2f}".format(position.getWeightedPnl()))
         
     def buildPositions(self, fromDate, toDate, setLastMarketData):
         movementList = MovementDao().getMovementsByDate(fromDate, toDate)

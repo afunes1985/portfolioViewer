@@ -1,2 +1,9 @@
 /__init__.cpython-37.pyc
 /asset.cpython-37.pyc
+/cashMovement.cpython-37.pyc
+/corporateEvent.cpython-37.pyc
+/currency.cpython-37.pyc
+/custody.cpython-37.pyc
+/price.cpython-37.pyc
+/tax.cpython-37.pyc
+/movement.cpython-37.pyc

@@ -1,2 +1,4 @@
 /__init__.cpython-37.pyc
 /dao.cpython-37.pyc
+/movementDao.cpython-37.pyc
+/priceDao.cpython-37.pyc

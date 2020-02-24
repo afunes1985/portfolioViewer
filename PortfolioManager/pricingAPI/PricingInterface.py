@@ -10,18 +10,18 @@ import logging
 
 import requests
 
-from dao.dao import DaoPrice
+from dao.priceDao import PriceDao
 
 
 class PricingInterface:
     
     @staticmethod
     def getPriceInterfacesDict():
-        return dict({"EXCEL":PricingInterfaceExcel, 
+        return dict({"EXCEL":PricingInterfaceExcel(), 
                     #"YAHOO":PricingInterfaceYahoo,
-                    "TRADIER":PricingInterfaceTradier,
-                    "ALPHAVANTAGE":PricingInterfaceAlphaVantage,
-                    "DB":PricingInterfaceDB}) 
+                    "TRADIER":PricingInterfaceTradier(),
+                    "ALPHAVANTAGE":PricingInterfaceAlphaVantage(),
+                    "DB":PricingInterfaceDB()}) 
         
     @staticmethod
     def getExchangeRateByCurrency(fromCurrency, toCurrency):
@@ -52,8 +52,7 @@ class PricingInterface:
 
 
 class PricingInterfaceAlphaVantage:
-    @staticmethod
-    def getExchangeRateByCurrency(fromCurrency, toCurrency):
+    def getExchangeRateByCurrency(self, fromCurrency, toCurrency):
         result = requests.get('https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency='+fromCurrency+'&to_currency='+toCurrency+'&apikey=Z09WI322376KBA3P')
         json_data = json.loads(result.text)
         return Decimal(18.60)
@@ -62,8 +61,7 @@ class PricingInterfaceAlphaVantage:
     
     
 class PricingInterfaceTradier:
-    @staticmethod
-    def getMarketPriceByAssetName(assetName):
+    def getMarketPriceByAssetName(self, assetName):
         # Request: Market Quotes (https://sandbox.tradier.com/v1/markets/quotes?symbols=spy)
         connection = http.client.HTTPSConnection('sandbox.tradier.com', 443, timeout = 30)
         # Headers
@@ -76,8 +74,7 @@ class PricingInterfaceTradier:
         json_data = json.loads(content)
         return Decimal(json_data['quotes']['quote']['last'])
     
-    @staticmethod
-    def getReferenceDataByAssetNames(assetNames):
+    def getReferenceDataByAssetNames(self, assetNames):
         returnList = []
         # Request: Market Quotes (https://sandbox.tradier.com/v1/markets/quotes?symbols=spy)
         connection = http.client.HTTPSConnection('sandbox.tradier.com', 443, timeout = 30)
@@ -110,8 +107,7 @@ class PricingInterfaceTradier:
     
 class PricingInterfaceExcel:
     
-    @staticmethod
-    def getExchangeRateByCurrency(fromCurrency, toCurrency):
+    def getExchangeRateByCurrency(self, fromCurrency, toCurrency):
         import pandas
         #df = pandas.read_excel('C://Users//afunes//iCloudDrive//PortfolioViewer//import//quotes.csv')
         df = pandas.read_csv('C://Users//afunes//iCloudDrive//PortfolioViewer//import//quotes.csv');
@@ -126,12 +122,10 @@ class PricingInterfaceExcel:
                 #returnRow.append(round((((currentPrice)/(currentPrice-change)-1)*100), 2))
                 return round(currentPrice,2)
     
-    @staticmethod
-    def getMarketPriceByAssetName(assetName):
+    def getMarketPriceByAssetName(self, assetName):
         return 0
     
-    @staticmethod
-    def getReferenceDataByAssetNames(assetNames):
+    def getReferenceDataByAssetNames(self, assetNames):
         import pandas
         #df = pandas.read_excel('C://Users//afunes//iCloudDrive//PortfolioViewer//import//quotes.csv')
         df = pandas.read_csv('C://Users//afunes//iCloudDrive//PortfolioViewer//import//quotes.csv');
@@ -152,13 +146,12 @@ class PricingInterfaceExcel:
         return returnList
 
 class PricingInterfaceDB:
-    @staticmethod
-    def getMarketPriceByAssetName(assetName):
+
+    def getMarketPriceByAssetName(self, assetName):
         return 0
     
-    @staticmethod
-    def getReferenceDataByAssetNames(assetNames):
-        lastPriceList = DaoPrice.getLastPrice(assetNames)
+    def getReferenceDataByAssetNames(self, assetNames):
+        lastPriceList = PriceDao().getLastPrice(assetNames)
         returnList = []
         returnRow = []
         returnRow.append(assetNames)

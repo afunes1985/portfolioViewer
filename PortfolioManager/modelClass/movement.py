@@ -5,7 +5,7 @@ Created on Mar 18, 2017
 '''
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import Column, ForeignKey
-from sqlalchemy.sql.sqltypes import String, DateTime, Float, Integer
+from sqlalchemy.sql.sqltypes import String, DateTime, Float, Integer, Numeric
 
 from modelClass import PersistenObject
 
@@ -18,14 +18,14 @@ class Movement(PersistenObject):
     custody = relationship("Custody", back_populates="movementList")
     buySell = Column('buy_sell', String(), nullable=False)
     acquisitionDate = Column('acquisition_date', DateTime, nullable=False)
-    quantity = Column(Float(), nullable=False)
-    price = Column(Float(), nullable=False)
-    rate = Column(Float(), nullable=False)
-    grossAmount = Column('gross_amount',Float(), nullable=False)
-    netAmount = Column('net_amount', Float(), nullable=False)
-    commissionPercentage = Column('commission_percentage', Float(), nullable=False)
-    commissionAmount = Column('commission_amount', Float(), nullable=False)
-    commissionVATAmount = Column('commission_iva_amount', Float(), nullable=False)
+    quantity = Column(Integer(), nullable=False)
+    price = Column(Numeric(), nullable=False)
+    rate = Column(Numeric(), nullable=False)
+    grossAmount = Column('gross_amount',Numeric(), nullable=False)
+    netAmount = Column('net_amount', Numeric(), nullable=False)
+    commissionPercentage = Column('commission_percentage', Numeric(), nullable=False)
+    commissionAmount = Column('commission_amount', Numeric(), nullable=False)
+    commissionVATAmount = Column('commission_iva_amount', Numeric(), nullable=False)
     #custody = mainCache.custodyDictOID[custodyOID]
     comment = Column(String(), nullable=False)
     externalID = Column('external_id', String(), nullable=False)
