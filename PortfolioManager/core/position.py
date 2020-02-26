@@ -29,6 +29,7 @@ class Position():
     isMatured = 0
     maturityDate = None
     changePercentage = None
+    realizedPnlCorporateEvent = Decimal(0)
     
     def __init__(self, asset, movement):
         self.asset = asset
@@ -55,11 +56,11 @@ class Position():
         from core.cache import MainCache
         if(assetName == self.asset.name):
             self.setMarketPrice(price)
-            self.changePercentage = str(changePercentage) + '%'
+            self.changePercentage = changePercentage / 100
         elif(assetName == self.asset.originName):
             self.setMarketPriceOrig(Decimal(price)) 
             self.setMarketPrice(Decimal(price) * Decimal(MainCache.usdMXN))#Tal vez hay que quitar esta linea
-            self.changePercentage = str(changePercentage) + '%'
+            self.changePercentage = changePercentage / 100
     
     def setSpecificMarketData(self, price, usdMXN):
         if self.asset.isSIC:
@@ -212,4 +213,10 @@ class Position():
             return self.asset.originName
         else:
             return self.asset.name
+    
+    def addRealizedPnlCorporateEvent(self, corporateEventGrossAmount):
+        self.realizedPnlCorporateEvent += corporateEventGrossAmount 
+        
+    def getConsolidatedRealizedPnl(self):
+        return self.realizedPnl + self.realizedPnlCorporateEvent
     

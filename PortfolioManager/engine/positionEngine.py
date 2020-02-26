@@ -25,7 +25,7 @@ class PositionEngine():
             position = row[1]
             position_DF = position_DF.append(pd.Series([row[0], position.asset.assetType, position.asset.isSIC, position.getTotalQuantity(), position.getUnitCostOrRate(), position.getMarketPrice(), position.changePercentage, position.getInvestedAmount(), 
                   position.getValuatedAmount(), position.getElapsedDays(), position.getMaturityDate(), position.getGrossPnL(), position.getNetPnL(), position.getGrossPnLPercentage(), 
-                  position.getNetPnLPercentage(), position.realizedPnl, position.getPositionPercentage(), position.getWeightedPnl()], index=position_DF.columns), ignore_index=True)
+                  position.getNetPnLPercentage(), position.getConsolidatedRealizedPnl(), position.getPositionPercentage(), position.getWeightedPnl()], index=position_DF.columns), ignore_index=True)
         
         position_DF = position_DF.sort_values(['Asset Type', 'isSIC', 'Asset Name'], ascending=[1, 0, 1])
         
@@ -91,5 +91,25 @@ class PositionEngine():
         returnDict = {}
         returnDict[Constant.CONST_POSITION_DICT] = positionDict
         returnDict[Constant.CONST_OLD_POSITION_DICT] = oldPositionDict
+        
+#         corporateEventPositionDict = self.buildCorporateEventPosition()
+        #returnDict[Constant.CONST_CORPORATE_POSITION_DICT] = corporateEventPositionDict
+        #Corporate event        
+#         for (positionKey, corporateEventPosition) in corporateEventPositionDict.iteritems():
+#             position = positionDict.get(positionKey, None)
+#             if(position is not None):
+#                 position.addRealizedPnlCorporateEvent(corporateEventPosition.accGrossAmount)
+        
         return returnDict
 
+    def buildCorporateEventPosition(self):
+        resultDict = {}
+        resultSet = DaoCorporateEvent.getCorporateEventList()
+        for (row) in resultSet:
+            o = CorporateEvent(row)
+            corporateEventPosition = resultDict.get(o.asset.name, None)
+            if corporateEventPosition == None:
+                resultDict[o.asset.name] = CorporateEventPosition(o)
+            else:
+                corporateEventPosition.addCorporateEvent(o)
+        return resultDict

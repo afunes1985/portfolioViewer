@@ -280,7 +280,7 @@ class Engine:
         for (movementRow) in movementRS:
             movement = Movement(movementRow)
             return movement
-    @staticmethod
+
     def buildCorporateEventPosition():
         resultDict = {}
         resultSet = DaoCorporateEvent.getCorporateEventList()

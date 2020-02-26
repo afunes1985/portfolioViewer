@@ -27,7 +27,7 @@ formatColumns = [{"name": 'Asset Name', 'id': 'Asset Name', "deletable": False},
                  {"name": 'Asset Type', 'id': 'Asset Type', "deletable": False},
                  {"name": 'Position', 'id': 'Position', "deletable": False, 'type': 'numeric'},
                  {"name": 'Market Price', 'id': 'Market Price', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
-                 {"name": 'Change', 'id': 'Change', "deletable": False},
+                 {"name": 'Change', 'id': 'Change', "deletable": False, 'type': 'numeric','format': FormatTemplate.percentage(2)},
                  {"name": 'Invested Amount', 'id': 'Invested Amount', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
                  {"name": 'Valuated Amount', 'id': 'Valuated Amount', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
                  {"name": 'Tenor', 'id': 'Tenor', "deletable": False, 'type': 'numeric'},
@@ -39,6 +39,13 @@ formatColumns = [{"name": 'Asset Name', 'id': 'Asset Name', "deletable": False},
                  {"name": 'Realized PnL', 'id': 'Realized PnL', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
                  {"name": '%Portfolio', 'id': '%Portfolio', "deletable": False, 'type': 'numeric'},
                  {"name": 'WeightedPnL%', 'id': 'WeightedPnL%', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)}]
+
+styleDataCondition = [{ 'if': {'column_id': 'Gross PnL','filter_query': '{Gross PnL} > 0'},'color': 'green', 'fontWeight': 'bold'},
+                        {'if': {'column_id': 'Gross PnL','filter_query': '{Gross PnL} < 0'},'color': 'red', 'fontWeight': 'bold'},
+                        {'if': {'column_id': 'Change','filter_query': '{Change} > 0'},'color': 'green', 'fontWeight': 'bold'},
+                        {'if': {'column_id': 'Change','filter_query': '{Change} < 0'},'color': 'red', 'fontWeight': 'bold'},
+                        {'if': {'column_id': 'Gross%PNL','filter_query': '{Gross%PNL} > 0'},'color': 'green', 'fontWeight': 'bold'},
+                        {'if': {'column_id': 'Gross%PNL','filter_query': '{Gross%PNL} < 0'},'color': 'red', 'fontWeight': 'bold'},]
 
 layout = html.Div([
     html.Div(dt.DataTable(
@@ -54,5 +61,6 @@ layout = html.Div([
                     sort_action="native",
                     sort_mode="multi",
                     row_selectable="multi",
+                    style_data_conditional= styleDataCondition
                     )),
     html.Div(id='dt-position-container')])
