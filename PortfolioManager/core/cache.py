@@ -13,7 +13,7 @@ from pricingAPI.PricingInterface import PricingInterface
 class MainCache():
     _instance = None
     #DICTIONARY
-    positionDict = None
+    positionDf = None
     oldPositionDict = None
     summaryDict = None
     corporateEventPositionDictAsset = None

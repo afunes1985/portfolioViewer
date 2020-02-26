@@ -7,29 +7,48 @@ Created on May 4, 2017
 from datetime import datetime
 import threading
 
+import pandas
+
 from core.cache import MainCache
 from core.constant import Constant
 from core.position import Position
 from dao.movementDao import MovementDao
-
+import pandas as pd
 
 class PositionEngine():
 
-    def refreshAll(self, fromDate, toDate):
-        #mainCache = Singleton(MainCache)
-        #mainCache.refreshReferenceData()
+    def refreshPositions(self, fromDate, toDate):
+        position_DF = pd.DataFrame(columns=['Asset Name','Asset Type','isSIC','Position','Unit Cost', 'MarketPrice', 'Change', 'Invested Amount', 'Valuated Amount', 'Tenor', 'Maturity Date', 'Gross PnL', 'Net PnL', 'Gross%PNL', 'Net%PNL', 'Realized PnL', '%Portfolio', 'WeightedPnL%'])
         resultPositionDict = self.buildPositions(fromDate, toDate, True)
-        MainCache.positionDict = resultPositionDict[Constant.CONST_POSITION_DICT]
-        #mainCache.oldPositionDict = resultPositionDict[Constant.CONST_OLD_POSITION_DICT]
-        #mainCache.setGlobalAttribute(resultPositionDict[Constant.CONST_POSITION_DICT])
-        #mainCache.corporateEventPositionDictAsset = Engine.buildCorporateEventPosition()
-        #mainCache.summaryDict = Engine.buildSummaryByCustody(mainCache.positionDict, mainCache.oldPositionDict, mainCache.corporateEventPositionDictAsset)
-        #return mainCache
-        for row in MainCache.positionDict.items():
+        
+        for row in resultPositionDict[Constant.CONST_POSITION_DICT].items():
             position = row[1]
-            print(row[0], position.getTotalQuantity(), "{:.2f}".format(position.getUnitCostOrRate()), "{:.2f}".format(position.getMarketPrice()), position.changePercentage, "{:.2f}".format(position.getInvestedAmount()), 
-                  "{:.2f}".format(position.getValuatedAmount()), position.getElapsedDays(), position.getMaturityDate(), "{:.2f}".format(position.getGrossPnL()), "{:.2f}".format(position.getNetPnL()), "{:.2f}".format(position.getGrossPnLPercentage()), 
-                  "{:.2f}".format(position.getNetPnLPercentage()), "{:.2f}".format(position.realizedPnl), "{:.2f}".format(position.getPositionPercentage()), "{:.2f}".format(position.getWeightedPnl()))
+            position_DF = position_DF.append(pd.Series([row[0], position.asset.assetType, position.asset.isSIC, position.getTotalQuantity(), position.getUnitCostOrRate(), position.getMarketPrice(), position.changePercentage, position.getInvestedAmount(), 
+                  position.getValuatedAmount(), position.getElapsedDays(), position.getMaturityDate(), position.getGrossPnL(), position.getNetPnL(), position.getGrossPnLPercentage(), 
+                  position.getNetPnLPercentage(), position.realizedPnl, position.getPositionPercentage(), position.getWeightedPnl()], index=position_DF.columns), ignore_index=True)
+        
+        position_DF = position_DF.sort_values(['Asset Type', 'isSIC', 'Asset Name'], ascending=[1, 0, 1])
+        
+        posEquityNoSIC = position_DF.loc[(position_DF['Asset Type'] == 'EQUITY') & (position_DF['isSIC'] == False)]
+        posEquityNoSIC = posEquityNoSIC.append(pd.Series([posEquityNoSIC['Invested Amount'].sum(), posEquityNoSIC['Valuated Amount'].sum()], index=['Invested Amount', 'Valuated Amount']), ignore_index=True)
+        
+        posEquitySIC = position_DF.loc[(position_DF['Asset Type'] == 'EQUITY') & (position_DF['isSIC'] == True)]
+        posEquitySIC = posEquitySIC.append(pd.Series([posEquitySIC['Invested Amount'].sum(), posEquitySIC['Valuated Amount'].sum()], index=['Invested Amount', 'Valuated Amount']), ignore_index=True)
+        
+        posFund = position_DF.loc[(position_DF['Asset Type'] == 'FUND')]
+        posFund = posFund.append(pd.Series([posFund['Invested Amount'].sum(), posFund['Valuated Amount'].sum()], index=['Invested Amount', 'Valuated Amount']), ignore_index=True)
+       
+        posBond = position_DF.loc[(position_DF['Asset Type'] == 'BOND')]
+        posBond = posBond.append(pd.Series([posBond['Invested Amount'].sum(), posBond['Valuated Amount'].sum()], index=['Invested Amount', 'Valuated Amount']), ignore_index=True)
+        
+        finalPosition_DF = posEquityNoSIC.append(posEquitySIC, ignore_index=True)
+        finalPosition_DF = finalPosition_DF.append(posFund, ignore_index=True)
+        finalPosition_DF = finalPosition_DF.append(posBond, ignore_index=True)
+        
+        print(finalPosition_DF.to_string())
+            
+        MainCache.positionDf = finalPosition_DF
+        
         
     def buildPositions(self, fromDate, toDate, setLastMarketData):
         movementList = MovementDao().getMovementsByDate(fromDate, toDate)

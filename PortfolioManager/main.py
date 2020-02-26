@@ -10,7 +10,7 @@ def main():
     logging.basicConfig(level=logging.INFO)
     Initializer()
     MainCache.refreshReferenceData()
-    PositionEngine().refreshAll(datetime(2001, 7, 14).date(), datetime.now().date())
+    PositionEngine().refreshPositions(datetime(2001, 7, 14).date(), datetime.now().date())
 
 if __name__== '__main__':
     main()
