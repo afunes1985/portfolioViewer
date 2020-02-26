@@ -151,11 +151,11 @@ class PricingInterfaceDB:
         return 0
     
     def getReferenceDataByAssetNames(self, assetNames):
-        lastPriceList = PriceDao().getLastPrice(assetNames)
+        lastPrice = PriceDao().getLastPrice(assetNames)
         returnList = []
         returnRow = []
         returnRow.append(assetNames)
-        currentPrice = lastPriceList[0][0]
+        currentPrice = lastPrice[0]
         returnRow.append(round(currentPrice,2))
         change = 0
         returnRow.append(round((((currentPrice)/(currentPrice-change)-1)*100), 2))

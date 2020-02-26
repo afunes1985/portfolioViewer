@@ -18,7 +18,7 @@ import pandas as pd
 class PositionEngine():
 
     def refreshPositions(self, fromDate, toDate):
-        position_DF = pd.DataFrame(columns=['Asset Name','Asset Type','isSIC','Position','Unit Cost', 'MarketPrice', 'Change', 'Invested Amount', 'Valuated Amount', 'Tenor', 'Maturity Date', 'Gross PnL', 'Net PnL', 'Gross%PNL', 'Net%PNL', 'Realized PnL', '%Portfolio', 'WeightedPnL%'])
+        position_DF = pd.DataFrame(columns=['Asset Name','Asset Type','isSIC','Position','Unit Cost', 'Market Price', 'Change', 'Invested Amount', 'Valuated Amount', 'Tenor', 'Maturity Date', 'Gross PnL', 'Net PnL', 'Gross%PNL', 'Net%PNL', 'Realized PnL', '%Portfolio', 'WeightedPnL%'])
         resultPositionDict = self.buildPositions(fromDate, toDate, True)
         
         for row in resultPositionDict[Constant.CONST_POSITION_DICT].items():
@@ -44,6 +44,7 @@ class PositionEngine():
         finalPosition_DF = posEquityNoSIC.append(posEquitySIC, ignore_index=True)
         finalPosition_DF = finalPosition_DF.append(posFund, ignore_index=True)
         finalPosition_DF = finalPosition_DF.append(posBond, ignore_index=True)
+        finalPosition_DF = finalPosition_DF.append(pd.Series([position_DF['Invested Amount'].sum(), position_DF['Valuated Amount'].sum()], index=['Invested Amount', 'Valuated Amount']), ignore_index=True)
         
         print(finalPosition_DF.to_string())
             

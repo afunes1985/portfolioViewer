@@ -1,54 +1,45 @@
-'''
-Created on Apr 27, 2019
-
-@author: afunes
-'''
-from datetime import datetime
+from _decimal import Decimal
+from collections import OrderedDict
 
 import dash
-from dash.dependencies import Output, Input
 import dash_table
-from pandas.core.frame import DataFrame
+from dash_table.Format import Sign
+
 import dash_html_components as html
-from engine.positionEngine import PositionEngine
+import dash_table.FormatTemplate as FormatTemplate
 import pandas as pd
 
-#maincache = PositionEngine.refreshAll(datetime(2001, 7, 14).date(), datetime.now().date())
-df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
-#print(maincache.positionDict.items())
-#print(maincache.positionDict.keys())
-print(df)
-#df.columns = maincache.positionDict.keys()
 
 app = dash.Dash(__name__)
 
+df_typing_formatting = pd.DataFrame(OrderedDict([
+    ('city', ['Vancouver', 'Toronto', 'Calgary', 'Ottawa', 'Montreal', 'Halifax', 'Regina', 'Fredericton']),
+    ('average_04_2018', [1092000, Decimal(766000.123456), 431000, 382000, 341000, 316000, 276000, 173000]),
+    ('change_04_2017_04_2018', [0.143, -0.051, 0.001, 0.083, 0.063, 0.024, -0.065, 0.012]),
+]))
+
 app.layout = html.Div([
     dash_table.DataTable(
-        id='datatable-filtering-fe',
-        #columns=[
-        #    {"name": i, "id": i, "deletable": True} for i in df.columns
-        #],
-        data=df.to_dict('records'),
-        filtering=True,
-        style_cell={'fontSize':20, 'font-family':'sans-serif'}
-    ),
-    html.Div(id='datatable-filter-container')
+        id='typing_formatting_1',
+        data=df_typing_formatting.to_dict('rows'),
+        columns=[{
+            'id': 'city',
+            'name': 'City',
+            'type': 'text'
+        }, {
+            'id': 'average_04_2018',
+            'name': 'Average Price ($)',
+            'type': 'numeric',
+            'format': FormatTemplate.money(2)
+        }, {
+            'id': 'change_04_2017_04_2018',
+            'name': 'Variation (%)',
+            'type': 'numeric',
+            'format': FormatTemplate.percentage(1).sign(Sign.positive)
+        }],
+        editable=True
+    )
 ])
-
-
-@app.callback(
-    Output('datatable-filter-container', "children"),
-    [Input('datatable-filtering-fe', "data")])
-def update_graph(rows):
-    if rows is None:
-        dff = df
-    else:
-        dff = DataFrame(rows)
-
-    return dff
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-
-    

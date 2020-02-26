@@ -187,12 +187,12 @@ class Position():
         
     def getGrossPnLPercentage(self):
         try:
-            return (self.getValuatedAmount() / self.getInvestedAmount() -1 ) * 100
+            return (self.getValuatedAmount() / self.getInvestedAmount() -1 )
         except Exception as err:
             return 0
     
     def getNetPnLPercentage(self):
-        return (self.getValuatedAmount() / (self.getInvestedAmount() + self.accumulatedBuyCommission + self.accumulatedBuyVATCommission) -1 ) * 100
+        return (self.getValuatedAmount() / (self.getInvestedAmount() + self.accumulatedBuyCommission + self.accumulatedBuyVATCommission) -1 )
     
     def getPositionPercentage(self):
         from core.cache import MainCache

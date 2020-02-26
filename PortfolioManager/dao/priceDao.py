@@ -19,4 +19,6 @@ class PriceDao():
                 INNER JOIN ASSET A ON P.ASSET_OID = A.ID
             WHERE A.NAME = :assetName                  
             order by p.DATE_ desc""")
-        return session.execute(query, params)
+        resulSet = session.execute(query, params)
+        for row in resulSet:
+            return row
