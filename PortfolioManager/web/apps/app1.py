@@ -4,25 +4,21 @@ Created on 4 nov. 2018
 @author: afunes
 '''
 
-from _decimal import Decimal
 from datetime import datetime
 
+from dash.dependencies import Output, Input
 from dash_table import FormatTemplate
-from pandas.core.frame import DataFrame
 
 from base.initializer import Initializer
 from core.cache import MainCache
-import dash_core_components as dcc
 import dash_html_components as html
 import dash_table as dt
 from engine.positionEngine import PositionEngine
+from web.app import app
 
 
 Initializer()
-MainCache.refreshReferenceData()
-PositionEngine().refreshPositions(datetime(2001, 7, 14).date(), datetime.now().date())
 
-df2 = MainCache.positionDf
 formatColumns = [{"name": 'Asset Name', 'id': 'Asset Name', "deletable": False},
                  {"name": 'Asset Type', 'id': 'Asset Type', "deletable": False},
                  {"name": 'Position', 'id': 'Position', "deletable": False, 'type': 'numeric'},
@@ -48,9 +44,24 @@ styleDataCondition = [{ 'if': {'column_id': 'Gross PnL','filter_query': '{Gross 
                         {'if': {'column_id': 'Gross%PNL','filter_query': '{Gross%PNL} < 0'},'color': 'red', 'fontWeight': 'bold'},]
 
 layout = html.Div([
-    html.Div(dt.DataTable(
+    html.Button(id='btn-submit', n_clicks=0, children='Submit'),
+    html.Div(id='lbl-exchangeRate' ,children=''),
+    html.Div(dt.DataTable(data=[{}], id='dt-position'), style={'display': 'none'}),
+    html.Div(id='dt-position-container')])
+
+@app.callback(
+    [Output('dt-position-container', "children"),
+     Output('lbl-exchangeRate', "children")],
+    [Input('btn-submit', 'n_clicks')])
+def doSubmit(n_clicks):
+    if (n_clicks > 0):
+        MainCache.refreshReferenceData()
+        PositionEngine().refreshPositions(datetime(2001, 7, 14).date(), datetime.now().date())
+        df = MainCache.positionDf
+        if (len(df) != 0):
+            dt2 = dt.DataTable(
                     id='dt-position',
-                    data=df2.to_dict("rows"),
+                    data=df.to_dict("rows"),
                     columns= formatColumns,
                     style_as_list_view=True,
                     style_header={
@@ -61,6 +72,9 @@ layout = html.Div([
                     sort_action="native",
                     sort_mode="multi",
                     row_selectable="multi",
-                    style_data_conditional= styleDataCondition
-                    )),
-    html.Div(id='dt-position-container')])
+                    style_data_conditional= styleDataCondition)
+            return dt2, MainCache.usdMXN
+    else:
+        return None, None
+    
+

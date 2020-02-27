@@ -1,0 +1,5 @@
+label tipo de cambio 
+Realized pnl en 0
+Tenor incompleto
+%portfolio en 1 
+weightedPnl 0 
