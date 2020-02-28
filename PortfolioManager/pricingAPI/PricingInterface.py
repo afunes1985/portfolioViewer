@@ -26,7 +26,7 @@ class PricingInterface:
     @staticmethod
     def getExchangeRateByCurrency(fromCurrency, toCurrency):
         try:
-            return PricingInterface.getPriceInterfacesDict()["EXCEL"].getExchangeRateByCurrency(fromCurrency, toCurrency)
+            return PricingInterface.getPriceInterfacesDict()["ALPHAVANTAGE"].getExchangeRateByCurrency(fromCurrency, toCurrency)
         except Exception as e:
             logging.warning(e)
             return 0
@@ -55,8 +55,7 @@ class PricingInterfaceAlphaVantage:
     def getExchangeRateByCurrency(self, fromCurrency, toCurrency):
         result = requests.get('https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency='+fromCurrency+'&to_currency='+toCurrency+'&apikey=Z09WI322376KBA3P')
         json_data = json.loads(result.text)
-        return Decimal(18.60)
-        #return Decimal(json_data['Realtime Currency Exchange Rate']['5. Exchange Rate'])
+        return Decimal(json_data['Realtime Currency Exchange Rate']['5. Exchange Rate'])
     
     
     

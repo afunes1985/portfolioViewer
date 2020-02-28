@@ -7,13 +7,14 @@ Created on May 4, 2017
 from datetime import datetime
 import threading
 
-import pandas
-
 from core.cache import MainCache
 from core.constant import Constant
+from core.corporateEventPosition import CorporateEventPosition
 from core.position import Position
+from dao.corporateEventDao import CorporateEventDao
 from dao.movementDao import MovementDao
 import pandas as pd
+
 
 class PositionEngine():
 
@@ -23,7 +24,7 @@ class PositionEngine():
         
         for row in resultPositionDict[Constant.CONST_POSITION_DICT].items():
             position = row[1]
-            position_DF = position_DF.append(pd.Series([row[0], position.asset.assetType, position.asset.isSIC, position.getTotalQuantity(), position.getUnitCostOrRate(), position.getMarketPrice(), position.changePercentage, position.getInvestedAmount(), 
+            position_DF = position_DF.append(pd.Series([position.asset.getName(), position.asset.assetType, position.asset.isSIC, position.getTotalQuantity(), position.getUnitCostOrRate(), position.getMarketPrice(), position.changePercentage, position.getInvestedAmount(), 
                   position.getValuatedAmount(), position.getElapsedDays(), position.getMaturityDate(), position.getGrossPnL(), position.getNetPnL(), position.getGrossPnLPercentage(), 
                   position.getNetPnLPercentage(), position.getConsolidatedRealizedPnl(), position.getPositionPercentage(), position.getWeightedPnl()], index=position_DF.columns), ignore_index=True)
         
@@ -44,7 +45,8 @@ class PositionEngine():
         finalPosition_DF = posEquityNoSIC.append(posEquitySIC, ignore_index=True)
         finalPosition_DF = finalPosition_DF.append(posFund, ignore_index=True)
         finalPosition_DF = finalPosition_DF.append(posBond, ignore_index=True)
-        finalPosition_DF = finalPosition_DF.append(pd.Series([position_DF['Invested Amount'].sum(), position_DF['Valuated Amount'].sum()], index=['Invested Amount', 'Valuated Amount']), ignore_index=True)
+        finalPosition_DF = finalPosition_DF.append(pd.Series(['Total MXN', position_DF['Invested Amount'].sum(), position_DF['Valuated Amount'].sum()], index=['Asset Name','Invested Amount', 'Valuated Amount']), ignore_index=True)
+        finalPosition_DF = finalPosition_DF.append(pd.Series(['Total USD', position_DF['Valuated Amount'].sum()/MainCache.usdMXN], index=['Asset Name','Valuated Amount']), ignore_index=True)
         
         print(finalPosition_DF.to_string())
             
@@ -92,24 +94,22 @@ class PositionEngine():
         returnDict[Constant.CONST_POSITION_DICT] = positionDict
         returnDict[Constant.CONST_OLD_POSITION_DICT] = oldPositionDict
         
-#         corporateEventPositionDict = self.buildCorporateEventPosition()
-        #returnDict[Constant.CONST_CORPORATE_POSITION_DICT] = corporateEventPositionDict
-        #Corporate event        
-#         for (positionKey, corporateEventPosition) in corporateEventPositionDict.iteritems():
-#             position = positionDict.get(positionKey, None)
-#             if(position is not None):
-#                 position.addRealizedPnlCorporateEvent(corporateEventPosition.accGrossAmount)
+        #Corporate event 
+        corporateEventPositionDict = self.buildCorporateEventPosition()
+        for (positionKey, corporateEventPosition) in corporateEventPositionDict.items():
+            position = positionDict.get(positionKey, None)
+            if(position is not None):
+                position.addRealizedPnlCorporateEvent(corporateEventPosition.accGrossAmount)
         
         return returnDict
 
     def buildCorporateEventPosition(self):
         resultDict = {}
-        resultSet = DaoCorporateEvent.getCorporateEventList()
-        for (row) in resultSet:
-            o = CorporateEvent(row)
-            corporateEventPosition = resultDict.get(o.asset.name, None)
+        ceList = CorporateEventDao().getCorporateEventList()
+        for ce in ceList:
+            corporateEventPosition = resultDict.get(ce.asset.name, None)
             if corporateEventPosition == None:
-                resultDict[o.asset.name] = CorporateEventPosition(o)
+                resultDict[ce.asset.name] = CorporateEventPosition(ce)
             else:
-                corporateEventPosition.addCorporateEvent(o)
+                corporateEventPosition.addCorporateEvent(ce)
         return resultDict

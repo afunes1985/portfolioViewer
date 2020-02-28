@@ -3,13 +3,15 @@ Created on 4 dic. 2017
 
 @author: afunes
 '''
+from _decimal import Decimal
+
 
 class CorporateEventPosition():
     asset = None
-    accGrossAmount = 0
+    accGrossAmount = Decimal(0)
     custody = None
-    corporateEventType = None
-    accNetAmount = 0
+    #corporateEventType = None
+    accNetAmount = Decimal(0)
     corporateEventList = None
     
     def __init__(self, corporateEvent):
@@ -23,4 +25,4 @@ class CorporateEventPosition():
         self.accNetAmount += corporateEvent.netAmount
         self.custody = corporateEvent.custody
         self.asset = corporateEvent.asset
-        self.corporateEventType = corporateEvent.corporateEventType
+        #self.corporateEventType = corporateEvent.corporateEventType

@@ -20,4 +20,11 @@ class Asset(PersistenObject):
     priceSource = Column('price_source', String(), nullable=False)
     movementList = relationship("Movement", back_populates="asset")
     #defaultCustody = None
+    
+    def getName(self):
+        if(self.originName is not None):
+            return self.originName
+        else:
+            return self.name
+            
 

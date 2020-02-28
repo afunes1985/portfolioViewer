@@ -26,7 +26,6 @@ class Movement(PersistenObject):
     commissionPercentage = Column('commission_percentage', Numeric(), nullable=False)
     commissionAmount = Column('commission_amount', Numeric(), nullable=False)
     commissionVATAmount = Column('commission_iva_amount', Numeric(), nullable=False)
-    #custody = mainCache.custodyDictOID[custodyOID]
     comment = Column(String(), nullable=False)
     externalID = Column('external_id', String(), nullable=False)
     tenor = Column(Integer(), nullable=False)
