@@ -30,6 +30,8 @@ class PositionEngine():
         
         position_DF = position_DF.sort_values(['Asset Type', 'isSIC', 'Asset Name'], ascending=[1, 0, 1])
         
+        MainCache.totalValuatedAmount = position_DF['Valuated Amount'].sum()
+        
         posEquityNoSIC = position_DF.loc[(position_DF['Asset Type'] == 'EQUITY') & (position_DF['isSIC'] == False)]
         posEquityNoSIC = posEquityNoSIC.append(pd.Series([posEquityNoSIC['Invested Amount'].sum(), posEquityNoSIC['Valuated Amount'].sum()], index=['Invested Amount', 'Valuated Amount']), ignore_index=True)
         
@@ -45,8 +47,8 @@ class PositionEngine():
         finalPosition_DF = posEquityNoSIC.append(posEquitySIC, ignore_index=True)
         finalPosition_DF = finalPosition_DF.append(posFund, ignore_index=True)
         finalPosition_DF = finalPosition_DF.append(posBond, ignore_index=True)
-        finalPosition_DF = finalPosition_DF.append(pd.Series(['Total MXN', position_DF['Invested Amount'].sum(), position_DF['Valuated Amount'].sum()], index=['Asset Name','Invested Amount', 'Valuated Amount']), ignore_index=True)
-        finalPosition_DF = finalPosition_DF.append(pd.Series(['Total USD', position_DF['Valuated Amount'].sum()/MainCache.usdMXN], index=['Asset Name','Valuated Amount']), ignore_index=True)
+        finalPosition_DF = finalPosition_DF.append(pd.Series(['Total MXN', position_DF['Invested Amount'].sum(), MainCache.totalValuatedAmount], index=['Asset Name','Invested Amount', 'Valuated Amount']), ignore_index=True)
+        finalPosition_DF = finalPosition_DF.append(pd.Series(['Total USD', MainCache.totalValuatedAmount/MainCache.usdMXN], index=['Asset Name','Valuated Amount']), ignore_index=True)
         
         print(finalPosition_DF.to_string())
             

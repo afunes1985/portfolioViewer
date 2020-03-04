@@ -56,8 +56,13 @@ class PricingInterfaceAlphaVantage:
         result = requests.get('https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency='+fromCurrency+'&to_currency='+toCurrency+'&apikey=Z09WI322376KBA3P')
         json_data = json.loads(result.text)
         return Decimal(json_data['Realtime Currency Exchange Rate']['5. Exchange Rate'])
-    
-    
+
+class PricingInterfaceIEX():    
+    def getMarketPriceByAssetName(self, assetName, date):
+        dateForUrl = date.strftime('YYYYMMDD')
+        result = requests.get('https://cloud.iexapis.com/stable/stock/' + assetName + '/chart/date/' + dateForUrl + '?chartByDay=true&token=pk_c4c339ea14ba4aad92d9256ac75705e4')
+        json_data = json.loads(result.text)
+        print(json_data)
     
 class PricingInterfaceTradier:
     def getMarketPriceByAssetName(self, assetName):
@@ -108,12 +113,9 @@ class PricingInterfaceExcel:
     
     def getExchangeRateByCurrency(self, fromCurrency, toCurrency):
         import pandas
-        #df = pandas.read_excel('C://Users//afunes//iCloudDrive//PortfolioViewer//import//quotes.csv')
         df = pandas.read_csv('C://Users//afunes//iCloudDrive//PortfolioViewer//import//quotes.csv');
-        #get the values for a given column
         symbolValues = df['Symbol'].values
         curPriceValues = df['Current Price'].values
-        #changeValues = df['Change'].values
         for index, rfRow in enumerate(symbolValues):
             if 'MXN=X' == rfRow:
                 currentPrice = curPriceValues[index]
@@ -126,9 +128,7 @@ class PricingInterfaceExcel:
     
     def getReferenceDataByAssetNames(self, assetNames):
         import pandas
-        #df = pandas.read_excel('C://Users//afunes//iCloudDrive//PortfolioViewer//import//quotes.csv')
         df = pandas.read_csv('C://Users//afunes//iCloudDrive//PortfolioViewer//import//quotes.csv');
-        #get the values for a given column
         symbolValues = df['Symbol'].values
         curPriceValues = df['Current Price'].values
         changeValues = df['Change'].values

@@ -8,19 +8,12 @@ from decimal import Decimal
 from pricingAPI.PricingInterface import PricingInterface
 
 
-# from engine.engine import Engine
-#from pricingAPI.PricingInterface import PricingInterface
 class MainCache():
-    _instance = None
     #DICTIONARY
     positionDf = None
     oldPositionDict = None
     summaryDict = None
     corporateEventPositionDictAsset = None
-    #REFERENCE DATA
-    custodyDictOID = None
-    corporateEventTypeOID = None
-    assetDictOID = None
     #COMMON VALUE
     usdMXN = None
     totalValuatedAmount = None
@@ -28,9 +21,6 @@ class MainCache():
     
     def setUSDMXN(self, usdMXN):
         self.usdMXN = Decimal(usdMXN)
-    
-#     def setGlobalAttribute(self, positionDict):    
-#         self.totalValuatedAmount = Engine.getSubTotalValuatedAmount2(positionDict, 'ALL')
     
     @staticmethod
     def refreshReferenceData():
