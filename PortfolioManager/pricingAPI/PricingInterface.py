@@ -28,7 +28,7 @@ class PricingInterface:
         try:
             return PricingInterface.getPriceInterfacesDict()["ALPHAVANTAGE"].getExchangeRateByCurrency(fromCurrency, toCurrency)
         except Exception as e:
-            logging.warning(e)
+            logging.exception(e)
             return 0
         
     @staticmethod
