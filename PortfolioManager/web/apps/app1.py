@@ -15,6 +15,7 @@ import dash_html_components as html
 import dash_table as dt
 from engine.positionEngine import PositionEngine
 from web.app import app
+import dash_bootstrap_components as dbc
 
 
 Initializer()
@@ -44,11 +45,14 @@ styleDataCondition = [{ 'if': {'column_id': 'Gross PnL','filter_query': '{Gross 
                         {'if': {'column_id': 'Gross%PNL','filter_query': '{Gross%PNL} > 0'},'color': 'green', 'fontWeight': 'bold'},
                         {'if': {'column_id': 'Gross%PNL','filter_query': '{Gross%PNL} < 0'},'color': 'red', 'fontWeight': 'bold'},]
 
-layout = html.Div([
-    html.Button(id='btn-submit', n_clicks=0, children='Submit'),
-    html.Div(id='lbl-exchangeRate' ,children=''),
-    html.Div(dt.DataTable(data=[{}], id='dt-position'), style={'display': 'none'}),
-    html.Div(id='dt-position-container')])
+layout = dbc.Container([
+            dbc.Row([dbc.Col(html.Button(id='btn-submit', n_clicks=0, children='Submit', style = {'margin': 5})),
+                     dbc.Col(html.Label("USD/MXN", style = {'margin': 5}), width = {"size": 1, "offset": 9}),
+                     dbc.Col(html.Div(id='lbl-exchangeRate' ,children='', style = {'margin': 5}), width = {"size": 1})]),
+            dbc.Row([dbc.Col(html.Div(dt.DataTable(data=[{}], id='dt-position'), style={'display': 'none'}), width={"size": 0}),
+                     dbc.Col(html.Div(id='dt-position-container', style = {'width':'90%'}), width={"size": 12,"offset": 1})],
+                     justify="center")
+        ],style={"max-width":"100%"})
 
 @app.callback(
     [Output('dt-position-container', "children"),
@@ -69,7 +73,7 @@ def doSubmit(n_clicks):
                         'backgroundColor': 'white',
                         'fontWeight': 'bold'
                     },
-                    filter_action="native",
+                    #filter_action="native",
                     sort_action="native",
                     sort_mode="multi",
                     row_selectable="multi",
