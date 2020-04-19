@@ -35,7 +35,7 @@ class Position():
     
     def __init__(self, asset, movement):
         self.asset = asset
-        print('New position ' + self.getAssetName())
+        #print('New position ' + self.getAssetName())
         self.custody = movement.custody
         self.acquisitionDate = movement.acquisitionDate
         if (self.asset.assetType == 'BOND'):

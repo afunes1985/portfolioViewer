@@ -18,6 +18,7 @@ class Asset(PersistenObject):
     isSIC = Column('is_sic', Boolean(), nullable=False)
     isOnlinePrice = Column('is_online_price',Boolean(), nullable=False)
     priceSource = Column('price_source', String(), nullable=False)
+    historicalPriceSource = Column('historical_price_source', String(), nullable=False)
     #defaultCustody = None
     
     def getName(self):

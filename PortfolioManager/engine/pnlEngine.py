@@ -6,15 +6,21 @@ Created on Apr 18, 2020
 from datetime import datetime
 import logging
 
+from base.dbConnector import DBConnector
 from base.initializer import Initializer
 from core.cache import MainCache
 from core.constant import Constant
+from dao.cashMovementDao import CashMovementDao
+from dao.currencyDao import CurrencyDao
+from dao.dao import GenericDao
 from dao.priceDao import PriceDao
 from engine.positionEngine import PositionEngine
+from modelClass.currency import CurrencyValue, Currency
+from modelClass.price import Price
 import pandas as pd
+from pricingAPI.PricingInterface import PricingInterfaceExcel, PricingInterface
 from tools.tools import getLastWorkingDay
-from dao.currencyDao import CurrencyDao
-from dao.cashMovementDao import CashMovementDao
+
 
 Initializer()
 MainCache.refreshReferenceData()
@@ -82,24 +88,46 @@ class PnlEngine():
         return df
       
     def setReferenceData(self, positionDict, date):
+        dbconnector = DBConnector()
+        session = dbconnector.getNewSession()
         today = datetime.now().date()
         if today == date:
             setLastMarketData = True
         else:
             setLastMarketData = False 
             workingDate = getLastWorkingDay(date) 
-            currencyValue = CurrencyDao().getCurrencyValueByDate("USD/MXN", workingDate)
-        
+            currencyName = "USD/MXN"
+            currencyValue = CurrencyDao().getCurrencyValueByDate(currencyName=currencyName, date=workingDate, raiseNoResultFound=False)
+            if(currencyValue is None):
+                exchangeRateValue = PricingInterfaceExcel().getExchangeRateByDate('USD','MXN', workingDate)
+                if (exchangeRateValue is None):
+                    raise Exception("exchangeRateValue found: " + str(workingDate))
+                currencyValue = CurrencyValue()
+                currencyValue.value = exchangeRateValue
+                currencyValue.currency = GenericDao().getOneResult(objectClazz=Currency, condition=(Currency.name == currencyName), session = session)
+                currencyValue.date = workingDate
+                session.add(currencyValue)
+                session.commit()
         for row in positionDict.items():
             position = row[1]
             if position.asset.assetType != 'BOND':
                 if(setLastMarketData):
                     position.refreshMarketData()
                 else:
-                    price = PriceDao().getPriceByDate(position.getAssetName(), workingDate)
+                    price = PriceDao().getPriceByDate(position.getAssetName(), workingDate, raiseNoResultFound=False)
                     if price is None:
-                        logging.warning("price not found: " + position.getAssetName() + " " + str(workingDate))    
+                        priceValue = PricingInterface.getMarketPriceByDate(position.getMainName(), position.asset.historicalPriceSource, workingDate)
+                        if priceValue is None:
+                            raise Exception("price not found: " + position.getMainName() + " " + str(workingDate))
+                        price = Price()
+                        price.assetOID = position.asset.ID
+                        price.date = workingDate
+                        price.lastPrice = priceValue  
+                        session.add(price)
+                        session.commit()
+                        print("Price added " + position.getAssetName() + str(workingDate)) 
                     position.setMarketPrice(marketPrice=price.lastPrice, exchangeRate=currencyValue.value)
+        session.close_all()
             
 # if __name__ == '__main__':
 #     PnlEngine().calculatePnl(datetime(2017, 1, 1).date(), datetime(2018, 1, 1).date())

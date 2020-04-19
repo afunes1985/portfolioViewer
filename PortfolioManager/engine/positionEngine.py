@@ -50,8 +50,6 @@ class PositionEngine():
         finalPosition_DF = finalPosition_DF.append(pd.Series(['Total MXN', position_DF['Invested Amount'].sum(), MainCache.totalValuatedAmount], index=['Asset Name','Invested Amount', 'Valuated Amount']), ignore_index=True)
         finalPosition_DF = finalPosition_DF.append(pd.Series(['Total USD', MainCache.totalValuatedAmount/MainCache.usdMXN], index=['Asset Name','Valuated Amount']), ignore_index=True)
         
-        print(finalPosition_DF.to_string())
-            
         MainCache.positionDf = finalPosition_DF
         
         

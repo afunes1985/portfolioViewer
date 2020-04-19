@@ -12,7 +12,7 @@ from modelClass.currency import Currency, CurrencyValue
 
 class CurrencyDao():
 
-    def getCurrencyValueByDate(self, currencyName, date, session=None):
+    def getCurrencyValueByDate(self, currencyName, date, session=None, raiseNoResultFound=True):
         try:
             if (session is None): 
                 dbconnector = DBConnector()
@@ -21,6 +21,8 @@ class CurrencyDao():
                     .join(CurrencyValue.currency)\
                     .filter(and_(Currency.name == currencyName, CurrencyValue.date == date))
             objectResult = query.one()
-        except NoResultFound as e:
-            raise Exception("NoResultFound - " + str(currencyName) + " " + str(date))
+        except NoResultFound:
+            if(raiseNoResultFound):
+                raise Exception("NoResultFound - " + str(currencyName) + " " + str(date))
+            return None
         return objectResult  

@@ -14,7 +14,7 @@ from modelClass.price import Price
 
 class PriceDao():
 
-    def getPriceByDate(self, assetName, date,session = None):
+    def getPriceByDate(self, assetName, date,session = None, raiseNoResultFound=True):
         try:
             if (session is None): 
                 dbconnector = DBConnector()
@@ -24,7 +24,9 @@ class PriceDao():
                     .filter(and_(Asset.name == assetName, Price.date == date))
             objectResult = query.one()
         except NoResultFound as e:
-            raise Exception("NoResultFound - " + str(assetName) + " " + str(date))
+            if(raiseNoResultFound):
+                raise Exception("NoResultFound - " + str(assetName) + " " + str(date))
+            return None
         return objectResult    
     
     def getLastPrice(self, assetName, session = None):

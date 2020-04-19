@@ -20,10 +20,11 @@ navbar = dbc.Navbar(
             dbc.Row(
                 [
                     dbc.Col(dbc.NavbarBrand("Portfolio Viewer", className="ml-2")),
+                    dbc.Col(dcc.Link("Positions", href="/apps/app1")),
                     dbc.Col(dcc.Link("PnL Report", href="/apps/app2")),
                 ],
                 align="center",
-                no_gutters=True,
+                justify="end"
             )
         ),
     ],

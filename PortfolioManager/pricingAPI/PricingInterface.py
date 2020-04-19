@@ -3,6 +3,7 @@ Created on 8 nov. 2017
 
 @author: afunes
 '''
+from datetime import datetime, timedelta
 from decimal import Decimal
 import http
 import json
@@ -14,14 +15,14 @@ from dao.priceDao import PriceDao
 
 
 class PricingInterface:
-    
     @staticmethod
     def getPriceInterfacesDict():
         return dict({"EXCEL":PricingInterfaceExcel(), 
                     #"YAHOO":PricingInterfaceYahoo,
                     "TRADIER":PricingInterfaceTradier(),
                     "ALPHAVANTAGE":PricingInterfaceAlphaVantage(),
-                    "DB":PricingInterfaceDB()}) 
+                    "DB":PricingInterfaceDB(),
+                    "IEX":PricingInterfaceIEX()}) 
         
     @staticmethod
     def getExchangeRateByCurrency(fromCurrency, toCurrency):
@@ -46,10 +47,19 @@ class PricingInterface:
         except Exception as e:
             logging.warning(e)
             return []
+    
+    @staticmethod
+    def getMarketPriceByDate(assetName, priceSource, date):
+        if(priceSource != "EXCEL"):
+            priceSource = 'IEX'
+        try:    
+            return PricingInterface.getPriceInterfacesDict()[priceSource].getMarketPriceByDate(assetName, date)
+        except Exception as e:
+            logging.warning(e)
+            return []
 
 
-
-
+########################################################################################################################
 
 class PricingInterfaceAlphaVantage:
     def getExchangeRateByCurrency(self, fromCurrency, toCurrency):
@@ -57,12 +67,31 @@ class PricingInterfaceAlphaVantage:
         json_data = json.loads(result.text)
         return Decimal(json_data['Realtime Currency Exchange Rate']['5. Exchange Rate'])
 
+########################################################################################################################
+
 class PricingInterfaceIEX():    
-    def getMarketPriceByAssetName(self, assetName, date):
+    def getMarketPriceByDate(self, assetName, date):
+        daysToBack = 10
+        for offset in range(0, daysToBack):
+            dateToImport = date + timedelta(days=(offset * -1))
+            dateForUrl = dateToImport.strftime('%Y%m%d')
+            url = 'https://cloud.iexapis.com/stable/stock/' + assetName + '/chart/date/' + dateForUrl + '?chartByDay=true&token=pk_55cd20ce5c41439886a06ea27e1eb2e5'
+            result = requests.get(url)
+            if(result.ok):
+                json_data = json.loads(result.text)
+                if (len(json_data) > 0 and json_data[0]['date'] == date.strftime('%Y-%m-%d')):
+                    return json_data[0]['close']
+    
+    def getExchangeRateByDate(self, fromCurrency, toCurrency, date):   
+        """The requested data is not available to free tier accounts. Please upgrade for access to this data."""
         dateForUrl = date.strftime('YYYYMMDD')
-        result = requests.get('https://cloud.iexapis.com/stable/stock/' + assetName + '/chart/date/' + dateForUrl + '?chartByDay=true&token=pk_c4c339ea14ba4aad92d9256ac75705e4')
+        url = 'https://cloud.iexapis.com/fx/historical?symbols=MXNUSD&from=' + dateForUrl + '&token=pk_c4c339ea14ba4aad92d9256ac75705e4'
+        result = requests.get(url)
+        print(result)
         json_data = json.loads(result.text)
-        print(json_data)
+        print(json_data) 
+    
+########################################################################################################################
     
 class PricingInterfaceTradier:
     def getMarketPriceByAssetName(self, assetName):
@@ -108,9 +137,10 @@ class PricingInterfaceTradier:
     @staticmethod
     def getHistoricalPrice(assetName, fromDate, ToDate):
         return None
+
+########################################################################################################################
     
 class PricingInterfaceExcel:
-    
     def getExchangeRateByCurrency(self, fromCurrency, toCurrency):
         import pandas
         df = pandas.read_csv('C://Users//afunes//iCloudDrive//PortfolioViewer//import//quotes.csv');
@@ -122,6 +152,25 @@ class PricingInterfaceExcel:
                 #change = changeValues[index]
                 #returnRow.append(round((((currentPrice)/(currentPrice-change)-1)*100), 2))
                 return round(currentPrice,2)
+            
+    def getExchangeRateByDate(self, fromCurrency, toCurrency, date):
+        import pandas
+        currencyName = fromCurrency+"/"+toCurrency
+        df = pandas.read_excel('C://Users//afunes//iCloudDrive//PortfolioViewer//import//ImportHistoricalPriceAndExchangeRate.xlsx')
+        for index, row in df.iterrows():
+            if(currencyName == row['Asset Name']
+                and date == datetime.strptime(str(row['Date']), '%d-%m-%Y').date()):
+                closePrice = row['Close*']
+                return round(closePrice,2)
+            
+    def getMarketPriceByDate(self, assetName, date):
+        import pandas
+        df = pandas.read_excel('C://Users//afunes//iCloudDrive//PortfolioViewer//import//ImportHistoricalPriceAndExchangeRate.xlsx')
+        for index, row in df.iterrows():
+            if(assetName == row['Asset Name']
+                and date == datetime.strptime(str(row['Date']), '%d-%m-%Y').date()):
+                closePrice = row['Close*']
+                return round(closePrice,2)
     
     def getMarketPriceByAssetName(self, assetName):
         return 0
@@ -144,8 +193,9 @@ class PricingInterfaceExcel:
                 returnList.append(returnRow)
         return returnList
 
-class PricingInterfaceDB:
+########################################################################################################################
 
+class PricingInterfaceDB:
     def getMarketPriceByAssetName(self, assetName):
         return 0
     
@@ -160,3 +210,10 @@ class PricingInterfaceDB:
         returnRow.append(round((((currentPrice)/(currentPrice-change)-1)*100), 2))
         returnList.append(returnRow)
         return returnList
+
+if __name__ == '__main__':
+    datetime.strptime('Dec 31, 2015', '%b %d, %Y')
+    
+    cp = PricingInterfaceExcel().getExchangeRateByDate("USD", "MXN", datetime(2019, 12, 31).date())
+    cp = PricingInterfaceExcel().getPriceByDate(assetName='ICA.MX', date=datetime(2019, 12, 31).date())
+    print(cp)
