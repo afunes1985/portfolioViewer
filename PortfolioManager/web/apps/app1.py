@@ -9,7 +9,6 @@ from datetime import datetime
 from dash.dependencies import Output, Input
 from dash_table import FormatTemplate
 
-from base.initializer import Initializer
 from core.cache import MainCache
 import dash_html_components as html
 import dash_table as dt
@@ -17,8 +16,6 @@ from engine.positionEngine import PositionEngine
 from web.app import app
 import dash_bootstrap_components as dbc
 
-
-Initializer()
 
 formatColumns = [{"name": 'Asset Name', 'id': 'Asset Name', "deletable": False},
                  {"name": 'Asset Type', 'id': 'Asset Type', "deletable": False},

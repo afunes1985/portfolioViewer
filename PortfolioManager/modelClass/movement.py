@@ -13,9 +13,9 @@ from modelClass import PersistenObject
 class Movement(PersistenObject):
     __tablename__ = 'movement'    
     assetOID = Column("asset_oid", Integer, ForeignKey('asset.ID'))
-    asset = relationship("Asset", back_populates="movementList")
+    asset = relationship("Asset")
     custodyOID = Column("custody_oid", Integer, ForeignKey('custody.ID'))
-    custody = relationship("Custody", back_populates="movementList")
+    custody = relationship("Custody")
     buySell = Column('buy_sell', String(), nullable=False)
     acquisitionDate = Column('acquisition_date', DateTime, nullable=False)
     quantity = Column(Integer(), nullable=False)

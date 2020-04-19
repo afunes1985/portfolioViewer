@@ -36,7 +36,7 @@ class PricingInterface:
         try:
             return PricingInterface.getPriceInterfacesDict()[priceSource].getMarketPriceByAssetName(assetName)
         except Exception as e:
-            logging.warning(e)
+            logging.warning("Price not found "+ assetName + " " + priceSource)
             return 0
         
     @staticmethod

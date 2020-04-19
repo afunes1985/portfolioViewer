@@ -18,7 +18,6 @@ class Asset(PersistenObject):
     isSIC = Column('is_sic', Boolean(), nullable=False)
     isOnlinePrice = Column('is_online_price',Boolean(), nullable=False)
     priceSource = Column('price_source', String(), nullable=False)
-    movementList = relationship("Movement", back_populates="asset")
     #defaultCustody = None
     
     def getName(self):

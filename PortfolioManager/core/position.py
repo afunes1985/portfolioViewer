@@ -8,6 +8,8 @@ from decimal import Decimal
 
 from sqlalchemy.sql.sqltypes import Float
 
+from core.cache import MainCache
+
 
 class Position():
     unitCost = Decimal(0)
@@ -53,21 +55,13 @@ class Position():
 
         
     def setReferenceData(self, assetName, price, changePercentage):
-        from core.cache import MainCache
         if(assetName == self.asset.name):
-            self.setMarketPrice(price)
+            self.setMarketPrice(marketPrice=price)
             self.changePercentage = changePercentage / 100
         elif(assetName == self.asset.originName):
             self.setMarketPriceOrig(Decimal(price)) 
-            self.setMarketPrice(Decimal(price) * Decimal(MainCache.usdMXN))#Tal vez hay que quitar esta linea
+            self.setMarketPrice(marketPrice=Decimal(price), exchangeRate=Decimal(MainCache.usdMXN))
             self.changePercentage = changePercentage / 100
-    
-    def setSpecificMarketData(self, price, usdMXN):
-        if self.asset.isSIC:
-            self.setMarketPriceOrig(Decimal(price))
-            self.setMarketPrice(Decimal(price) * usdMXN)#Tal vez hay que quitar esta linea
-        else:
-            self.setMarketPrice(price)
     
     def addPositionToOldPosition(self, position):
         self.realizedPnl += position.realizedPnl
@@ -141,7 +135,7 @@ class Position():
             return self.accumulatedAmount * (1 + (self.getElapsedDays() * (self.rate / 360))) - self.taxAmount
         else:  
             if (self.marketPrice == 0):
-                return self.totalQuantity * self.unitCost
+                return self.totalQuantity * 0
             else:
                 return self.totalQuantity * self.marketPrice
             
@@ -157,23 +151,23 @@ class Position():
     def setMarketPriceOrig(self, marketPriceOrig):
         self.marketPriceOrig = Decimal(marketPriceOrig)
     
-    def setMarketPrice(self, marketPrice):
-        self.marketPrice = Decimal(marketPrice)
+    def setMarketPrice(self, marketPrice, exchangeRate = None):
+        if (self.asset.isSIC):
+            self.marketPrice = Decimal(marketPrice) * exchangeRate
+            self.marketPriceOrig = Decimal(marketPrice)
+        else:
+            self.marketPrice = Decimal(marketPrice)
         
     def getMarketPrice(self):
-        from core.cache import MainCache
         from pricingAPI.PricingInterface import PricingInterface
         if self.asset.isOnlinePrice:
             if (self.marketPrice == 0):
-                self.setMarketPrice(PricingInterface.getMarketPriceByAssetName(self.getAssetName(), self.asset.priceSource))
-                if (self.marketPrice == 0 and self.asset.isSIC):
-                    marketPriceOrigAux = PricingInterface.getMarketPriceByAssetName(self.asset.originName, self.asset.priceSource)
-                    self.setMarketPrice(marketPriceOrigAux * Decimal(MainCache.usdMXN))
+                self.setMarketPrice(marketPrice=PricingInterface.getMarketPriceByAssetName(self.getMainName(), self.asset.priceSource),
+                                    exchangeRate=MainCache.usdMXN)
         return self.marketPrice
     
     def getMarketPriceOrig(self):
         from pricingAPI.PricingInterface import PricingInterface
-        from core.cache import MainCache
         if self.asset.isOnlinePrice and self.asset.isSIC:
             if (self.marketPriceOrig == 0):
                 self.setMarketPriceOrig(PricingInterface.getMarketPriceByAssetName(self.asset.originName, self.asset.priceSource))
@@ -193,7 +187,10 @@ class Position():
             return 0
     
     def getNetPnLPercentage(self):
-        return (self.getValuatedAmount() / (self.getInvestedAmount() + self.accumulatedBuyCommission + self.accumulatedBuyVATCommission) -1 )
+        try:
+            return (self.getValuatedAmount() / (self.getInvestedAmount() + self.accumulatedBuyCommission + self.accumulatedBuyVATCommission) -1 )
+        except Exception as e:
+            raise e
     
     def getPositionPercentage(self):
         from core.cache import MainCache
