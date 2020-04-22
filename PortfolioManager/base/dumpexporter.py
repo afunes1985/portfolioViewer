@@ -9,8 +9,7 @@ import time
 
 class DumpExporter():
     
-    @staticmethod
-    def exportDump(dbHost, dbUser, dbUserPass, dbName ):
+    def exportDump(self, dbHost, dbUser, dbUserPass, dbName ):
         fileName = time.strftime("%Y%m%d") + "_" + "dump_"+ dbName 
         BACKUP_PATH = 'C:\\Users\\afunes\\iCloudDrive\\PortfolioViewer\\dumps\\'
          
@@ -19,7 +18,6 @@ class DumpExporter():
         print(dumpcmd)
         print ("Backup script completed " + fileName)
     
-    @staticmethod  
     def exportAllDump(self):
-        DumpExporter.exportDump('localhost', 'root', 'root', 'portfolio')
-        DumpExporter.exportDump('localhost', 'root', 'root', 'fundamentalanalytics')
+        self.exportDump('localhost', 'root', 'root', 'portfolio')
+        self.exportDump('localhost', 'root', 'root', 'fundamentalanalytics')

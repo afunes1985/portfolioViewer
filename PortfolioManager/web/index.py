@@ -9,10 +9,19 @@ import dash_core_components as dcc
 import dash_html_components as html
 from tools.tools import createLog
 from web.app import app
-from web.apps import app1, app2
+from web.apps import app1, app2, app3
 
 
 Initializer()
+
+dropDownMenu = dbc.DropdownMenu(
+            children=[
+                dbc.DropdownMenuItem(dcc.Link("Administration Tools", href="/apps/app3"))
+            ],
+            #nav=True,
+            in_navbar=True,
+            label="More"
+        )
 
 navbar = dbc.Navbar(
     [
@@ -22,6 +31,7 @@ navbar = dbc.Navbar(
                     dbc.Col(dbc.NavbarBrand("Portfolio Viewer", className="ml-2")),
                     dbc.Col(dcc.Link("Positions", href="/apps/app1")),
                     dbc.Col(dcc.Link("PnL Report", href="/apps/app2")),
+                    dbc.Col(dropDownMenu)
                 ],
                 align="center",
                 justify="end"
@@ -45,6 +55,8 @@ def display_page(pathname):
         return app1.layout
     elif pathname == '/apps/app2':
         return app2.layout
+    elif pathname == '/apps/app3':
+        return app3.layout
     else:
         return app1.layout
 

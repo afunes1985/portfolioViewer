@@ -18,7 +18,7 @@ import dash_bootstrap_components as dbc
 
 
 formatColumns = [{"name": 'Asset Name', 'id': 'Asset Name', "deletable": False},
-                 {"name": 'Asset Type', 'id': 'Asset Type', "deletable": False},
+#                  {"name": 'Asset Type', 'id': 'Asset Type', "deletable": False},
                  {"name": 'Position', 'id': 'Position', "deletable": False, 'type': 'numeric'},
                  {"name": 'Unit Cost', 'id': 'Unit Cost', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
                  {"name": 'Market Price', 'id': 'Market Price', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
