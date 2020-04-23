@@ -10,13 +10,9 @@ from pricingAPI.PricingInterface import PricingInterface
 
 class MainCache():
     #DICTIONARY
-    positionDf = None
     oldPositionDict = None
-    summaryDict = None
-    corporateEventPositionDictAsset = None
     #COMMON VALUE
     usdMXN = None
-    totalValuatedAmount = None
     
     
     def setUSDMXN(self, usdMXN):

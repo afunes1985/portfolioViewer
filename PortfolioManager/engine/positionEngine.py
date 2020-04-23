@@ -26,11 +26,11 @@ class PositionEngine():
             position = row[1]
             position_DF = position_DF.append(pd.Series([position.asset.getName(), position.asset.assetType, position.asset.isSIC, position.getTotalQuantity(), position.getUnitCostOrRate(), position.getMarketPrice(), position.changePercentage, position.getInvestedAmount(), 
                   position.getValuatedAmount(), position.getElapsedDays(), position.getMaturityDate(), position.getGrossPnL(), position.getNetPnL(), position.getGrossPnLPercentage(), 
-                  position.getNetPnLPercentage(), position.getConsolidatedRealizedPnl(), position.getPositionPercentage(), position.getWeightedPnl()], index=position_DF.columns), ignore_index=True)
+                  position.getNetPnLPercentage(), position.getConsolidatedRealizedPnl(), None, None], index=position_DF.columns), ignore_index=True)
         
         position_DF = position_DF.sort_values(['Asset Type', 'isSIC', 'Asset Name'], ascending=[1, 0, 1])
         
-        MainCache.totalValuatedAmount = position_DF['Valuated Amount'].sum()
+        totalValuatedAmount = position_DF['Valuated Amount'].sum()
         
         posEquityNoSIC = position_DF.loc[(position_DF['Asset Type'] == 'EQUITY') & (position_DF['isSIC'] == False)]
         posEquityNoSIC = posEquityNoSIC.append(pd.Series([posEquityNoSIC['Invested Amount'].sum(), posEquityNoSIC['Valuated Amount'].sum()], index=['Invested Amount', 'Valuated Amount']), ignore_index=True)
@@ -47,10 +47,17 @@ class PositionEngine():
         finalPosition_DF = posEquityNoSIC.append(posEquitySIC, ignore_index=True)
         finalPosition_DF = finalPosition_DF.append(posFund, ignore_index=True)
         finalPosition_DF = finalPosition_DF.append(posBond, ignore_index=True)
-        finalPosition_DF = finalPosition_DF.append(pd.Series(['Total MXN', position_DF['Invested Amount'].sum(), MainCache.totalValuatedAmount], index=['Asset Name','Invested Amount', 'Valuated Amount']), ignore_index=True)
-        finalPosition_DF = finalPosition_DF.append(pd.Series(['Total USD', MainCache.totalValuatedAmount/MainCache.usdMXN], index=['Asset Name','Valuated Amount']), ignore_index=True)
+        finalPosition_DF = finalPosition_DF.append(pd.Series(['Total MXN', position_DF['Invested Amount'].sum(), totalValuatedAmount], index=['Asset Name','Invested Amount', 'Valuated Amount']), ignore_index=True)
         
-        MainCache.positionDf = finalPosition_DF
+        for index, row in finalPosition_DF.iterrows():
+            positionPercentage = row['Valuated Amount']/totalValuatedAmount
+            finalPosition_DF.at[index, '%Portfolio'] = positionPercentage
+            if (not pd.isnull(row['Gross%PNL'])):
+                finalPosition_DF.at[index, 'WeightedPnL%'] = row['Gross%PNL'] * positionPercentage
+        
+        finalPosition_DF = finalPosition_DF.append(pd.Series(['Total USD', totalValuatedAmount/MainCache.usdMXN], index=['Asset Name','Valuated Amount']), ignore_index=True)
+        
+        return finalPosition_DF
         
         
     def buildPositions(self, fromDate, toDate, setLastMarketData):

@@ -6,8 +6,6 @@ Created on Mar 18, 2017
 import datetime
 from decimal import Decimal
 
-from sqlalchemy.sql.sqltypes import Float
-
 from core.cache import MainCache
 
 
@@ -191,13 +189,6 @@ class Position():
             return (self.getValuatedAmount() / (self.getInvestedAmount() + self.accumulatedBuyCommission + self.accumulatedBuyVATCommission) -1 )
         except Exception as e:
             raise e
-    
-    def getPositionPercentage(self):
-        from core.cache import MainCache
-        return Decimal(1) #'FIX' #(self.getValuatedAmount() * 100) / Singleton(MainCache).totalValuatedAmount
-    
-    def getWeightedPnl(self):
-        return self.getGrossPnLPercentage() * self.getPositionPercentage() / 100
     
     def getUnitCostOrRate(self):
         if self.asset.assetType == 'BOND':

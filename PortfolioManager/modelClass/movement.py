@@ -5,7 +5,7 @@ Created on Mar 18, 2017
 '''
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import Column, ForeignKey
-from sqlalchemy.sql.sqltypes import String, DateTime, Float, Integer, Numeric
+from sqlalchemy.sql.sqltypes import String, DateTime, Integer, Numeric
 
 from modelClass import PersistenObject
 

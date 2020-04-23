@@ -32,8 +32,8 @@ formatColumns = [{"name": 'Asset Name', 'id': 'Asset Name', "deletable": False},
                  {"name": 'Gross%PNL', 'id': 'Gross%PNL', "deletable": False, 'type': 'numeric','format': FormatTemplate.percentage(2)},
                  {"name": 'Net%PNL', 'id': 'Net%PNL', "deletable": False, 'type': 'numeric','format': FormatTemplate.percentage(2)},
                  {"name": 'Realized PnL', 'id': 'Realized PnL', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
-                 {"name": '%Portfolio', 'id': '%Portfolio', "deletable": False, 'type': 'numeric'},
-                 {"name": 'WeightedPnL%', 'id': 'WeightedPnL%', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)}]
+                 {"name": '%Portfolio', 'id': '%Portfolio', "deletable": False, 'type': 'numeric','format': FormatTemplate.percentage(2)},
+                 {"name": 'WeightedPnL%', 'id': 'WeightedPnL%', "deletable": False, 'type': 'numeric','format': FormatTemplate.percentage(2)}]
 
 styleDataCondition = [{ 'if': {'column_id': 'Gross PnL','filter_query': '{Gross PnL} > 0'},'color': 'green', 'fontWeight': 'bold'},
                         {'if': {'column_id': 'Gross PnL','filter_query': '{Gross PnL} < 0'},'color': 'red', 'fontWeight': 'bold'},
@@ -58,8 +58,7 @@ layout = dbc.Container([
 def doSubmit(n_clicks):
     if (n_clicks > 0):
         MainCache.refreshReferenceData()
-        PositionEngine().refreshPositions(datetime(2001, 7, 14).date(), datetime.now().date())
-        df = MainCache.positionDf
+        df = PositionEngine().refreshPositions(datetime(2001, 7, 14).date(), datetime.now().date())
         if (len(df) != 0):
             dt2 = dt.DataTable(
                     id='dt-position',

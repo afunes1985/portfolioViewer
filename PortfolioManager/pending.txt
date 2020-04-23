@@ -1,4 +1,1 @@
-Tenor incompleto
-%portfolio en 1 
-weightedPnl 0 
 en imporación de cetes directo no toma la ultima hoja de mov, 2020-01
