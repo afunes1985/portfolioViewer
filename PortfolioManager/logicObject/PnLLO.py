@@ -78,7 +78,7 @@ class PnLLO():
         pnlVO.initialPosition = Engine.getSubTotalValuatedAmountByCustodyOID(self.startPositionDict[Constant.CONST_POSITION_DICT], custodyOID)
         pnlVO.pnlAmount =  pnlVO.finalPosition - pnlVO.initialPosition - (pnlVO.totalCashIn - pnlVO.totalCashOut)
         pnlVO.pnlWeightedAmount =  0 #pnlVO.finalPosition - pnlVO.initialPosition - (pnlVO.totalWeightedCashIn - pnlVO.totalWeightedCashOut)
-        pnlVO.tir = (pnlVO.pnlAmount / (pnlVO.initialPosition + abs(pnlVO.totalCashIn - pnlVO.totalCashOut)))*100
+        pnlVO.tir = (pnlVO.pnlAmount / (pnlVO.initialPosition + (pnlVO.totalCashIn - pnlVO.totalCashOut)))*100
         pnlVO.weightedTir = 0 #(pnlVO.pnlAmount / (pnlVO.initialPosition + (pnlVO.totalWeightedCashIn - pnlVO.totalWeightedCashOut)))*100
         return pnlVO
         
