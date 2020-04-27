@@ -24,6 +24,7 @@ formatColumns = [{"name": 'Asset Name', 'id': 'Asset Name', "deletable": False},
                  {"name": 'Quantity', 'id': 'Quantity', "deletable": False, 'type': 'numeric'},
                  {"name": 'Price', 'id': 'Price', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
                  {"name": 'Gross Amount', 'id': 'Gross Amount', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
+                 {"name": 'Net Amount', 'id': 'Net Amount', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
                  {"name": 'Comm %', 'id': 'Comm %', "deletable": False, 'type': 'numeric','format': FormatTemplate.percentage(2)},
                  {"name": 'Comm Amount', 'id': 'Comm Amount', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
                  {"name": 'Comm VAT Amount', 'id': 'Comm VAT Amount', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)}]
@@ -68,7 +69,7 @@ def doSubmit(n_clicks, fromDate, toDate):
                         'backgroundColor': 'white',
                         'fontWeight': 'bold'
                     },
-                    #filter_action="native",
+                    filter_action="native",
                     sort_action="native",
                     sort_mode="multi",
                     row_selectable="multi")
