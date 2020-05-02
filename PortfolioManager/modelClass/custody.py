@@ -12,3 +12,4 @@ from modelClass import PersistenObject
 class Custody(PersistenObject):
     __tablename__ = 'custody'
     name = Column(String(), nullable=False)
+    assetList = relationship("Asset", back_populates="defaultCustody")
