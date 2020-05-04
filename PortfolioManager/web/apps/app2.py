@@ -23,7 +23,7 @@ formatColumns = [{"name": 'Custody Name', 'id': 'Custody Name', "deletable": Fal
                  {"name": 'Cash In', 'id': 'Cash In', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
                  {"name": 'Cash Out', 'id': 'Cash Out', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
                  {"name": 'PnL', 'id': 'PnL', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
-                 {"name": 'TIR', 'id': 'TIR', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)}]
+                 {"name": 'TIR', 'id': 'TIR', "deletable": False, 'type': 'numeric','format': FormatTemplate.percentage(2)}]
 today = datetime.now().date()
 dps_fromDate = dcc.DatePickerSingle(
         id='dps_fromDate',

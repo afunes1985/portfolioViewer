@@ -61,7 +61,7 @@ class PnlEngine():
             totalInitialPosition = initialPosition_DF['Valuated Amount'].sum()
             totalFinalPosition = finalPosition_DF['Valuated Amount'].sum()
             totalPnlAmount =  totalFinalPosition - totalInitialPosition - (totalCashIn - totalCashOut)
-            totalTir = (totalPnlAmount / (totalInitialPosition + (totalCashIn - totalCashOut)))*100
+            totalTir = (totalPnlAmount / (totalInitialPosition + (totalCashIn - totalCashOut)))
             return ["Total", totalInitialPosition, totalFinalPosition, totalCashIn, totalCashOut, totalPnlAmount, totalTir]
         else:
             totalCashIn = cashInMovementDF.loc[(cashInMovementDF['Custody Name'] == custodyName)]['Amount'].sum()
@@ -69,7 +69,7 @@ class PnlEngine():
             totalInitialPosition = initialPosition_DF.loc[(initialPosition_DF['Custody Name'] == custodyName)]['Valuated Amount'].sum()
             totalFinalPosition = finalPosition_DF.loc[(finalPosition_DF['Custody Name'] == custodyName)]['Valuated Amount'].sum()
             totalPnlAmount =  totalFinalPosition - totalInitialPosition - (totalCashIn - totalCashOut)
-            totalTir = (totalPnlAmount / (totalInitialPosition + (totalCashIn - totalCashOut)))*100
+            totalTir = (totalPnlAmount / (totalInitialPosition + (totalCashIn - totalCashOut)))
             return [custodyName, totalInitialPosition, totalFinalPosition, totalCashIn, totalCashOut, totalPnlAmount, totalTir]
         
         
