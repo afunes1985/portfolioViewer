@@ -6,6 +6,7 @@ Created on Jan 8, 2020
 from dao.assetDao import AssetDao
 from dao.movementDao import MovementDao
 import pandas as pd
+from dao.dao import GenericDao
 
 
 class MovementEngine():
@@ -25,7 +26,6 @@ class MovementEngine():
         resultList = []
         for item in itemList:
             resultList.append({'label': item[0], 'value': item[0]})
-        print(resultList)
         return resultList
     
     def getAssetList(self, assetType):
@@ -45,3 +45,5 @@ class MovementEngine():
     def getCustodyByAssetID(self, assetID):
         return AssetDao().getCustodyByAssetID(assetID)
         
+    def addMovement(self, movement):
+        GenericDao().addObject(objectToAdd=movement, doCommit=True)

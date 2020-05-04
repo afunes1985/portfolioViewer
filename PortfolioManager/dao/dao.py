@@ -42,3 +42,22 @@ class GenericDao():
         .limit(limit)\
         .all()
         return objectResult
+    
+    def addObjectList(self, objectList, session):
+        if(len(objectList) > 0):
+            for obj in objectList:
+                self.addObject(objectToAdd=obj, session=session) 
+            session.commit()
+            
+    def addObject(self, objectToAdd, session=None, doCommit=False, doFlush=False):
+        if(session is None):
+            internalSession = DBConnector().getNewSession()
+        else:
+            internalSession = session
+        internalSession.add(objectToAdd)
+        if(doCommit):
+            internalSession.commit()
+        elif(doFlush):
+            internalSession.flush()
+        if(session is None):
+            internalSession.close()

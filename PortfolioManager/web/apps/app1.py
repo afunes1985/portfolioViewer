@@ -4,12 +4,13 @@ Created on 4 nov. 2018
 @author: afunes
 '''
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import dash
 from dash.dependencies import Output, Input, State
 from dash.exceptions import PreventUpdate
 from dash_table import FormatTemplate
+from numpy import rate
 
 from core.cache import MainCache
 from core.constant import Constant
@@ -19,7 +20,9 @@ import dash_html_components as html
 import dash_table as dt
 from engine.movementEngine import MovementEngine
 from engine.positionEngine import PositionEngine
+from modelClass.movement import Movement
 from web.app import app
+
 
 assetTypeOptions = MovementEngine().getAssetTypeList()
 custodyOptions = MovementEngine().getCustodyList()
@@ -68,7 +71,7 @@ dps_acquisitionDate = dcc.DatePickerSingle(
 
 modal = dbc.Modal(
                     [
-                        dbc.ModalHeader("Add Movement"),
+                        dbc.ModalHeader("Movement Editor"),
                         dbc.ModalBody(
                             dbc.Container([  
                                 dbc.Row([ dbc.Col(html.Label("Asset Type", style={'margin': 5}), width={"size": 6}),
@@ -89,7 +92,7 @@ modal = dbc.Modal(
                                 dbc.Row([ dbc.Col(html.Label("Price", style={'margin': 5}), width={"size": 6}),
                                                 dbc.Col(dbc.Input(id='input-price', type="number", min=0, step=1))]),
                                 dbc.Row([ dbc.Col(html.Label("Rate", style={'margin': 5}), width={"size": 6}),
-                                                dbc.Col(dbc.Input(id='input-rate', type="number", min=0, max=10, step=0.01))]),
+                                                dbc.Col(dbc.Input(id='input-rate', type="number", min=0, max=10, step=0.0001))]),
                                 dbc.Row([ dbc.Col(html.Label("Net Amount", style={'margin': 5}), width={"size": 6}),
                                                 dbc.Col(dbc.Input(id='input-netAmount', type="number", min=0, step=1, disabled=True))]),
                                 dbc.Row([ dbc.Col(html.Label("Commission Percentage", style={'margin': 5}), width={"size": 6}),
@@ -103,8 +106,8 @@ modal = dbc.Modal(
                             ])
                         ),
                         dbc.ModalFooter(
-                            dbc.Row([dbc.Button("Save", id="save", className="ml-auto", style={'margin': 5}),
-                                    dbc.Button("Close", id="close", className="ml-auto", style={'margin': 5})])
+                            dbc.Row([dbc.Button("Save", id="btn-save", className="ml-auto", style={'margin': 5}),
+                                    dbc.Button("Close", id="btn-close", className="ml-auto", style={'margin': 5})])
                         ),
                     ],
                     id="modal",
@@ -136,14 +139,14 @@ styleDataCondition = [{ 'if': {'column_id': 'Gross PnL', 'filter_query': '{Gross
                         {'if': {'column_id': 'Gross%PNL', 'filter_query': '{Gross%PNL} < 0'}, 'color': 'red', 'fontWeight': 'bold'}, ]
 
 layout = dbc.Container([
-            dbc.Row([dbc.Col(html.Button(id='btn-submit', n_clicks=0, children='Submit', style={'margin': 5})),
+            dbc.Row([dbc.Col(dbc.Button(id='btn-submit', n_clicks=0, children='Submit', style={'margin': 5})),
                      dbc.Col(html.Label("USD/MXN", style={'margin': 5}), width={"size": 1, "offset": 9}),
                      dbc.Col(html.Div(id='lbl-exchangeRate' , children='', style={'margin': 5}), width={"size": 1})]),
             dbc.Row([dbc.Col(html.Div(dt.DataTable(data=[{}], id='dt-position'), style={'display': 'none'}), width={"size": 0}),
                      dbc.Col(html.Div(id='dt-position-container', style={'width':'90%'}), width={"size": 12, "offset": 1})],
                      justify="center"),
             modal,
-            dbc.Button("Open modal", id="open")
+            dbc.Button("Open modal", id="btn-open")
         ], style={"max-width":"100%"})
 
 
@@ -227,8 +230,6 @@ def calculateGrossAmount(price, quantity, commissionPercentage, byAmount, grossA
      State("ri-ByAmount", "value")])
 def calculatePrice(quantity, grossAmount, byAmount):
     print(grossAmount, quantity)
-    ctx = dash.callback_context
-    print(ctx.triggered[0]['prop_id'])
     if(byAmount == 'BY_AMOUNT'):
         if grossAmount is not None and quantity is not None:
             price = grossAmount / quantity
@@ -241,12 +242,46 @@ def calculatePrice(quantity, grossAmount, byAmount):
 
 @app.callback(
     Output("modal", "is_open"),
-    [Input("open", "n_clicks"), Input("close", "n_clicks")],
-    [State("modal", "is_open")],
+    [Input("btn-open", "n_clicks"), 
+     Input("btn-close", "n_clicks"),
+     Input("btn-save", "n_clicks")],
+    [State("modal", "is_open"), State("dd-assetType", "value"), State("dd-asset", "value"), State("dd-custody", "value"), State("dd-buySell", "value"),
+     State("input-grossAmount", "value"), State("dps-acquisitionDate", "date"), State("input-quantity", "value"), State("input-price", "value"),
+     State("input-rate", "value"), State("input-netAmount", "value"), State("input-commissionPercentage", "value"), State("input-commissionAmount", "value"),
+     State("input-commissionVATAmount", "value"), State("input-tenor", "value")],
 )
-def toggle_modal(n1, n2, is_open):
-    if n1 or n2:
+def buttonAction(btnOpen, btnClose, btnSave, 
+                is_open, assetType, assetOID, custodyOID, buySell,
+                grossAmount, acquisitionDate, quantity, price, 
+                rate, netAmount, commissionPercentage, commissionAmount,
+                commissionVATAmount, tenor):
+    ctx = dash.callback_context
+    btnID = ctx.triggered[0]['prop_id']
+    acquisitionDate = datetime.strptime(acquisitionDate, '%Y-%m-%d').date()
+    if btnID == 'btn-open.n_clicks' or btnID == 'btn-close.n_clicks':
         return not is_open
+    if btnID == 'btn-save.n_clicks':
+        if(assetType == 'CURRENCY'):
+            print(assetType)
+        else:
+            m = Movement()
+            m.assetOID = assetOID
+            m.custodyOID = custodyOID
+            m.buySell = buySell
+            m.grossAmount = grossAmount
+            m.acquisitionDate = acquisitionDate
+            m.quantity = quantity
+            m.price = price
+            m.netAmount = netAmount
+            m.commissionPercentage = commissionPercentage
+            m.commissionAmount = commissionAmount
+            m.commissionVATAmount = commissionVATAmount
+            if(assetType == 'BOND'):
+                m.tenor = tenor
+                m.rate = rate
+                m.maturityDate = acquisitionDate +  timedelta(days=tenor)
+            MovementEngine().addMovement(m)
+        return False
     return is_open
 
 
