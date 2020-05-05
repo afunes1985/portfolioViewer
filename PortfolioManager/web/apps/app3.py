@@ -13,7 +13,7 @@ from web.app import app
 
 
 layout = dbc.Container([
-            dbc.Row([dbc.Col(html.Button(id='btn-submit', n_clicks=0, children='Submit', style = {'margin': 5}))]),
+            dbc.Row([dbc.Col(html.Button(id='btn-submit', n_clicks=0, children='Create dumps', style = {'margin': 5}))]),
             dbc.Row([]),
             html.Div(id = 'div-hidden')
         ],style={"max-width":"80%"})

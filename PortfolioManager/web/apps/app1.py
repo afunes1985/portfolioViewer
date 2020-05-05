@@ -20,6 +20,7 @@ import dash_html_components as html
 import dash_table as dt
 from engine.movementEngine import MovementEngine
 from engine.positionEngine import PositionEngine
+from modelClass.cashMovement import CashMovement
 from modelClass.movement import Movement
 from web.app import app
 
@@ -90,7 +91,7 @@ modal = dbc.Modal(
                                 dbc.Row([ dbc.Col(html.Label("Quantity", style={'margin': 5}), width={"size": 6}),
                                                 dbc.Col(dbc.Input(id='input-quantity', type="number", min=0, step=1))]),
                                 dbc.Row([ dbc.Col(html.Label("Price", style={'margin': 5}), width={"size": 6}),
-                                                dbc.Col(dbc.Input(id='input-price', type="number", min=0, step=1))]),
+                                                dbc.Col(dbc.Input(id='input-price', type="number", min=0, step=0.000001))]),
                                 dbc.Row([ dbc.Col(html.Label("Rate", style={'margin': 5}), width={"size": 6}),
                                                 dbc.Col(dbc.Input(id='input-rate', type="number", min=0, max=10, step=0.0001))]),
                                 dbc.Row([ dbc.Col(html.Label("Net Amount", style={'margin': 5}), width={"size": 6}),
@@ -155,18 +156,28 @@ layout = dbc.Container([
      Output('dd-buySell', 'options'),
      Output('input-rate', 'disabled'),
      Output('input-tenor', 'disabled'),
-     Output('input-commissionPercentage', 'value')],
+     Output('input-quantity', 'disabled'),
+     Output('input-commissionPercentage', 'value'),
+     Output('ri-ByAmount', 'value')],
     [Input('dd-assetType', 'value')])
 def updateDDAsset(assetType):
     assetList = MovementEngine().getAssetList(assetType)
     buySellList = Constant.BUY_SELL_IN_OUT_DICT.get(assetType, Constant.BUY_SELL_IN_OUT_DICT.get('OTHER'))
-    inputBondDisabled = True
+    inputRateDisabled = True
+    inputTenorDisabled = True
+    byAmountValue = 'BY_QUANTITY'
     if(assetType == 'BOND'):
-        inputBondDisabled = False
+        inputRateDisabled = False
+        inputTenorDisabled = False
+        byAmountValue = 'BY_AMOUNT'
     commissionPercentage = Constant.CONST_DEF_OTHER_COMMISSION_PERCENTAGE
     if(assetType == 'EQUITY'):
-        commissionPercentage = Constant.CONST_DEF_EQUITY_COMMISSION_PERCENTAGE 
-    return assetList, buySellList, inputBondDisabled, inputBondDisabled, commissionPercentage
+        commissionPercentage = Constant.CONST_DEF_EQUITY_COMMISSION_PERCENTAGE
+    inputQuantityDisabled = False
+    if(assetType == 'CURRENCY'):
+        inputQuantityDisabled = True
+        byAmountValue = 'BY_AMOUNT'
+    return assetList, buySellList, inputRateDisabled, inputTenorDisabled, inputQuantityDisabled, commissionPercentage, byAmountValue
 
 
 @app.callback(
@@ -248,8 +259,7 @@ def calculatePrice(quantity, grossAmount, byAmount):
     [State("modal", "is_open"), State("dd-assetType", "value"), State("dd-asset", "value"), State("dd-custody", "value"), State("dd-buySell", "value"),
      State("input-grossAmount", "value"), State("dps-acquisitionDate", "date"), State("input-quantity", "value"), State("input-price", "value"),
      State("input-rate", "value"), State("input-netAmount", "value"), State("input-commissionPercentage", "value"), State("input-commissionAmount", "value"),
-     State("input-commissionVATAmount", "value"), State("input-tenor", "value")],
-)
+     State("input-commissionVATAmount", "value"), State("input-tenor", "value")])
 def buttonAction(btnOpen, btnClose, btnSave, 
                 is_open, assetType, assetOID, custodyOID, buySell,
                 grossAmount, acquisitionDate, quantity, price, 
@@ -262,7 +272,13 @@ def buttonAction(btnOpen, btnClose, btnSave,
         return not is_open
     if btnID == 'btn-save.n_clicks':
         if(assetType == 'CURRENCY'):
-            print(assetType)
+            cm = CashMovement()
+            cm.inOut = buySell
+            cm.custodyOID = custodyOID
+            cm.assetOID = assetOID
+            cm.movementDate = acquisitionDate
+            cm.amount = grossAmount
+            MovementEngine().addCashMovement(cm)
         else:
             m = Movement()
             m.assetOID = assetOID

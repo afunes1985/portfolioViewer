@@ -47,3 +47,6 @@ class MovementEngine():
         
     def addMovement(self, movement):
         GenericDao().addObject(objectToAdd=movement, doCommit=True)
+        
+    def addCashMovement(self, cashMovement):
+        GenericDao().addObject(objectToAdd=cashMovement, doCommit=True)

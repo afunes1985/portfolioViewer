@@ -13,10 +13,8 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table as dt
-from engine.pnlEngine import PnlEngine
 from web.app import app
 from engine.movementEngine import MovementEngine
-from pandas.core.frame import DataFrame
 
 formatColumns = [{"name": 'Asset Name', 'id': 'Asset Name', "deletable": False},
                  {"name": 'Buy Sell', 'id': 'Buy Sell', "deletable": False},
