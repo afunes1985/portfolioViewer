@@ -10,7 +10,6 @@ import dash
 from dash.dependencies import Output, Input, State
 from dash.exceptions import PreventUpdate
 from dash_table import FormatTemplate
-from numpy import rate
 
 from core.cache import MainCache
 from core.constant import Constant
@@ -70,7 +69,7 @@ dps_acquisitionDate = dcc.DatePickerSingle(
     date=today
 )
 
-modal = dbc.Modal(
+movementEditor = dbc.Modal(
                     [
                         dbc.ModalHeader("Movement Editor"),
                         dbc.ModalBody(
@@ -111,7 +110,7 @@ modal = dbc.Modal(
                                     dbc.Button("Close", id="btn-close", className="ml-auto", style={'margin': 5})])
                         ),
                     ],
-                    id="modal",
+                    id="movementEditor",
                 )
 
 formatColumns = [{"name": 'Asset Name', 'id': 'Asset Name', "deletable": False},
@@ -139,15 +138,21 @@ styleDataCondition = [{ 'if': {'column_id': 'Gross PnL', 'filter_query': '{Gross
                         {'if': {'column_id': 'Gross%PNL', 'filter_query': '{Gross%PNL} > 0'}, 'color': 'green', 'fontWeight': 'bold'},
                         {'if': {'column_id': 'Gross%PNL', 'filter_query': '{Gross%PNL} < 0'}, 'color': 'red', 'fontWeight': 'bold'}, ]
 
+button_group = dbc.ButtonGroup(
+    [
+        dbc.Col(dbc.Button(id='btn-submit', style={'margin': 5}, className="fa fa-refresh")),
+        dbc.Col(dbc.Button(id="btn-open", style={'margin': 5}, className="fa fa-plus"))
+    ],
+    vertical=True,
+)
+
 layout = dbc.Container([
-            dbc.Row([dbc.Col(dbc.Button(id='btn-submit', n_clicks=0, children='Submit', style={'margin': 5})),
-                     dbc.Col(html.Label("USD/MXN", style={'margin': 5}), width={"size": 1, "offset": 9}),
+            dbc.Row([dbc.Col(html.Label("USD/MXN", style={'margin': 5}), width={"size": 1, "offset": 9}),
                      dbc.Col(html.Div(id='lbl-exchangeRate' , children='', style={'margin': 5}), width={"size": 1})]),
-            dbc.Row([dbc.Col(html.Div(dt.DataTable(data=[{}], id='dt-position'), style={'display': 'none'}), width={"size": 0}),
-                     dbc.Col(html.Div(id='dt-position-container', style={'width':'90%'}), width={"size": 12, "offset": 1})],
-                     justify="center"),
-            modal,
-            dbc.Button("Open modal", id="btn-open")
+            dbc.Row([dbc.Col(button_group, width={"size": "5px"}),
+                    dbc.Col(html.Div(dt.DataTable(data=[{}], id='dt-position'), style={'display': 'none'}), width={"size": 0}),
+                    dbc.Col(html.Div(id='dt-position-container', style={'width':'100%'}), width={"size": 11})]),
+            movementEditor
         ], style={"max-width":"100%"})
 
 
@@ -252,11 +257,11 @@ def calculatePrice(quantity, grossAmount, byAmount):
 
 
 @app.callback(
-    Output("modal", "is_open"),
+    Output("movementEditor", "is_open"),
     [Input("btn-open", "n_clicks"), 
      Input("btn-close", "n_clicks"),
      Input("btn-save", "n_clicks")],
-    [State("modal", "is_open"), State("dd-assetType", "value"), State("dd-asset", "value"), State("dd-custody", "value"), State("dd-buySell", "value"),
+    [State("movementEditor", "is_open"), State("dd-assetType", "value"), State("dd-asset", "value"), State("dd-custody", "value"), State("dd-buySell", "value"),
      State("input-grossAmount", "value"), State("dps-acquisitionDate", "date"), State("input-quantity", "value"), State("input-price", "value"),
      State("input-rate", "value"), State("input-netAmount", "value"), State("input-commissionPercentage", "value"), State("input-commissionAmount", "value"),
      State("input-commissionVATAmount", "value"), State("input-tenor", "value")])
