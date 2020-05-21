@@ -10,15 +10,15 @@ from sqlalchemy.sql.sqltypes import DateTime, String, Integer, Numeric
 from modelClass import PersistenObject
 
 
-class Currency(PersistenObject):
+class ExchangeRate(PersistenObject):
     __tablename__ = 'currency'
     name = Column(String(30), nullable=False)
     source = Column(String(30), nullable=False)
-    currencyValueList = relationship("CurrencyValue", back_populates="currency")
+    exchangeRateValueList = relationship("ExchangeRateValue", back_populates="exchangeRate")
 
-class CurrencyValue(PersistenObject):
+class ExchangeRateValue(PersistenObject):
     __tablename__ = 'currency_value'
-    currencyOID = Column("currency_id", Integer, ForeignKey('currency.ID'))
-    currency = relationship("Currency", back_populates="currencyValueList")
+    exchangeRateOID = Column("currency_id", Integer, ForeignKey('currency.ID'))
+    exchangeRate = relationship("ExchangeRate", back_populates="exchangeRateValueList")
     date = Column("date_", DateTime, nullable=False)
     value = Column(Numeric(), nullable=False)

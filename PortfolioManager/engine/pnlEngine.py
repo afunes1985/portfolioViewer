@@ -11,12 +11,11 @@ from base.initializer import Initializer
 from core.cache import MainCache
 from core.constant import Constant
 from dao.cashMovementDao import CashMovementDao
-from dao.currencyDao import CurrencyDao
+from dao.exchangeRateDao import ExchangeRateDao
 from dao.dao import GenericDao
 from dao.priceDao import PriceDao
 from engine.positionEngine import PositionEngine
-from modelClass.currency import CurrencyValue, Currency
-from modelClass.price import Price
+from modelClass.currency import ExchangeRate
 import pandas as pd
 from pricingAPI.PricingInterface import PricingInterfaceExcel, PricingInterface
 from tools.tools import getLastWorkingDay
@@ -100,18 +99,16 @@ class PnlEngine():
         else:
             setLastMarketData = False 
             workingDate = getLastWorkingDay(date) 
-            currencyName = "USD/MXN"
-            currencyValue = CurrencyDao().getCurrencyValueByDate(currencyName=currencyName, date=workingDate, raiseNoResultFound=False)
-            if(currencyValue is None):
+            exchangeRateID = "USD/MXN"
+            #Try to find the exchangeRate in DB
+            exchangeRateValue = ExchangeRateDao().getExchangeRateValueByDate(exchangeRateID=exchangeRateID, date=workingDate, raiseNoResultFound=False)
+            if(exchangeRateValue is None):
+                #Try to find the exchangeRate in EXCEL
                 exchangeRateValue = PricingInterfaceExcel().getExchangeRateByDate('USD','MXN', workingDate)
                 if (exchangeRateValue is None):
                     raise Exception("exchangeRateValue found: " + str(workingDate))
-                currencyValue = CurrencyValue()
-                currencyValue.value = exchangeRateValue
-                currencyValue.currency = GenericDao().getOneResult(objectClazz=Currency, condition=(Currency.name == currencyName), session = session)
-                currencyValue.date = workingDate
-                session.add(currencyValue)
-                session.commit()
+                exchangeRate=GenericDao().getOneResult(objectClazz=ExchangeRate, condition=(ExchangeRate.name == exchangeRateID), session = session)
+                ExchangeRateDao().addExchangeRateValue(value=exchangeRateValue, exchangeRate=exchangeRate, date=workingDate, session=session)
         #SET MARKET PRICE TO POSITIONS
         for row in positionDict.items():
             position = row[1]
@@ -127,11 +124,11 @@ class PnlEngine():
                         if priceValue is None:
                             raise Exception("price not found: " + position.getMainName() + " " + str(workingDate))
                         PriceDao().addPrice(assetOID=position.asset.ID, date=workingDate, lastPrice=priceValue, session=session)
-                    position.setMarketPrice(marketPrice=price.lastPrice, exchangeRateValue=currencyValue.value)
+                    position.setMarketPrice(marketPrice=price.lastPrice, exchangeRateValue=exchangeRateValue.value)
             else:
                 #set exchange rate for BOND
                 if(not setLastMarketData):
-                    position.setExchangeRate(exchangeRateValue=currencyValue.value)
+                    position.setExchangeRate(exchangeRateValue=exchangeRateValue.value)
                 else:
                     position.setExchangeRate(exchangeRateValue=MainCache.usdMXN)
         session.close_all()
