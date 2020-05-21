@@ -30,6 +30,7 @@ class Position():
     maturityDate = None
     changePercentage = None
     realizedPnlCorporateEvent = Decimal(0)
+    exchangeRateValue = None
     
     def __init__(self, asset, movement):
         self.asset = asset
@@ -50,16 +51,19 @@ class Position():
                 rfList = PricingInterface.getReferenceDataByAssetNames(self.asset.name, self.asset.priceSource)     
             for rfRow in rfList:
                 self.setReferenceData(rfRow[0], rfRow[1], rfRow[2])
+        
 
         
     def setReferenceData(self, assetName, price, changePercentage):
         if(assetName == self.asset.name):
             self.setMarketPrice(marketPrice=price)
             self.changePercentage = changePercentage / 100
+            self.exchangeRateValue = MainCache.usdMXN
         elif(assetName == self.asset.originName):
             self.setMarketPriceOrig(Decimal(price)) 
-            self.setMarketPrice(marketPrice=Decimal(price), exchangeRate=Decimal(MainCache.usdMXN))
+            self.setMarketPrice(marketPrice=Decimal(price), exchangeRateValue=Decimal(MainCache.usdMXN))
             self.changePercentage = changePercentage / 100
+            self.exchangeRateValue = MainCache.usdMXN
     
     def addPositionToOldPosition(self, position):
         self.realizedPnl += position.realizedPnl
@@ -137,31 +141,31 @@ class Position():
             else:
                 return self.totalQuantity * self.marketPrice
             
-    def getValuatedAmountOrig(self):
-        if (self.asset.assetType == 'BOND'):
-            return 0
-        else:  
-            if (self.asset.isSIC):
-                return self.totalQuantity * self.marketPriceOrig
-            else:
-                return 0
+    def getValuatedAmountUSD(self):
+        valuatedAmount = self.getValuatedAmount()
+        return valuatedAmount / self.exchangeRateValue
     
+    def setExchangeRate(self, exchangeRateValue):
+        self.exchangeRateValue = exchangeRateValue
+ 
     def setMarketPriceOrig(self, marketPriceOrig):
         self.marketPriceOrig = Decimal(marketPriceOrig)
     
-    def setMarketPrice(self, marketPrice, exchangeRate = None):
+    def setMarketPrice(self, marketPrice, exchangeRateValue = None):
         if (self.asset.isSIC):
-            self.marketPrice = Decimal(marketPrice) * exchangeRate
+            self.marketPrice = Decimal(marketPrice) * exchangeRateValue
             self.marketPriceOrig = Decimal(marketPrice)
+            self.exchangeRateValue = exchangeRateValue
         else:
             self.marketPrice = Decimal(marketPrice)
+            self.exchangeRateValue = exchangeRateValue
         
     def getMarketPrice(self):
         from pricingAPI.PricingInterface import PricingInterface
         if self.asset.isOnlinePrice:
             if (self.marketPrice == 0):
                 self.setMarketPrice(marketPrice=PricingInterface.getMarketPriceByAssetName(self.getMainName(), self.asset.priceSource),
-                                    exchangeRate=MainCache.usdMXN)
+                                    exchangeRateValue=MainCache.usdMXN)
         return self.marketPrice
     
     def getMarketPriceOrig(self):

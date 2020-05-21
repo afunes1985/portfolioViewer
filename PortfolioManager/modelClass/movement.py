@@ -31,31 +31,3 @@ class Movement(PersistenObject):
     tenor = Column(Integer(), nullable=False)
     maturityDate = Column('maturity_date', DateTime, nullable=False)
     #tax = tax
-    
-#     @staticmethod 
-#     def constructMovementByType(assetType):
-#         if assetType == 'EQUITY':
-#             return EquityMovement(None)
-#         elif assetType == 'FUND':
-#             return FundMovement(None)
-#         elif assetType == 'BOND':
-#             return BondMovement(None)
-# 
-#     def getAcquisitionDate(self):
-#         return acquisitionDate.strftime("%Y-%m-%d")
-#     
-#     def getMovementType(self):
-#         return Constant.CONST_MOVEMENT_TYPE
-#     
-#     def getMovementSubType(self):
-#         return Constant.CONST_MOVEMENT_SUB_TYPE
-    
-# class BondMovement(Movement):
-#     rate = 0
-# 
-# class EquityMovement(Movement):
-#     price = 0
-# 
-# class FundMovement(Movement):
-#     price = 0
-

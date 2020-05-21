@@ -48,7 +48,7 @@ class PnlEngine():
         cashInMovementDF = cashMovementDF.loc[(cashMovementDF['In Out'] == 'IN')]
         cashOutMovementDF = cashMovementDF.loc[(cashMovementDF['In Out'] == 'OUT')]
         # set position summary DF
-        position_SummaryDF = pd.DataFrame(columns=['Custody Name', 'Initial Position', 'Final Position', 'Cash In', 'Cash Out', 'PnL', 'TIR'])
+        position_SummaryDF = pd.DataFrame(columns=['Custody Name', 'Initial Position USD', 'Final Position USD', 'Initial Position', 'Final Position', 'Cash In', 'Cash Out', 'PnL', 'TIR'])
         position_SummaryDF = position_SummaryDF.append(pd.Series(self.getSerieForSummary(cashInMovementDF, cashOutMovementDF, initialPosition_DF, finalPosition_DF, 'CETESDIRECTO'), index=position_SummaryDF.columns), ignore_index=True)
         position_SummaryDF = position_SummaryDF.append(pd.Series(self.getSerieForSummary(cashInMovementDF, cashOutMovementDF, initialPosition_DF, finalPosition_DF, 'GBM'), index=position_SummaryDF.columns), ignore_index=True)
         position_SummaryDF = position_SummaryDF.append(pd.Series(self.getSerieForSummary(cashInMovementDF, cashOutMovementDF, initialPosition_DF, finalPosition_DF), index=position_SummaryDF.columns), ignore_index=True)
@@ -59,26 +59,30 @@ class PnlEngine():
             totalCashIn = cashInMovementDF['Amount'].sum()
             totalCashOut = cashOutMovementDF['Amount'].sum()
             totalInitialPosition = initialPosition_DF['Valuated Amount'].sum()
+            totalInitialPositionUSD = initialPosition_DF['Valuated Amount USD'].sum()
             totalFinalPosition = finalPosition_DF['Valuated Amount'].sum()
+            totalFinalPositionUSD = finalPosition_DF['Valuated Amount USD'].sum()
             totalPnlAmount =  totalFinalPosition - totalInitialPosition - (totalCashIn - totalCashOut)
             totalTir = (totalPnlAmount / (totalInitialPosition + (totalCashIn - totalCashOut)))
-            return ["Total", totalInitialPosition, totalFinalPosition, totalCashIn, totalCashOut, totalPnlAmount, totalTir]
+            return ["Total", totalInitialPositionUSD, totalFinalPositionUSD, totalInitialPosition, totalFinalPosition, totalCashIn, totalCashOut, totalPnlAmount, totalTir]
         else:
             totalCashIn = cashInMovementDF.loc[(cashInMovementDF['Custody Name'] == custodyName)]['Amount'].sum()
             totalCashOut = cashOutMovementDF.loc[(cashOutMovementDF['Custody Name'] == custodyName)]['Amount'].sum()
             totalInitialPosition = initialPosition_DF.loc[(initialPosition_DF['Custody Name'] == custodyName)]['Valuated Amount'].sum()
             totalFinalPosition = finalPosition_DF.loc[(finalPosition_DF['Custody Name'] == custodyName)]['Valuated Amount'].sum()
+            totalInitialPositionUSD = initialPosition_DF.loc[(initialPosition_DF['Custody Name'] == custodyName)]['Valuated Amount USD'].sum()
+            totalFinalPositionUSD = finalPosition_DF.loc[(finalPosition_DF['Custody Name'] == custodyName)]['Valuated Amount USD'].sum()
             totalPnlAmount =  totalFinalPosition - totalInitialPosition - (totalCashIn - totalCashOut)
             totalTir = (totalPnlAmount / (totalInitialPosition + (totalCashIn - totalCashOut)))
-            return [custodyName, totalInitialPosition, totalFinalPosition, totalCashIn, totalCashOut, totalPnlAmount, totalTir]
+            return [custodyName, totalInitialPositionUSD, totalFinalPositionUSD, totalInitialPosition, totalFinalPosition, totalCashIn, totalCashOut, totalPnlAmount, totalTir]
         
         
     def convertToDFPosition(self, positionDict):
-        position_DF = pd.DataFrame(columns=['Custody Name', 'Asset Name', 'Asset Type', 'isSIC', 'Position', 'Unit Cost', 'Invested Amount', 'Valuated Amount'])
+        position_DF = pd.DataFrame(columns=['Custody Name', 'Asset Name', 'Asset Type', 'isSIC', 'Position', 'Unit Cost', 'Invested Amount', 'Valuated Amount', 'Valuated Amount USD'])
         for row in positionDict.items():
             position = row[1]
             position_DF = position_DF.append(pd.Series([position.custody.name, position.asset.getName(), position.asset.assetType, position.asset.isSIC, position.getTotalQuantity(), position.getUnitCostOrRate(), position.getInvestedAmount(),
-                  position.getValuatedAmount()], index=position_DF.columns), ignore_index=True)
+                  position.getValuatedAmount(), position.getValuatedAmountUSD()], index=position_DF.columns), ignore_index=True)
         return position_DF
     
     def convertToDFCashMovement(self, cashMovementList):
@@ -108,25 +112,28 @@ class PnlEngine():
                 currencyValue.date = workingDate
                 session.add(currencyValue)
                 session.commit()
+        #SET MARKET PRICE TO POSITIONS
         for row in positionDict.items():
             position = row[1]
             if position.asset.assetType != 'BOND':
                 if(setLastMarketData):
                     position.refreshMarketData()
                 else:
+                    #Try to find the price in DB
                     price = PriceDao().getPriceByDate(position.getAssetName(), workingDate, raiseNoResultFound=False)
                     if price is None:
+                        #Try to find the price in source
                         priceValue = PricingInterface.getMarketPriceByDate(position.getMainName(), position.asset.historicalPriceSource, workingDate)
                         if priceValue is None:
                             raise Exception("price not found: " + position.getMainName() + " " + str(workingDate))
-                        price = Price()
-                        price.assetOID = position.asset.ID
-                        price.date = workingDate
-                        price.lastPrice = priceValue  
-                        session.add(price)
-                        session.commit()
-                        print("Price added " + position.getAssetName() + str(workingDate)) 
-                    position.setMarketPrice(marketPrice=price.lastPrice, exchangeRate=currencyValue.value)
+                        PriceDao().addPrice(assetOID=position.asset.ID, date=workingDate, lastPrice=priceValue, session=session)
+                    position.setMarketPrice(marketPrice=price.lastPrice, exchangeRateValue=currencyValue.value)
+            else:
+                #set exchange rate for BOND
+                if(not setLastMarketData):
+                    position.setExchangeRate(exchangeRateValue=currencyValue.value)
+                else:
+                    position.setExchangeRate(exchangeRateValue=MainCache.usdMXN)
         session.close_all()
             
 # if __name__ == '__main__':

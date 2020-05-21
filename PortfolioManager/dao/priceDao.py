@@ -42,3 +42,11 @@ class PriceDao():
         resulSet = session.execute(query, params)
         for row in resulSet:
             return row
+        
+    def addPrice(self, assetOID, date, lastPrice, session):
+        price = Price()
+        price.assetOID = assetOID
+        price.date = date
+        price.lastPrice = lastPrice  
+        session.add(price)
+        session.commit()

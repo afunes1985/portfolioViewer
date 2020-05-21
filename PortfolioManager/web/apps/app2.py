@@ -18,6 +18,8 @@ from web.app import app
 
 
 formatColumns = [{"name": 'Custody Name', 'id': 'Custody Name', "deletable": False},
+                 {"name": 'Initial Position USD', 'id': 'Initial Position USD', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
+                 {"name": 'Final Position USD', 'id': 'Final Position USD', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
                  {"name": 'Initial Position', 'id': 'Initial Position', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
                  {"name": 'Final Position', 'id': 'Final Position', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
                  {"name": 'Cash In', 'id': 'Cash In', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
