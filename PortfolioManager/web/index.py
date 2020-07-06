@@ -2,7 +2,6 @@ import logging
 
 from dash.dependencies import Input, Output
 
-from base.initializer import Initializer
 from core.constant import Constant
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -10,9 +9,6 @@ import dash_html_components as html
 from tools.tools import createLog
 from web.app import app
 from web.apps import app1, app2, app3, app4
-
-
-Initializer()
 
 dropDownMenu = dbc.DropdownMenu(
             children=[

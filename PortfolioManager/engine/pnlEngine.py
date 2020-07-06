@@ -20,14 +20,10 @@ import pandas as pd
 from pricingAPI.PricingInterface import PricingInterfaceExcel, PricingInterface
 from tools.tools import getLastWorkingDay
 
-
-Initializer()
-MainCache.refreshReferenceData()
-
-
 class PnlEngine():
     
     def calculatePnl(self, fromDate, toDate):
+        MainCache.refreshReferenceData()
         initDate = datetime(2001, 1, 1).date()
         initialPositionDict = PositionEngine().buildPositions(fromDate=initDate, toDate=fromDate, setLastMarketData=False)
         if len(initialPositionDict) == 0:
@@ -106,7 +102,7 @@ class PnlEngine():
                 #Try to find the exchangeRate in EXCEL
                 exchangeRateValue = PricingInterfaceExcel().getExchangeRateByDate('USD','MXN', workingDate)
                 if (exchangeRateValue is None):
-                    raise Exception("exchangeRateValue found: " + str(workingDate))
+                    raise Exception("exchangeRateValue not found: " + str(workingDate))
                 exchangeRate=GenericDao().getOneResult(objectClazz=ExchangeRate, condition=(ExchangeRate.name == exchangeRateID), session = session)
                 ExchangeRateDao().addExchangeRateValue(value=exchangeRateValue, exchangeRate=exchangeRate, date=workingDate, session=session)
         #SET MARKET PRICE TO POSITIONS

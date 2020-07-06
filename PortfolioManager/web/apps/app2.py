@@ -43,7 +43,7 @@ dps_toDate = dcc.DatePickerSingle(
 layout = dbc.Container([
             dbc.Row([dbc.Col(dps_fromDate, style = {'margin': 5}, width={"size": 2, "offset": 1}), 
                      dbc.Col(dps_toDate,style = {'margin': 5}, width={"size": 2, "offset": 1})]),
-            dbc.Row([dbc.Col(html.Button(id='btn-submit', n_clicks=0, children='Submit', style = {'margin': 5}))]),
+            dbc.Row([dbc.Col(dbc.Button(id='btn-submit', n_clicks=0, children='Submit', style = {'margin': 5}))]),
             dbc.Row([dbc.Col(html.Div(dt.DataTable(data=[{}], id='dt-pnl-report'), style={'display': 'none'}), width={"size": 0}),
                      dbc.Col(html.Div(id='dt-pnl-report-container', style = {'width':'90%'}), width={"size": 12,"offset": 1})],
                      justify="center")
