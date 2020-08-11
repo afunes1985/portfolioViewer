@@ -33,12 +33,12 @@ class MovementDao():
                 .join(Movement.asset)\
                 .join(Movement.custody)\
                 .filter(and_(Movement.acquisitionDate >= fromDate, Movement.acquisitionDate <= toDate, Movement.assetOID.isnot(None)))\
-                .with_entities(Asset.name, Movement.buySell, Movement.acquisitionDate, Movement.quantity, Movement.price, Movement.grossAmount, Movement.netAmount, Movement.commissionPercentage, Movement.commissionAmount, Movement.commissionVATAmount, Custody.name.label("custodyName"))
+                .with_entities(Asset.name, Movement.buySell, Movement.acquisitionDate, Movement.quantity, Movement.price, Movement.grossAmount, Movement.netAmount, Movement.commissionPercentage, Movement.commissionAmount, Movement.commissionVATAmount, Custody.name.label("custodyName"), Movement.externalID, Movement.ID)
         queryCashMov = session.query(CashMovement)\
                 .join(CashMovement.asset)\
                 .join(CashMovement.custody)\
                 .filter(and_(CashMovement.movementDate >= fromDate, CashMovement.movementDate <= toDate))\
-                .with_entities(Asset.name, CashMovement.inOut, CashMovement.movementDate.label("acquisitionDate"),  sqlalchemy.null(), sqlalchemy.null(), sqlalchemy.null(), CashMovement.amount, sqlalchemy.null(), sqlalchemy.null(), sqlalchemy.null(), Custody.name)
+                .with_entities(Asset.name, CashMovement.inOut, CashMovement.movementDate.label("acquisitionDate"),  sqlalchemy.null(), sqlalchemy.null(), sqlalchemy.null(), CashMovement.amount, sqlalchemy.null(), sqlalchemy.null(), sqlalchemy.null(), Custody.name, CashMovement.externalID, CashMovement.ID)
         query = queryMov.union(queryCashMov)
         objectResult = query.order_by(text('movement_acquisition_date')).all()
         return objectResult   

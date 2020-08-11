@@ -15,10 +15,10 @@ class MovementEngine():
         return MovementDao().getMovementsByDate(fromDate, toDate)
     
     def getMovementsForReport(self, fromDate, toDate):
-        movement_DF = pd.DataFrame(columns=['Asset Name','Buy Sell','Acquisition Date','Quantity','Price','Gross Amount','Net Amount','Comm %','Comm Amount','Comm VAT Amount', 'Custody'])
+        movement_DF = pd.DataFrame(columns=['Asset Name','Buy Sell','Acquisition Date','Quantity','Price','Gross Amount','Net Amount','Comm %','Comm Amount','Comm VAT Amount', 'Custody', 'External ID', 'ID'])
         rs = MovementDao().getMovementsForReport(fromDate, toDate)
         for row in rs:
-            movement_DF = movement_DF.append(pd.Series([row.name, row.buySell, row.acquisitionDate.strftime("%Y-%m-%d"), row.quantity, row.price, row.grossAmount, row.netAmount, row.commissionPercentage, row.commissionAmount, row.commissionVATAmount, row.custodyName], index=movement_DF.columns), ignore_index=True)
+            movement_DF = movement_DF.append(pd.Series([row.name, row.buySell, row.acquisitionDate.strftime("%Y-%m-%d"), row.quantity, row.price, row.grossAmount, row.netAmount, row.commissionPercentage, row.commissionAmount, row.commissionVATAmount, row.custodyName, row.externalID, row.ID], index=movement_DF.columns), ignore_index=True)
         return movement_DF
     
     def getAssetTypeList(self):
