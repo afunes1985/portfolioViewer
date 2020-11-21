@@ -35,9 +35,7 @@ dps_fromDate = dcc.DatePickerSingle(
     )
 dps_toDate = dcc.DatePickerSingle(
         id='dps_toDate',
-        max_date_allowed=today,
         display_format='YYYY-MM-DD',
-        date=today
     )
 
 layout = dbc.Container([
@@ -73,4 +71,9 @@ def doSubmit(n_clicks, fromDate, toDate):
                     row_selectable="multi")
             return dt2
     
-
+@app.callback(
+    [Output('dps_toDate', "max_date_allowed"),
+     Output('dps_toDate', "date")],
+    [Input('btn-submit', 'n_clicks')])
+def setMaxDate(n_clicks):
+    return datetime.now().date(), datetime.now().date()
