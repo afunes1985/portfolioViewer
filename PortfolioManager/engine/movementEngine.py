@@ -4,9 +4,10 @@ Created on Jan 8, 2020
 @author: afunes
 '''
 from dao.assetDao import AssetDao
+from dao.dao import GenericDao
 from dao.movementDao import MovementDao
 import pandas as pd
-from dao.dao import GenericDao
+from tools.tools import getDateFormated
 
 
 class MovementEngine():
@@ -15,10 +16,10 @@ class MovementEngine():
         return MovementDao().getMovementsByDate(fromDate, toDate)
     
     def getMovementsForReport(self, fromDate, toDate):
-        movement_DF = pd.DataFrame(columns=['Asset Name','Buy Sell','Acquisition Date','Quantity','Price','Gross Amount','Net Amount','Comm %','Comm Amount','Comm VAT Amount', 'Custody', 'External ID', 'ID'])
+        movement_DF = pd.DataFrame(columns=['Asset Name','Buy Sell','Acquisition Date','Maturity Date','Tenor','Quantity','Price','Gross Amount','Net Amount','Comm %','Comm Amount','Comm VAT Amount', 'Custody', 'External ID', 'ID'])
         rs = MovementDao().getMovementsForReport(fromDate, toDate)
         for row in rs:
-            movement_DF = movement_DF.append(pd.Series([row.name, row.buySell, row.acquisitionDate.strftime("%Y-%m-%d"), row.quantity, row.price, row.grossAmount, row.netAmount, row.commissionPercentage, row.commissionAmount, row.commissionVATAmount, row.custodyName, row.externalID, row.ID], index=movement_DF.columns), ignore_index=True)
+            movement_DF = movement_DF.append(pd.Series([row.name, row.buySell, getDateFormated(row.acquisitionDate, "%Y-%m-%d"), getDateFormated(row.maturityDate, "%Y-%m-%d"), row.tenor, row.quantity, row.price, row.grossAmount, row.netAmount, row.commissionPercentage, row.commissionAmount, row.commissionVATAmount, row.custodyName, row.externalID, row.ID], index=movement_DF.columns), ignore_index=True)
         return movement_DF
     
     def getAssetTypeList(self):

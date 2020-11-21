@@ -19,6 +19,8 @@ from engine.movementEngine import MovementEngine
 formatColumns = [{"name": 'Asset Name', 'id': 'Asset Name', "deletable": False},
                  {"name": 'Buy Sell', 'id': 'Buy Sell', "deletable": False},
                  {"name": 'Acquisition Date', 'id': 'Acquisition Date', "deletable": False},
+                 {"name": 'Maturity Date', 'id': 'Maturity Date', "deletable": False},
+                 {"name": 'Tenor', 'id': 'Tenor', "deletable": False},
                  {"name": 'Quantity', 'id': 'Quantity', "deletable": False, 'type': 'numeric'},
                  {"name": 'Price', 'id': 'Price', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
                  {"name": 'Gross Amount', 'id': 'Gross Amount', "deletable": False, 'type': 'numeric','format': FormatTemplate.money(2)},
@@ -36,16 +38,14 @@ dps_fromDate = dcc.DatePickerSingle(
         display_format='YYYY-MM-DD',
         date=datetime(today.year, 1, 1).date()
     )
-dps_toDate = dcc.DatePickerSingle(
-        id='dps_toDate',
-        max_date_allowed=today,
-        display_format='YYYY-MM-DD',
-        date=today
+dps_toDate2 = dcc.DatePickerSingle(
+        id='dps_toDate2',
+        display_format='YYYY-MM-DD'
     )
 
 layout = dbc.Container([
             dbc.Row([dbc.Col(dps_fromDate, style = {'margin': 5}, width={"size": 2, "offset": 1}), 
-                     dbc.Col(dps_toDate,style = {'margin': 5}, width={"size": 2, "offset": 1})]),
+                     dbc.Col(dps_toDate2,style = {'margin': 5}, width={"size": 2, "offset": 1})]),
             dbc.Row([dbc.Col(html.Button(id='btn-submit', n_clicks=0, children='Submit', style = {'margin': 5}))]),
             dbc.Row([dbc.Col(html.Div(dt.DataTable(data=[{}], id='dt-movement-report'), style={'display': 'none'}), width={"size": 0}),
                      dbc.Col(html.Div(id='dt-movement-report-container', style = {'width':'90%'}), width={"size": 12,"offset": 1})],
@@ -56,7 +56,7 @@ layout = dbc.Container([
     Output('dt-movement-report-container', "children"),
     [Input('btn-submit', 'n_clicks')],
     [State('dps_fromDate', "date"),
-     State('dps_toDate', "date")])
+     State('dps_toDate2', "date")])
 def doSubmit(n_clicks, fromDate, toDate):
     if (n_clicks > 0):
         df = MovementEngine().getMovementsForReport(datetime.strptime(fromDate, '%Y-%m-%d').date(), datetime.strptime(toDate, '%Y-%m-%d').date())
@@ -76,4 +76,9 @@ def doSubmit(n_clicks, fromDate, toDate):
                     row_selectable="multi")
             return dt2
     
-
+@app.callback(
+    [Output('dps_toDate2', "max_date_allowed"),
+     Output('dps_toDate2', "date")],
+    [Input('btn-submit', 'n_clicks')])
+def setMaxDate(n_clicks):
+    return datetime.now().date(), datetime.now().date()

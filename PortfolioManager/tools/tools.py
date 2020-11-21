@@ -22,3 +22,7 @@ def getLastWorkingDay(date):
     while lastWorkingDay.weekday() > 4: # Mon-Fri are 0-4
         lastWorkingDay -= timedelta(days=1)
     return lastWorkingDay 
+
+def getDateFormated(date, formatDate):
+    if(date is not None):
+        return date.strftime(formatDate)
