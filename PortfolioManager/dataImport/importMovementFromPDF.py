@@ -46,7 +46,7 @@ class MovementImporter():
     
     nonMovementTypeList = corporateEventTAXTypeList
     
-    headerCetes = {"Folio": None, "Descripci": None, "Emisora": None, "Serie": None, "tulos": None, "Precio": None, "Plazo": None, "Tasa": None, "Cargo": None, "Abono": None}
+    headerCetes = {"Folio": None, "Descrip": None, "Emisora": None, "Serie": None, "tulos": None, "Precio": None, "Plazo": None, "Tasa": None, "Cargo": None, "Abono": None}
     
     def getMovementList(self, filePath, assetName):
         self.assetDict = Engine.getAssetDict()
@@ -75,7 +75,7 @@ class MovementImporter():
                     for headerKey in self.headerCetes.keys():
                         if (cellValue.find(headerKey) != -1):
                             self.headerCetes[headerKey] = i
-                            break
+#                             break
                 for value in self.headerCetes.values():
                     if value is None:
                         isReadyToReadFirstMov = False
@@ -99,8 +99,10 @@ class MovementImporter():
                             imLO.setToDate(paymentDate.replace(day = calendar.monthrange(paymentDate.year, paymentDate.month)[1]))
                         importerMovementVO = ImporterMovementVO()
                         importerMovementVO.setPaymentDate(paymentDate)
-                        importerMovementVO.setExternalID(self.getColumnValueFromList(row, self.headerCetes["Folio"]))
-                        importerMovementVO.setOriginMovementType(self.getColumnValueFromList(row, self.headerCetes["Descripci"]))
+                        externalID = self.getColumnValueFromList(row, self.headerCetes["Folio"])
+                        importerMovementVO.setExternalID(externalID[0:12].strip())
+                        description = self.getColumnValueFromList(row, self.headerCetes["Descrip"])
+                        importerMovementVO.setOriginMovementType(description[12:len(description)].strip())
                         assetName = self.getColumnValueFromList(row, self.headerCetes["Emisora"])
                         assetNameSerie = self.getColumnValueFromList(row, self.headerCetes["Serie"])
                         importerMovementVO.setAssetSerie(assetNameSerie)
