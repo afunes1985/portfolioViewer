@@ -50,3 +50,4 @@ class PriceDao():
         price.lastPrice = lastPrice  
         session.add(price)
         session.commit()
+        return price

@@ -205,6 +205,9 @@ class Position():
             return self.asset.originName
         else:
             return self.asset.name
+        
+    def getHistoricalPriceName(self):
+        return self.asset.historicalPriceName
     
     def addRealizedPnlCorporateEvent(self, corporateEventGrossAmount):
         self.realizedPnlCorporateEvent += corporateEventGrossAmount 

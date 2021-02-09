@@ -19,6 +19,7 @@ class Asset(PersistenObject):
     isOnlinePrice = Column('is_online_price',Boolean(), nullable=False)
     priceSource = Column('price_source', String(), nullable=False)
     historicalPriceSource = Column('historical_price_source', String(), nullable=False)
+    historicalPriceName = Column('historical_price_name', String(), nullable=False)
     defaultCustodyOID = Column("default_custody_oid", Integer, ForeignKey('custody.ID'))
     defaultCustody = relationship("Custody")
     

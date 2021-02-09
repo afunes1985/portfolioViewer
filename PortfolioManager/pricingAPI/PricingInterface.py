@@ -50,13 +50,15 @@ class PricingInterface:
     
     @staticmethod
     def getMarketPriceByDate(assetName, priceSource, date):
-        if(priceSource != "EXCEL"):
-            priceSource = 'IEX'
         try:    
             return PricingInterface.getPriceInterfacesDict()[priceSource].getMarketPriceByDate(assetName, date)
         except Exception as e:
             logging.warning(e)
             return []
+        
+    @staticmethod
+    def getExchangeRateByDate(fromCurrency, toCurrency, date):  
+        return PricingInterface.getPriceInterfacesDict()["IEX"].getExchangeRateByDate(fromCurrency, toCurrency, date)
 
 
 ########################################################################################################################
@@ -85,7 +87,7 @@ class PricingInterfaceIEX():
     def getExchangeRateByDate(self, fromCurrency, toCurrency, date):   
         """The requested data is not available to free tier accounts. Please upgrade for access to this data."""
         dateForUrl = date.strftime('YYYYMMDD')
-        url = 'https://cloud.iexapis.com/fx/historical?symbols=MXNUSD&from=' + dateForUrl + '&token=pk_c4c339ea14ba4aad92d9256ac75705e4'
+        url = 'https://cloud.iexapis.com/stable/fx/historical?symbols=MXNUSD&from=' + dateForUrl + '&token=pk_55cd20ce5c41439886a06ea27e1eb2e5'
         result = requests.get(url)
         print(result)
         json_data = json.loads(result.text)
@@ -214,6 +216,7 @@ class PricingInterfaceDB:
 if __name__ == '__main__':
     datetime.strptime('Dec 31, 2015', '%b %d, %Y')
     
-    cp = PricingInterfaceExcel().getExchangeRateByDate("USD", "MXN", datetime(2019, 12, 31).date())
-    cp = PricingInterfaceExcel().getPriceByDate(assetName='ICA.MX', date=datetime(2019, 12, 31).date())
+    cp = PricingInterface.getExchangeRateByDate("USD", "MXN", datetime(2020, 12, 31).date())
+#     cp = PricingInterfaceExcel().getExchangeRateByDate("USD", "MXN", datetime(2019, 12, 31).date())
+#     cp = PricingInterfaceExcel().getPriceByDate(assetName='ICA.MX', date=datetime(2019, 12, 31).date())
     print(cp)
