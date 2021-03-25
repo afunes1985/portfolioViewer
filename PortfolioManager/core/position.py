@@ -134,7 +134,7 @@ class Position():
     
     def getValuatedAmount(self):
         if (self.asset.assetType == 'BOND'):
-            return self.accumulatedAmount * (1 + (self.getElapsedDays() * (self.rate / 360))) - self.taxAmount
+            return self.accumulatedAmount * (1 + (self.getElapsedDays() * (self.rate / 360)))
         else:  
             if (self.marketPrice == 0):
                 return self.totalQuantity * 0
@@ -143,7 +143,10 @@ class Position():
             
     def getValuatedAmountUSD(self):
         valuatedAmount = self.getValuatedAmount()
-        return valuatedAmount / self.exchangeRateValue
+        if (self.exchangeRateValue):
+            return valuatedAmount / self.exchangeRateValue
+        else:
+            raise Exception("Exchange rate not found: " + self.getAssetName()) 
     
     def setExchangeRate(self, exchangeRateValue):
         self.exchangeRateValue = exchangeRateValue

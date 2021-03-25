@@ -58,23 +58,27 @@ def doSubmit(n_clicks, fromDate, toDate):
         df = PnlEngine().calculatePnl(datetime.strptime(fromDate, '%Y-%m-%d').date(), datetime.strptime(toDate, '%Y-%m-%d').date())
         if (len(df) != 0):
             dt2 = dt.DataTable(
-                    id='dt-pnl-report',
-                    data=df.to_dict("rows"),
-                    columns=formatColumns,
-                    style_as_list_view=True,
-                    style_header={
-                        'backgroundColor': 'white',
-                        'fontWeight': 'bold'
-                    },
-                    #filter_action="native",
-                    sort_action="native",
-                    sort_mode="multi",
-                    row_selectable="multi")
+                id='dt-pnl-report',
+                data=df.to_dict("rows"),
+                columns=formatColumns,
+                style_as_list_view=True,
+                style_header={
+                    'backgroundColor': 'white',
+                    'fontWeight': 'bold'
+                },
+                #filter_action="native",
+                sort_action="native",
+                sort_mode="multi",
+                row_selectable="multi")
             return dt2
     
 @app.callback(
     [Output('dps_toDate', "max_date_allowed"),
      Output('dps_toDate', "date")],
-    [Input('btn-submit', 'n_clicks')])
-def setMaxDate(n_clicks):
-    return datetime.now().date(), datetime.now().date()
+    [Input('btn-submit', 'n_clicks')],
+    [State('dps_toDate', "date")])
+def setMaxDate(n_clicks, toDate):
+    if (n_clicks == 0):
+        return datetime.now().date(), datetime.now().date()
+    else:
+        return toDate, toDate
